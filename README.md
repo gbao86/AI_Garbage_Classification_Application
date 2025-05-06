@@ -15,6 +15,22 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+♻️ Ứng Dụng Phân Loại Rác AI
+Phiên bản: 1.0.0
+
+Ứng Dụng Phân Loại Rác AI là công cụ hỗ trợ người dùng nhận diện và phân loại rác thải một cách thông minh thông qua hình ảnh. Ứng dụng tích hợp trí tuệ nhân tạo để xử lý nhanh chóng và chính xác.
+
+🚀 Tính năng chính:
+
+📷 Chế độ chụp ảnh trực tiếp: Mở camera và nhận diện rác ngay lập tức.
+🖼️ Chế độ chọn ảnh từ thư viện: Tải ảnh có sẵn để phân tích và phân loại rác.
+⚡ Xử lý nhanh chóng: Nhận kết quả trong vài giây.
+
+📥 Hướng dẫn:
+Bạn có thể tải ứng dụng về và chạy trên terminal như sau: flutter build apk --release
+
+📥 Hoặc tải file APK đã build sẵn tại đây: [Tải về từ Google Drive](https://drive.google.com/file/d/19GeplyAAUtq6kmA_knrNh9bxl3OCaRRk/view?usp=drive_link)
+
 Ảnh chụp màn hình ứng dụng[version 1.0.0]:
 
 ![image](https://github.com/user-attachments/assets/844fc223-a62b-45ca-9746-1b57623a3bdf)
