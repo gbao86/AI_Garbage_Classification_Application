@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1069257955215",
+    "project_id": "phan-loai-rac-ai",
+    "storage_bucket": "phan-loai-rac-ai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1069257955215:android:ab7d46d3014e0c0f649dfa",
+        "android_client_info": {
+          "package_name": "com.example.phan_loai_rac_qua_hinh_anh"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1069257955215-pcks9aqoe4ekbei13nhac9pm27b9t7l0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGuiFuDnGi_Fi-0rvxVdx_gAVctKPeeZU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1069257955215-pcks9aqoe4ekbei13nhac9pm27b9t7l0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
