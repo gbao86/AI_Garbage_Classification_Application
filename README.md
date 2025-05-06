@@ -57,4 +57,6 @@ Sau đó vào thư mục build/app/ouputs/flutter-apk/app-release.apk
 
 ![image](https://github.com/user-attachments/assets/efd4e2e1-d36a-42d7-a96d-d571d7f4cb7c)
 
+![image](https://github.com/user-attachments/assets/1ac3f3b5-bd67-48bd-9a66-9ff76dfdfd7c)
+
 ![image](https://github.com/user-attachments/assets/421967c9-8f6d-436b-b282-c56520edbd12)
