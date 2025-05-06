@@ -18,15 +18,24 @@ samples, guidance on mobile development, and a full API reference.
 ♻️ Ứng Dụng Phân Loại Rác AI
 Phiên bản: 1.0.0
 
-Ứng Dụng Phân Loại Rác AI là công cụ hỗ trợ người dùng nhận diện và phân loại rác thải một cách thông minh thông qua hình ảnh. Ứng dụng tích hợp trí tuệ nhân tạo để xử lý nhanh chóng và chính xác.
+Ứng Dụng Phân Loại Rác AI giúp người dùng nhận diện và phân loại rác một cách thông minh qua hình ảnh. Sử dụng công nghệ trí tuệ nhân tạo, ứng dụng phân loại rác nhanh chóng và chính xác. Bên cạnh đó, ứng dụng còn cung cấp hướng dẫn xử lý rác đúng cách, gợi ý cách thức xử lý và cảnh báo về các tác hại khi xử lý sai.
 
 🚀 Tính năng chính:
 
-📷 Chế độ chụp ảnh trực tiếp: Mở camera và nhận diện rác ngay lập tức.
-🖼️ Chế độ chọn ảnh từ thư viện: Tải ảnh có sẵn để phân tích và phân loại rác.
-⚡ Xử lý nhanh chóng: Nhận kết quả trong vài giây.
+📷 Chụp ảnh trực tiếp: Mở camera và nhận diện rác ngay lập tức.
+
+🖼️ Chọn ảnh từ thư viện: Tải lên ảnh có sẵn để phân tích và phân loại.
+
+⚡ Xử lý nhanh chóng: Nhận kết quả phân loại rác trong vài giây.
+
+💡 Hướng dẫn xử lý: Cung cấp thông tin chi tiết về cách xử lý rác đúng cách.
+
+🗑️ Gợi ý cách xử lý: Đưa ra các gợi ý về phương pháp xử lý và nơi phù hợp.
+
+⚠️ Cảnh báo tác hại: Thông báo về các nguy cơ và tác hại khi xử lý rác sai cách.
 
 📥 Hướng dẫn:
+
 Bạn có thể tải source code về và chạy trên terminal như sau: flutter build apk --release    
 Sau đó vào thư mục build/app/ouputs/flutter-apk/app-release.apk
 
