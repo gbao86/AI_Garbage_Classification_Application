@@ -27,7 +27,8 @@ Phiên bản: 1.0.0
 ⚡ Xử lý nhanh chóng: Nhận kết quả trong vài giây.
 
 📥 Hướng dẫn:
-Bạn có thể tải ứng dụng về và chạy trên terminal như sau: flutter build apk --release
+Bạn có thể tải source code về và chạy trên terminal như sau: flutter build apk --release    
+Sau đó vào thư mục build/app/ouputs/flutter-apk/app-release.apk
 
 📥 Hoặc tải file APK đã build sẵn tại đây: [Tải về từ Google Drive](https://drive.google.com/file/d/19GeplyAAUtq6kmA_knrNh9bxl3OCaRRk/view?usp=drive_link)
 
