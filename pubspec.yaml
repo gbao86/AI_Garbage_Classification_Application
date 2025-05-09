@@ -33,6 +33,7 @@ dependencies:
     sdk: flutter
   image_picker: ^1.1.2
   permission_handler: ^12.0.0+1
+  tflite_flutter: 0.11.0
   path_provider: ^2.1.5
   google_generative_ai: ^0.4.7
   # The following adds the Cupertino Icons font to your application.
@@ -41,7 +42,7 @@ dependencies:
   mime: ^2.0.0
   image: ^4.5.4
   image_cropper: ^9.0.0
-  http: ^1.3.0
+  http: ^1.4.0
   camera: ^0.11.1
   flutter_svg: ^2.1.0
   provider: ^6.1.5
@@ -70,6 +71,8 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/
+    - assets/models/model_unquant.tflite
+    - assets/models/labels.txt
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

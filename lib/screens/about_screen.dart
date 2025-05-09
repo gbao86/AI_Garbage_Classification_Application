@@ -40,10 +40,6 @@ class AboutScreen extends StatelessWidget {
               'Facebook: Trinh Gia Bao',
               style: TextStyle(fontSize: 16),
             ),
-            Text(
-              'TikTok: @gbao.102',
-              style: TextStyle(fontSize: 16),
-            ),
           ],
         ),
       ),
