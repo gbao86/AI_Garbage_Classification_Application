@@ -25,7 +25,8 @@ Phiên bản mới nhất: **1.0.1**
 - 🧠 Thêm tính năng dùng API Gemini 1.5 Flash để hỗ trợ phân tích ảnh khi mô hình không nhận diện được hoặc lỗi.
 - ⚡ Phản hồi nhanh hơn, cải thiện hiệu suất toàn hệ thống.
 
-📦 Phiên bản cũ: **1.0.0**
+📦 Phiên bản cũ: **1.0.0**  
+
 Ứng Dụng Phân Loại Rác AI giúp người dùng nhận diện và phân loại rác một cách thông minh qua hình ảnh. Sử dụng công nghệ trí tuệ nhân tạo, ứng dụng phân loại rác nhanh chóng và chính xác. Bên cạnh đó, ứng dụng còn cung cấp hướng dẫn xử lý rác đúng cách, gợi ý cách thức xử lý và cảnh báo về các tác hại khi xử lý sai.
 
 🚀 Tính năng chính:
