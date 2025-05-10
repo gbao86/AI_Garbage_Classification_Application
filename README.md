@@ -106,6 +106,12 @@ Rất hoan nghênh mọi đóng góp từ cộng đồng! Nếu bạn muốn c�
 
 ---
 
+🕒 Lịch sử phiên bản
+
+Xem chi tiết tại [CHANGELOG.md](./CHANGELOG)
+
+---
+
 📄 Giấy phép
 
 Dự án này được phát hành theo giấy phép [MIT](./LICENSE).
