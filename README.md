@@ -69,7 +69,21 @@ flutter run -d chrome
 
 📁 Cấu trúc thư mục
 
-AI_Garbage_Classification_Application/ ├── assets/                   # Thư mục chứa hình ảnh, icon, v.v. │   └── images/               # Hình minh họa giao diện, mô hình ├── lib/                      # Code chính của ứng dụng Flutter │   ├── models/               # Các model dữ liệu │   ├── screens/              # Các màn hình giao diện chính │   ├── services/             # Dịch vụ gọi API và xử lý logic │   ├── utils/                # Các tiện ích dùng chung │   └── widgets/              # Các widget tái sử dụng ├── android/                 # Mã Android gốc ├── ios/                     # Mã iOS gốc ├── pubspec.yaml             # File cấu hình dự án Flutter ├── README.md                # Tài liệu giới thiệu dự án ├── LICENSE                  # Giấy phép MIT └── CHANGELOG.md             # Lịch sử cập nhật phiên bản
+AI_Garbage_Classification_Application/ 
+├── assets/                   # Thư mục chứa hình ảnh, icon, v.v. 
+|     └── images/             # Hình minh họa giao diện, 
+|     ├── models/             # Các model dữ liệu mô hình 
+├── lib/                      # Code chính của ứng dụng Flutter   
+       ├── screens/              # Các màn hình giao diện chính 
+       ├── services/             # Dịch vụ gọi API và xử lý logic 
+       ├── utils/                # Các tiện ích dùng chung 
+       └── widgets/              # Các widget tái sử dụng 
+├── android/                 # Mã Android gốc 
+├── ios/                     # Mã iOS gốc 
+├── pubspec.yaml             # File cấu hình dự án Flutter 
+├── README.md                # Tài liệu giới thiệu dự án 
+├── LICENSE                  # Giấy phép MIT 
+└── CHANGELOG.md             # Lịch sử cập nhật phiên bản
 
 
 ---
@@ -108,13 +122,13 @@ Rất hoan nghênh mọi đóng góp từ cộng đồng! Nếu bạn muốn c�
 
 🕒 Lịch sử phiên bản
 
-Xem chi tiết tại [CHANGELOG.md](./CHANGELOG)
+Xem chi tiết tại [CHANGELOG](./CHANGELOG.md)
 
 ---
 
 📄 Giấy phép
 
-Dự án này được phát hành theo giấy phép [MIT](./LICENSE).
+Dự án này được phát hành theo giấy phép [LICENSE MIT](./LICENSE).
 
 
 ---
