@@ -65,7 +65,6 @@ flutter run -d chrome
 
 
 
-
 ---
 
 📁 Cấu trúc thư mục
@@ -117,7 +116,7 @@ Rất hoan nghênh mọi đóng góp từ cộng đồng! Nếu bạn muốn c�
 
 📄 Giấy phép
 
-Dự án này được cấp phép theo MIT License.
+Dự án này được phát hành theo giấy phép [MIT](./LICENSE).
 
 
 ---
