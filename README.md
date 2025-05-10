@@ -121,7 +121,8 @@ Dự án này được phát hành theo giấy phép [MIT](./LICENSE).
 
 ---
 
-📬 Liên hệ
+❗ Báo lỗi & Đề xuất
 
-Nếu bạn có bất kỳ câu hỏi hoặc góp ý nào, vui lòng mở một Issue mới.
+Gặp sự cố? Có ý tưởng cải tiến?  
+Hãy tạo một [Issue tại đây](https://github.com/gbao86/AI_Garbage_Classification_Application/issues) để cùng nhau cải thiện dự án nhé!
 
