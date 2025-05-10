@@ -1,71 +1,128 @@
-# phan_loai_rac_qua_hinh_anh
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
 ♻️ Ứng Dụng Phân Loại Rác AI
-Phiên bản mới nhất: **1.0.1**
 
-🆕 **Cập nhật trong phiên bản 1.0.1** (09/05/2025):
-- 🔧 Sửa lại code `home_screen`, giúp thao tác dễ dàng và thân thiện hơn.
-- 🤖 Tối ưu mô hình phân loại rác TFLite: cải thiện tốc độ và độ chính xác.
-- 🔌 Đã tương thích đầy đủ và sửa lỗi tích hợp với hệ thống Flutter.
-- 🧠 Thêm tính năng dùng API Gemini 1.5 Flash để hỗ trợ phân tích ảnh khi mô hình không nhận diện được hoặc lỗi.
-- ⚡ Phản hồi nhanh hơn, cải thiện hiệu suất toàn hệ thống.
+Phiên bản: 1.0.1
+Tác giả: gbao86
+Nền tảng: Flutter (đa nền tảng: Android, iOS, Web, Desktop)
 
-📦 Phiên bản cũ: **1.0.0**  
 
-Ứng Dụng Phân Loại Rác AI giúp người dùng nhận diện và phân loại rác một cách thông minh qua hình ảnh. Sử dụng công nghệ trí tuệ nhân tạo, ứng dụng phân loại rác nhanh chóng và chính xác. Bên cạnh đó, ứng dụng còn cung cấp hướng dẫn xử lý rác đúng cách, gợi ý cách thức xử lý và cảnh báo về các tác hại khi xử lý sai.
+---
 
-🚀 Tính năng chính:
+📌 Giới thiệu
 
-📷 Chụp ảnh trực tiếp: Mở camera và nhận diện rác ngay lập tức.
+Ứng dụng sử dụng trí tuệ nhân tạo để phân loại rác thải thông qua hình ảnh. Người dùng có thể chụp ảnh hoặc tải lên hình ảnh rác thải, và ứng dụng sẽ phân loại chúng vào các nhóm như: rác hữu cơ, vô cơ, tái chế, v.v.
 
-🖼️ Chọn ảnh từ thư viện: Tải lên ảnh có sẵn để phân tích và phân loại.
 
-⚡ Xử lý nhanh chóng: Nhận kết quả phân loại rác trong vài giây.
+---
 
-💡 Hướng dẫn xử lý: Cung cấp thông tin chi tiết về cách xử lý rác đúng cách.
+🚀 Tính năng
 
-🗑️ Gợi ý cách xử lý: Đưa ra các gợi ý về phương pháp xử lý và nơi phù hợp.
+📷 Nhận diện rác thải từ hình ảnh
 
-⚠️ Cảnh báo tác hại: Thông báo về các nguy cơ và tác hại khi xử lý rác sai cách.
+🧠 Phân loại rác bằng mô hình AI tích hợp
 
-📥 Hướng dẫn:
+💾 Hỗ trợ đa nền tảng: Android, iOS, Web, Desktop
 
-Bạn có thể tải source code về và chạy trên terminal như sau: flutter build apk    
-Sau đó vào thư mục build/app/ouputs/flutter-apk/app-release.apk
+🌐 Giao diện người dùng thân thiện và dễ sử dụng
 
-📥 Hoặc tải file APK đã build sẵn tại đây: [Tải về từ Google Drive](https://drive.google.com/drive/folders/1fD1au9okONl6mIuCO_DkCi0H7SOKDqZ2?usp=drive_link)
 
-Ảnh chụp màn hình ứng dụng[version 1.0.0]:
 
-![image](https://github.com/user-attachments/assets/844fc223-a62b-45ca-9746-1b57623a3bdf)
+---
 
-![image](https://github.com/user-attachments/assets/e867343b-df95-46b7-afe7-dc11789266a2)
+🛠️ Cài đặt
 
-![image](https://github.com/user-attachments/assets/22f966e9-b7d2-4e24-8519-11ae19c634a7)
+Yêu cầu
 
-![image](https://github.com/user-attachments/assets/01e4d0e4-b104-4246-849e-ec84092ccc0e)
+Flutter SDK 3.x
 
-![image](https://github.com/user-attachments/assets/7561e0f5-47ea-4516-9f22-2bc969021620)
+Dart SDK
 
-![image](https://github.com/user-attachments/assets/6f28a007-7934-44e0-8c8c-250e61002280)
+Thiết bị hoặc trình giả lập Android/iOS hoặc trình duyệt Web
 
-![image](https://github.com/user-attachments/assets/efd4e2e1-d36a-42d7-a96d-d571d7f4cb7c)
 
-![image](https://github.com/user-attachments/assets/1ac3f3b5-bd67-48bd-9a66-9ff76dfdfd7c)
+Các bước cài đặt
 
-![image](https://github.com/user-attachments/assets/421967c9-8f6d-436b-b282-c56520edbd12)
+1. Clone repository:
+
+git clone https://github.com/gbao86/AI_Garbage_Classification_Application.git
+cd AI_Garbage_Classification_Application
+
+
+2. Cài đặt các gói phụ thuộc:
+
+flutter pub get
+
+
+3. Chạy ứng dụng:
+
+Android/iOS:
+
+flutter run
+
+Web:
+
+flutter run -d chrome
+
+
+
+
+
+---
+
+📁 Cấu trúc thư mục
+
+.
+├── lib/                 # Mã nguồn chính của ứng dụng
+├── assets/              # Hình ảnh và tài nguyên tĩnh
+├── android/             # Cấu hình cho Android
+├── ios/                 # Cấu hình cho iOS
+├── web/                 # Cấu hình cho Web
+├── test/                # Bài kiểm thử
+├── pubspec.yaml         # Thông tin và phụ thuộc của dự án
+└── README.md            # Tài liệu hướng dẫn
+
+
+---
+
+🧪 Công nghệ sử dụng
+
+Flutter: Phát triển ứng dụng đa nền tảng
+
+TensorFlow Lite: Mô hình AI nhẹ cho thiết bị di động
+
+Dart: Ngôn ngữ lập trình chính
+
+
+---
+
+🤝 Đóng góp
+
+Rất hoan nghênh mọi đóng góp từ cộng đồng! Nếu bạn muốn cải thiện ứng dụng, vui lòng:
+
+1. Fork repository
+
+
+2. Tạo nhánh mới: git checkout -b feature/ten-tinh-nang
+
+
+3. Commit thay đổi: git commit -m 'Thêm tính năng mới'
+
+
+4. Push lên nhánh của bạn: git push origin feature/ten-tinh-nang
+
+
+5. Tạo Pull Request
+
+
+---
+
+📄 Giấy phép
+
+Dự án này được cấp phép theo MIT License.
+
+
+---
+
+📬 Liên hệ
+
+Nếu bạn có bất kỳ câu hỏi hoặc góp ý nào, vui lòng mở một Issue mới.
+
