@@ -128,7 +128,7 @@ Xem chi tiết tại [CHANGELOG](./CHANGELOG.md)
 
 📄 Giấy phép
 
-Dự án này được phát hành theo giấy phép [LICENSE MIT](./LICENSE).
+Dự án này được phát hành theo giấy phép [MIT License](./LICENSE).
 
 
 ---
