@@ -69,15 +69,7 @@ flutter run -d chrome
 
 📁 Cấu trúc thư mục
 
-.
-├── lib/                 # Mã nguồn chính của ứng dụng
-├── assets/              # Hình ảnh và tài nguyên tĩnh
-├── android/             # Cấu hình cho Android
-├── ios/                 # Cấu hình cho iOS
-├── web/                 # Cấu hình cho Web
-├── test/                # Bài kiểm thử
-├── pubspec.yaml         # Thông tin và phụ thuộc của dự án
-└── README.md            # Tài liệu hướng dẫn
+AI_Garbage_Classification_Application/ ├── assets/                   # Thư mục chứa hình ảnh, icon, v.v. │   └── images/               # Hình minh họa giao diện, mô hình ├── lib/                      # Code chính của ứng dụng Flutter │   ├── models/               # Các model dữ liệu │   ├── screens/              # Các màn hình giao diện chính │   ├── services/             # Dịch vụ gọi API và xử lý logic │   ├── utils/                # Các tiện ích dùng chung │   └── widgets/              # Các widget tái sử dụng ├── android/                 # Mã Android gốc ├── ios/                     # Mã iOS gốc ├── pubspec.yaml             # File cấu hình dự án Flutter ├── README.md                # Tài liệu giới thiệu dự án ├── LICENSE                  # Giấy phép MIT └── CHANGELOG.md             # Lịch sử cập nhật phiên bản
 
 
 ---
