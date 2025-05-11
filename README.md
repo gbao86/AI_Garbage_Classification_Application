@@ -104,6 +104,9 @@ Rất hoan nghênh mọi đóng góp từ cộng đồng! Nếu bạn muốn c�
 
 5. Tạo Pull Request
 
+  
+6. Trải nghiệm nhanh bằng cách cài apk tại đây: [APK](https://drive.google.com/file/d/1213GsWXbb6MnhcNWX-Rw91m5oS8cE7Z5/view?usp=drive_link)
+
 
 ---
 
