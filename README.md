@@ -69,21 +69,8 @@ flutter run -d chrome
 
 📁 Cấu trúc thư mục
 
-AI_Garbage_Classification_Application/ 
-├── assets/                   # Thư mục chứa hình ảnh, icon, v.v. 
-|     └── images/             # Hình minh họa giao diện, 
-|     ├── models/             # Các model dữ liệu mô hình 
-├── lib/                      # Code chính của ứng dụng Flutter   
-       ├── screens/              # Các màn hình giao diện chính 
-       ├── services/             # Dịch vụ gọi API và xử lý logic 
-       ├── utils/                # Các tiện ích dùng chung 
-       └── widgets/              # Các widget tái sử dụng 
-├── android/                 # Mã Android gốc 
-├── ios/                     # Mã iOS gốc 
-├── pubspec.yaml             # File cấu hình dự án Flutter 
-├── README.md                # Tài liệu giới thiệu dự án 
-├── LICENSE                  # Giấy phép MIT 
-└── CHANGELOG.md             # Lịch sử cập nhật phiên bản
+<img width="338" alt="image" src="https://github.com/user-attachments/assets/5d8090be-1ef1-4347-ba02-14f0bb3bcc90" />
+
 
 
 ---
