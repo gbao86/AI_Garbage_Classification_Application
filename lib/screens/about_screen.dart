@@ -18,7 +18,7 @@ class AboutScreen extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              'Phiên bản: 1.0.0',
+              'Phiên bản: 1.0.1',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 20),

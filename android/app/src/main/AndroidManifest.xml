@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     
     <application
-        android:label="phan_loai_rac_qua_hinh_anh"
+        android:label="Phân Loại Rác AI"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

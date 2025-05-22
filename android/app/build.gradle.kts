@@ -6,10 +6,9 @@ plugins {
 }
 
 android {
-    ndkVersion = "28.1.13356709"
+    ndkVersion = "27.0.12077973"
     namespace = "com.example.phan_loai_rac_qua_hinh_anh"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -28,12 +27,13 @@ android {
         versionName = "1.0"
 
         buildTypes {
-            release {
+            getByName("release") {
+                isMinifyEnabled = false
+                isShrinkResources = false
                 signingConfig = signingConfigs.getByName("debug")
             }
         }
     }
-
     flutter {
         source = "../.."
     }
