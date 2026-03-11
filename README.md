@@ -11,6 +11,13 @@ Nền tảng: Flutter (đa nền tảng: Android, iOS, Web, Desktop)
 
 Ứng dụng sử dụng trí tuệ nhân tạo để phân loại rác thải thông qua hình ảnh. Người dùng có thể chụp ảnh hoặc tải lên hình ảnh rác thải, và ứng dụng sẽ phân loại chúng vào các nhóm như: rác hữu cơ, vô cơ, tái chế, v.v.
 
+---
+
+🎥 Video Demo
+
+Bạn có thể xem video giới thiệu và hướng dẫn sử dụng ứng dụng tại đây:
+
+👉 [Xem Video Demo trên YouTube](https://youtu.be/YuI4tK1fNLU?si=LTzk0kVj0328i7m5)
 
 ---
 
