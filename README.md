@@ -1,7 +1,9 @@
 ♻️ Ứng Dụng Phân Loại Rác AI
 
 Phiên bản: 1.0.1
+
 Tác giả: gbao86
+
 Nền tảng: Flutter (đa nền tảng: Android, iOS, Web, Desktop)
 
 
