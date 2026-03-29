@@ -3,7 +3,7 @@
 Lịch sử cập nhật các phiên bản của **Ứng dụng Phân loại Rác bằng AI**
 
 ---
-
+ 
 ## [1.0.4] - 30/03/2026
 
 ### ✨ Nâng cấp giao diện & Tính năng mới
