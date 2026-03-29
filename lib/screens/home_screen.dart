@@ -101,10 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
       originalLabel = originalLabel.replaceFirst(RegExp(r'^\d+\s+'), ''); 
 
       if (maxScore * 100 < 40) return 'Lỗi: Độ tin cậy thấp.';
-      
       final translatedLabel = _labelTranslations[originalLabel] ?? originalLabel;
       final classification = _getClassification(originalLabel);
-      
       return '''**Loại rác**: $translatedLabel ($originalLabel)\n**Phân loại**: $classification\n**Độ tin cậy**: ${(maxScore * 100).toStringAsFixed(2)}%''';
     } catch (e) { return 'Lỗi: $e'; }
   }
@@ -168,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Hành động nhỏ,', style: theme.textTheme.bodyLarge?.copyWith(color: Colors.black54)),
-                                Text('Vì môi trường xanh', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, color: theme.primaryColor)),
+                                Text('EcoSort by Bao', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, color: theme.primaryColor)),
                               ],
                             ),
                             Container(
@@ -299,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded, color: Colors.black26, size: 16),
+            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.black26, size: 16),
           ],
         ),
       ),

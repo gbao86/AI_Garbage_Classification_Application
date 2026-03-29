@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/screens/home_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/screens/about_screen.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/screens/map_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/app_theme.dart';
 
 void main() {
@@ -14,12 +15,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Phân Loại Rác AI',
+      title: 'EcoSort by Bao',
       theme: AppTheme.lightTheme,
       home: const HomeScreen(),
       routes: {
         '/home': (context) => const HomeScreen(),
         '/about': (context) => const AboutScreen(),
+        '/map': (context) => const MapScreen(),
       },
     );
   }
