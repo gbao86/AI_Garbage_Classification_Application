@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phan_loai_rac_qua_hinh_anh/screens/home_screen2.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/screens/home_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/screens/about_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/app_theme.dart';
 
@@ -13,12 +13,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Phân Loại Rác AI',
       theme: AppTheme.lightTheme,
-      home: HomeScreen(),
+      home: const HomeScreen(),
       routes: {
-        '/home': (context) => HomeScreen(),
-        '/about': (context) => AboutScreen(),
+        '/home': (context) => const HomeScreen(),
+        '/about': (context) => const AboutScreen(),
       },
     );
   }

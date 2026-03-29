@@ -4,6 +4,23 @@ Lịch sử cập nhật các phiên bản của **Ứng dụng Phân loại Rá
 
 ---
 
+## [1.0.4] - 30/03/2026
+
+### ✨ Nâng cấp giao diện & Tính năng mới
+- 🗺️ **Tính năng Bản đồ**: Thêm màn hình Bản đồ điểm bỏ rác công cộng sử dụng OpenStreetMap hoàn toàn miễn phí.
+- 📍 **Định vị GPS**: Tự động xác định vị trí người dùng để tìm điểm bỏ rác gần nhất.
+- 🎨 **Cải tổ UI/UX**:
+    - Thiết kế lại trang chủ với phong cách hiện đại (Premium Banner, Rounded Cards).
+    - Làm mới trang thông tin (About) với hiệu ứng SliverAppBar co giãn.
+    - Tối ưu trang kết quả với định dạng Markdown chuyên nghiệp và màu sắc theo loại rác.
+- 🌍 **Đa ngôn ngữ**: Ánh xạ dữ liệu nhãn rác sang Tiếng Việt chuẩn.
+- 📱 **Xử lý ảnh HEIC**: Hỗ trợ nhận diện ảnh định dạng HEIC/HEIF từ iPhone.
+- 🛠️ **Hệ thống**: 
+    - Nâng cấp Gradle lên 8.11.1 và Android Gradle Plugin lên 8.10.0.
+    - Tự động hóa thông tin phiên bản và năm bản quyền.
+
+---
+
 ## [1.0.1] - 09/05/2025
 
 ### 🆕 Cập nhật

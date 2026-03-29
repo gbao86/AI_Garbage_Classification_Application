@@ -1,47 +1,200 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-class AboutScreen extends StatelessWidget {
+class AboutScreen extends StatefulWidget {
+  const AboutScreen({super.key});
+
+  @override
+  State<AboutScreen> createState() => _AboutScreenState();
+}
+
+class _AboutScreenState extends State<AboutScreen> {
+  String _version = "...";
+  final int _currentYear = DateTime.now().year;
+
+  @override
+  void initState() {
+    super.initState();
+    _initPackageInfo();
+  }
+
+  Future<void> _initPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() {
+        _version = info.version;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Về ứng dụng'),
+      backgroundColor: const Color(0xFFF0F4F3),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 280.0,
+            pinned: true,
+            stretch: true,
+            backgroundColor: theme.primaryColor,
+            flexibleSpace: FlexibleSpaceBar(
+              stretchModes: const [StretchMode.zoomBackground, StretchMode.blurBackground],
+              title: const Text('Về ứng dụng', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [theme.primaryColor, theme.primaryColor.withAlpha(200)],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: -20,
+                    right: -20,
+                    child: Icon(Icons.eco_rounded, size: 200, color: Colors.white.withOpacity(0.1)),
+                  ),
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                          ),
+                          child: const Icon(Icons.auto_awesome, size: 60, color: Colors.white),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Waste AI v$_version',
+                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionCard(
+                    theme,
+                    title: 'Sứ mệnh của chúng tôi',
+                    content: 'Được phát triển bởi Trịnh Gia Bảo, ứng dụng sử dụng công nghệ AI để nhận diện rác thải, giúp người dùng hình thành thói quen phân loại rác tại nguồn, bảo vệ môi trường bền vững.',
+                    icon: Icons.explore_rounded,
+                    iconColor: Colors.orange,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildSectionCard(
+                    theme,
+                    title: 'Công nghệ sử dụng',
+                    content: 'Kết hợp giữa mô hình TFLite chạy Offline và Gemini AI Online để đảm bảo độ chính xác tối ưu trong mọi điều kiện kết nối.',
+                    icon: Icons.psychology_rounded,
+                    iconColor: Colors.blue,
+                  ),
+                  const SizedBox(height: 32),
+                  Text('Liên hệ với chúng tôi', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  _buildContactTile(
+                    theme,
+                    icon: Icons.email_rounded,
+                    label: 'Email',
+                    value: 'tiktokthu10@gmail.com',
+                    color: Colors.redAccent,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildContactTile(
+                    theme,
+                    icon: Icons.facebook_rounded,
+                    label: 'Facebook',
+                    value: 'Trinh Gia Bao',
+                    color: Colors.blueAccent,
+                  ),
+                  const SizedBox(height: 48),
+                  Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          '© $_currentYear Waste Classification AI',
+                          style: const TextStyle(color: Colors.black38, fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text('Made with ❤️ for the Planet', style: TextStyle(color: Colors.black26, fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
-      body: const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'Ứng dụng Phân Loại Rác AI',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Phiên bản: 1.0.1',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Ứng dụng Phân Loại Rác AI được phát triển bởi Trịnh Gia Bảo, sử dụng mô hình trí tuệ nhân tạo tiên tiến để nhận diện nhanh chóng và chính xác các loại rác thải.\n\nChỉ cần chụp ảnh hoặc chọn ảnh từ thư viện, hệ thống sẽ tự động phân tích, xác định loại rác (hữu cơ, tái chế, nguy hại...) và đưa ra hướng dẫn xử lý chi tiết, giúp bạn góp phần bảo vệ môi trường từ những hành động nhỏ nhất.',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Liên hệ:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Email: tiktokthu10@gmail.com',
-              style: TextStyle(fontSize: 16),
-            ),
-            Text(
-              'Facebook: Trinh Gia Bao',
-              style: TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
+    );
+  }
+
+  Widget _buildSectionCard(ThemeData theme, {required String title, required String content, required IconData icon, required Color iconColor}) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: iconColor, size: 24),
+              const SizedBox(width: 12),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(content, style: const TextStyle(color: Colors.black54, fontSize: 15, height: 1.5)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContactTile(ThemeData theme, {required IconData icon, required String label, required String value, required Color color}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.black.withOpacity(0.05)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(14)),
+            child: Icon(icon, color: color, size: 22),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: const TextStyle(color: Colors.black38, fontSize: 11, fontWeight: FontWeight.bold)),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            ],
+          ),
+        ],
       ),
     );
   }
