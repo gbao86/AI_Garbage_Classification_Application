@@ -1,4 +1,4 @@
-# ♻️ Waste Classification AI - Ứng Dụng Phân Loại Rác Thông Minh
+# ♻️ EcoSort by Bao - Ứng Dụng Phân Loại Rác Thông Minh
 
 [![Version](https://img.shields.io/badge/version-1.0.4-green.svg)](./CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Flutter-blue.svg)](https://flutter.dev)
@@ -10,7 +10,7 @@
 
 ## 📌 Giới thiệu
 
-**Waste Classification AI** là giải pháp công nghệ nhằm hỗ trợ cộng đồng phân loại rác tại nguồn một cách dễ dàng và chính xác. Bằng cách kết hợp sức mạnh của mô hình **TFLite (Offline)** và **Gemini AI (Online)**, ứng dụng cung cấp khả năng nhận diện đa dạng các loại rác thải và đưa ra hướng dẫn xử lý chi tiết theo tiêu chuẩn môi trường.
+**EcoSort by Bao** là giải pháp công nghệ nhằm hỗ trợ cộng đồng phân loại rác tại nguồn một cách dễ dàng và chính xác. Bằng cách kết hợp sức mạnh của mô hình **TFLite (Offline)** và **Gemini AI (Online)**, ứng dụng cung cấp khả năng nhận diện đa dạng các loại rác thải và đưa ra hướng dẫn xử lý chi tiết theo tiêu chuẩn môi trường.
 
 ---
 
