@@ -1,11 +1,11 @@
 # ♻️ EcoSort by Bao - Ứng Dụng Phân Loại Rác Thông Minh
 
-[![Version](https://img.shields.io/badge/version-1.0.4-green.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.6-green.svg)](./CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Flutter-blue.svg)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](./LICENSE)
 
 Ứng dụng sử dụng trí tuệ nhân tạo (AI) tiên tiến để nhận diện và phân loại rác thải qua hình ảnh, giúp người dùng xử lý rác đúng cách và bảo vệ môi trường.
- 
+
 ---
 
 ## 📌 Giới thiệu
@@ -16,20 +16,20 @@
 
 ## 🎥 Video Demo
 
-> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v1.0.1**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v1.0.4**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
+> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v1.0.1**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v1.0.6**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
 
 👉 [Xem Video Demo trên YouTube (v1.0.1)](https://youtu.be/YuI4tK1fNLU?si=LTzk0kVj0328i7m5)
 
 ---
 
-## 🚀 Tính năng nổi bật (v1.0.4)
+## 🚀 Tính năng nổi bật (v1.0.6)
 
 - 📷 **Nhận diện thông minh**: Chụp ảnh hoặc chọn từ thư viện để AI phân tích loại rác.
 - 🗺️ **Bản đồ điểm bỏ rác**: Tìm kiếm các điểm thu gom rác công cộng gần bạn thông qua OpenStreetMap hoàn toàn miễn phí.
 - 📍 **Định vị GPS**: Tự động xác định vị trí thực tế của người dùng trên bản đồ.
 - 🌍 **Đa ngôn ngữ**: Toàn bộ dữ liệu được ánh xạ sang Tiếng Việt chuẩn, dễ hiểu.
 - 📱 **Hỗ trợ HEIC**: Xử lý mượt mà các định dạng ảnh chất lượng cao từ iPhone.
-- 🧠 **Cơ chế xử lý kép**: Ưu tiên phân tích Offline bằng TFLite và dự phòng bằng Gemini 1.5 Flash Online.
+- 🧠 **Cơ chế xử lý kép**: Ưu tiên phân tích Offline bằng TFLite và dự phòng bằng Gemini 2.0 Online (API Key Gemini được mã hóa để tăng bảo mật).
 - 🎨 **Giao diện Modern UI**: Thiết kế hiện đại, sạch sẽ và tối ưu trải nghiệm người dùng (UX).
 
 ---
@@ -46,7 +46,22 @@
 
 ## 📁 Cấu trúc thư mục
 
-<img width="338" alt="folder structure" src="https://github.com/user-attachments/assets/5d8090be-1ef1-4347-ba02-14f0bb3bcc90" />
+```text
+phan_loai_rac_qua_hinh_anh/
+├── android/                  # Cấu hình dự án Android
+├── assets/                   # Tài nguyên ứng dụng (Images, Models)
+├── ios/                      # Cấu hình dự án iOS
+├── lib/                      # Mã nguồn chính (Dart)
+│   ├── models/               # Định nghĩa các lớp dữ liệu
+│   ├── screens/              # Các màn hình giao diện chính
+│   ├── services/             # Xử lý Logic AI & API
+│   ├── theme/                # Cấu hình giao diện (Styles)
+│   ├── utils/                # Hàm tiện ích & Hằng số
+│   ├── widgets/              # Thành phần UI dùng chung
+│   └── main.dart             # tđiểm bắt đầu của ứng dụng
+├── pubspec.yaml              # Quản lý thư viện & tài nguyên
+└── README.md                 # Tài liệu hướng dẫn dự án
+```
 
 ---
 

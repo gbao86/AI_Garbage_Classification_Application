@@ -1,0 +1,7 @@
+flutter clean
+dart run build_runner clean
+cd android
+./gradlew clean
+cd ..
+flutter pub get
+taskkill /F /IM java.exe

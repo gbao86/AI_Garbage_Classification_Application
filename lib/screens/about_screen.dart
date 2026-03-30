@@ -74,7 +74,7 @@ class _AboutScreenState extends State<AboutScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Waste AI v$_version',
+                          'EcoSort by Bao v$_version',
                           style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500),
                         ),
                       ],
@@ -128,7 +128,7 @@ class _AboutScreenState extends State<AboutScreen> {
                     child: Column(
                       children: [
                         Text(
-                          '© $_currentYear Waste Classification AI',
+                          '© $_currentYear EcoSort by Bao',
                           style: const TextStyle(color: Colors.black38, fontSize: 13, fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(height: 4),

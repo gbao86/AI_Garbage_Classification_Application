@@ -1,47 +1,45 @@
 import 'dart:io';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:mime/mime.dart';
-import 'package:phan_loai_rac_qua_hinh_anh/utils/constants.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/utils/env.dart';
 
 class GeminiService {
+  // Sử dụng API Key từ file Env bảo mật
   final GenerativeModel _model = GenerativeModel(
-    model: 'gemini-1.5-flash', // Hỗ trợ hình ảnh
-    apiKey: Constants.geminiApiKey,
+    model: 'gemini-2.0-flash', 
+    apiKey: Env.geminiApiKey,
   );
 
   Future<String> processImageAndGetGuidance(File imageFile) async {
     try {
-      // Đọc ảnh dưới dạng bytes
       final imageBytes = await imageFile.readAsBytes();
-
-      // Xác định MIME type
       final mimeType = lookupMimeType(imageFile.path) ?? 'image/jpeg';
+
       if (!['image/jpeg', 'image/png', 'image/webp', 'image/bmp'].contains(mimeType)) {
         return 'Lỗi: Định dạng ảnh không được hỗ trợ ($mimeType).';
       }
 
-      // Tạo prompt
       final prompt = """
-Bạn là một chuyên gia về quản lý và phân loại rác thải. Dựa trên ảnh được cung cấp, hãy thực hiện các bước sau bằng tiếng Việt:
+Bạn là một chuyên gia về quản lý và phân loại rác thải tại Việt Nam. 
+Dựa trên ảnh được cung cấp, hãy thực hiện các bước sau:
 
-1. Xác định loại rác trong ảnh (ví dụ: battery, biological, brown-glass, cardboard, clothes, green-glass, metal, paper, plastic, shoes, trash, white-glass).
-2. Phân loại rác (tái chế, hữu cơ, nguy hại, hoặc không tái chế).
-3. Cung cấp hướng dẫn chi tiết về cách xử lý loại rác này, bao gồm:
-   - Cách vứt bỏ đúng cách (ví dụ: thùng tái chế, điểm thu gom đặc biệt).
-   - Nơi xử lý (ví dụ: thùng rác xanh, trung tâm tái chế, bãi chôn lấp).
-   - Tác hại nếu xử lý không đúng (ví dụ: ô nhiễm môi trường, ảnh hưởng sức khỏe).
-4. Nếu không nhận diện được loại rác, giải thích lý do (ví dụ: ảnh không rõ, không phải rác).
+1. Xác định loại rác chính trong ảnh. Hãy chọn MỘT trong các nhãn sau để khớp với hệ thống: 
+   battery, biological, cardboard, clothes, glass, metal, paper, plastic, shoes, trash.
+2. Phân loại rác vào nhóm: Tái chế, Hữu cơ, Nguy hại, hoặc Không tái chế.
+3. Cung cấp hướng dẫn xử lý ngắn gọn, chuyên nghiệp.
 
-Định dạng kết quả:
-**Loại rác**: [loại rác]
-**Phân loại**: [tái chế/hữu cơ/nguy hại/không tái chế]
+Định dạng kết quả (Bắt buộc dùng Markdown):
+**Loại rác**: [Tên tiếng Việt] ([nhãn tiếng Anh tương ứng])
+**Phân loại**: [Tái chế/Hữu cơ/Nguy hại/Không tái chế]
+
 **Hướng dẫn xử lý**:
-- [Cách vứt bỏ]
-- [Nơi xử lý]
-- [Tác hại nếu xử lý sai]
+- **Cách vứt bỏ**: [Cách chuẩn bị rác]
+- **Nơi xử lý**: [Thùng rác hoặc điểm thu gom]
+- **Tác hại nếu xử lý sai**: [Ảnh hưởng môi trường/sức khỏe]
+
+**Mẹo sống xanh**: [Một lời khuyên nhỏ từ chuyên gia]
 """;
 
-      // Tạo nội dung gửi tới Gemini
       final content = [
         Content.multi([
           TextPart(prompt),
@@ -49,13 +47,11 @@ Bạn là một chuyên gia về quản lý và phân loại rác thải. Dựa 
         ]),
       ];
 
-      // Gửi yêu cầu
       final response = await _model.generateContent(content);
-      final result = response.text?.trim() ?? 'Không nhận được kết quả từ Gemini.';
-      return result;
+      return response.text?.trim() ?? 'Không nhận được kết quả từ Gemini.';
     } catch (e) {
-      print('Lỗi khi xử lý ảnh với Gemini: $e');
-      return 'Lỗi khi phân loại ảnh với Gemini: $e';
+      print('Lỗi khi xử lý ảnh với Gemini 2.0: $e');
+      return 'Lỗi phân tích Gemini AI: $e';
     }
   }
 }

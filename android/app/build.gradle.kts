@@ -23,8 +23,8 @@ android {
         applicationId = "com.example.phan_loai_rac_qua_hinh_anh"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
 
         buildTypes {
             getByName("release") {
