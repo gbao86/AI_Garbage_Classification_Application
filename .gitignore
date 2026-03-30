@@ -47,3 +47,4 @@ app.*.map.json
 # Sensitive files
 .env
 .env.*
+.clean

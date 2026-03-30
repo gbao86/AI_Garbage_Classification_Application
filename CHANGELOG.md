@@ -4,6 +4,35 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
+## [1.0.7] - 2026-03-31
+
+### 🚀 Nâng cấp AI Engine & Bảo mật
+- 🧠 **Cơ chế xử lý kép (TFLite → Gemini)**:
+    - Ưu tiên phân tích Offline bằng TFLite để tăng tốc độ và hoạt động không cần mạng.
+    - Tự động gọi Gemini Online khi TFLite chưa sẵn sàng hoặc độ tin cậy dưới 80% để lấy hướng dẫn chi tiết.
+- 📝 **Đồng nhất định dạng kết quả**:
+    - Chuẩn hóa đầu ra TFLite theo Markdown cùng cấu trúc với Gemini (Loại rác/Phân loại/Hướng dẫn xử lý/Mẹo sống xanh).
+- 🔐 **Bảo mật API Key**:
+    - Loại bỏ hard-code API key trong mã nguồn, chuyển sang lấy từ `Env.geminiApiKey` (obfuscate).
+- ⚡ **Ổn định Gemini Flash**:
+    - Cập nhật model Gemini Flash để tương thích tốt hơn với API `generateContent` trên `v1beta`.
+    - Thêm cơ chế retry + exponential backoff + timeout để giảm lỗi tạm thời `503`/`429` khi Gemini quá tải.
+    - Tối ưu ảnh trước khi gửi Gemini (resize/compress JPEG) để tăng tốc độ upload và giảm độ trễ.
+- 🎮 **Thử thách & Học tập 2.0**:
+    - Kết nối điều hướng thật từ Home sang màn hình game, bỏ trạng thái placeholder.
+    - Nâng cấp gameplay với timer, streak/combo, thống kê vòng chơi và phản hồi trực quan.
+    - Mở rộng bộ câu hỏi lên 200 câu ngẫu nhiên theo nhóm rác với ảnh online minh họa.
+    - Hoàn thiện cơ chế điểm và khóa đáp án để tránh cộng điểm trùng khi bấm nhanh nhiều lần.
+- 🏅 **Kho huy hiệu chuyên biệt**:
+    - Thêm màn hình Kho huy hiệu riêng hiển thị đầy đủ danh sách đã mở/chưa mở.
+    - Hiển thị tiến độ đến huy hiệu kế tiếp bằng thanh progress và điểm còn thiếu.
+    - Đồng bộ huy hiệu theo điểm từ `GameProvider` và hiển thị trực tiếp trên Home/Game.
+- 📱 **UI/UX đa thiết bị cho Game**:
+    - Chuyển layout game sang responsive theo kích thước màn hình (không fix cứng thông số).
+    - Khắc phục lỗi `RenderFlex overflow` trên thiết bị màn hình nhỏ.
+
+---
+
 ## [1.0.6] - 2026-03-31
 
 ### 🚀 Nâng cấp & Sửa lỗi quan trọng
@@ -18,8 +47,8 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
     - Tối ưu và tinh chỉnh lại mô hình AI phân loại rác để đảm bảo độ chính xác (cấm độc quyền đoán nhãn 'metal').
     - Cập nhật logic và ánh xạ dữ liệu tiếng Việt cho mô hình nhận diện 10 loại rác mới.
     - Tối ưu hóa việc xử lý nhãn và phân nhóm rác (Tái chế, Hữu cơ, Nguy hại).
-- 🔐 **Gemini 2.0 API Key (mã hóa key)**: 
-    - Thêm API Key Gemini 2.0 và mã hóa key để tăng bảo mật.
+- 🔐 **Gemini 1.5 API Key (mã hóa key)**: 
+    - Thêm API Key Gemini 1.5 và mã hóa key để tăng bảo mật.
 - 🛠️ **Hệ thống & Fix**:
     - Sửa lỗi biên dịch `camera.center!` trên Flutter 3.35+.
     - Loại bỏ hoàn toàn các cảnh báo `deprecated` (withOpacity, background).

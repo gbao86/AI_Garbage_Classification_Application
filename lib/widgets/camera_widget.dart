@@ -10,10 +10,10 @@ class CameraWidget extends StatefulWidget {
   final CameraDescription camera;
   final Function(XFile) onPictureTaken;
 
-  const CameraWidget({Key? key, required this.camera, required this.onPictureTaken}) : super(key: key);
+  const CameraWidget({super.key, required this.camera, required this.onPictureTaken});
 
   @override
-  _CameraWidgetState createState() => _CameraWidgetState();
+  State<CameraWidget> createState() => _CameraWidgetState();
 }
 
 class _CameraWidgetState extends State<CameraWidget> {
@@ -65,8 +65,8 @@ class _CameraWidgetState extends State<CameraWidget> {
                 bottom: 20,
                 child: FloatingActionButton(
                   onPressed: _takePicture,
-                  child: Icon(Icons.camera),
                   backgroundColor: CameraConstants.primaryColor, // Sử dụng CameraConstants
+                  child: const Icon(Icons.camera),
                 ),
               ),
             ],

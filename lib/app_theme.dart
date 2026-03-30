@@ -15,9 +15,9 @@ class AppTheme {
       primary: primaryColor,
       secondary: accentColor,
       surface: surfaceColor,
-      background: backgroundColor,
       onSurface: const Color(0xFF1A1C1E),
     ),
+    scaffoldBackgroundColor: backgroundColor,
     textTheme: GoogleFonts.plusJakartaSansTextTheme().copyWith(
       headlineMedium: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.5),
       titleLarge: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: -0.2),

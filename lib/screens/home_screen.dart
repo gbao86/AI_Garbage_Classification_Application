@@ -11,6 +11,10 @@ import 'package:phan_loai_rac_qua_hinh_anh/screens/map_screen.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:provider/provider.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/features/game/game_provider.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/features/game/game_screen.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/features/game/badge_inventory_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -40,6 +44,62 @@ class _HomeScreenState extends State<HomeScreen> {
     'shoes': 'Giày dép',
     'trash': 'Rác thông thường',
   };
+
+  String _buildLocalGuidanceMarkdown({
+    required String translatedLabel,
+    required String originalLabel,
+    required String classification,
+    required double confidencePct,
+    required bool lowConfidence,
+  }) {
+    final confidenceText = confidencePct.toStringAsFixed(2);
+
+    String disposal;
+    String where;
+    String harm;
+    String tip;
+
+    switch (classification) {
+      case 'tái chế':
+        disposal = 'Làm sạch (nếu có thể), để khô và tháo rời các phần khác vật liệu.';
+        where = 'Bỏ vào thùng/túi tái chế hoặc mang đến điểm thu gom tái chế gần nhất.';
+        harm = 'Lẫn bẩn/dính dầu mỡ có thể làm giảm khả năng tái chế và tăng rác thải chôn lấp.';
+        tip = 'Ưu tiên tái sử dụng trước khi tái chế (refill, dùng lại hộp/chai).';
+        break;
+      case 'hữu cơ':
+        disposal = 'Tách khỏi rác tái chế, để trong túi kín hoặc thùng có nắp.';
+        where = 'Bỏ vào thùng rác hữu cơ (nếu có) hoặc ủ compost tại nhà.';
+        harm = 'Để lẫn rác tái chế gây mùi, thu hút côn trùng và làm hỏng vật liệu tái chế.';
+        tip = 'Giảm rác hữu cơ bằng cách lên kế hoạch bữa ăn, bảo quản thực phẩm đúng cách.';
+        break;
+      case 'nguy hại':
+        disposal = 'Giữ nguyên trạng, không đập vỡ/khui mở; bọc kín nếu có nguy cơ rò rỉ.';
+        where = 'Mang đến điểm thu gom rác nguy hại (pin, ắc quy, hóa chất) hoặc chương trình thu hồi.';
+        harm = 'Có thể gây ô nhiễm đất/nước và ảnh hưởng sức khỏe nếu rò rỉ hoặc bị đốt.';
+        tip = 'Ưu tiên sản phẩm sạc lại, dùng bền để giảm phát sinh rác nguy hại.';
+        break;
+      default:
+        disposal = 'Buộc kín, hạn chế để lẫn với nhóm tái chế/hữu cơ.';
+        where = 'Bỏ vào thùng rác thường theo quy định địa phương.';
+        harm = 'Lẫn nhóm tái chế/hữu cơ sẽ làm tăng chi phí xử lý và giảm hiệu quả phân loại.';
+        tip = 'Cân nhắc thay thế bằng sản phẩm ít bao bì, dễ tái chế.';
+    }
+
+    final note = lowConfidence
+        ? '\n\n**Lưu ý**: Độ tin cậy chưa cao. Bạn có thể thử chụp lại ảnh rõ hơn (đủ sáng, vật thể chiếm khung hình) hoặc dùng chế độ Online để được hướng dẫn chi tiết.'
+        : '';
+
+    return '''**Loại rác**: $translatedLabel ($originalLabel)
+**Phân loại**: $classification
+**Độ tin cậy**: $confidenceText%$note
+
+**Hướng dẫn xử lý**:
+- **Cách vứt bỏ**: $disposal
+- **Nơi xử lý**: $where
+- **Tác hại nếu xử lý sai**: $harm
+
+**Mẹo sống xanh**: $tip''';
+  }
 
   @override
   void initState() {
@@ -74,12 +134,30 @@ class _HomeScreenState extends State<HomeScreen> {
     return file;
   }
 
-  Future<String> _classifyWithTFLite(File imageFile) async {
-    if (_interpreter == null || _labels.isEmpty) return 'Lỗi: Mô hình chưa sẵn sàng.';
+  Future<File> _prepareForGemini(File file) async {
+    final tempDir = await getTemporaryDirectory();
+    final targetPath = p.join(tempDir.path, "gemini_${DateTime.now().millisecondsSinceEpoch}.jpg");
+    final result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      format: CompressFormat.jpeg,
+      quality: 75,
+      minWidth: 1024,
+      minHeight: 1024,
+    );
+    return result != null ? File(result.path) : file;
+  }
+
+  Future<({String markdown, bool isLowConfidence, bool isReady, double confidencePct})> _classifyWithTFLite(File imageFile) async {
+    if (_interpreter == null || _labels.isEmpty) {
+      return (markdown: 'Lỗi: Mô hình chưa sẵn sàng.', isLowConfidence: true, isReady: false, confidencePct: 0.0);
+    }
     try {
       final imageBytes = await imageFile.readAsBytes();
       final image = img.decodeImage(imageBytes);
-      if (image == null) return 'Lỗi: Không thể giải mã ảnh.';
+      if (image == null) {
+        return (markdown: 'Lỗi: Không thể giải mã ảnh.', isLowConfidence: true, isReady: true, confidencePct: 0.0);
+      }
 
       final resizedImage = img.copyResize(image, width: 224, height: 224);
       final input = List.generate(1, (_) => List.generate(224, (_) => List.generate(224, (_) => List.filled(3, 0.0))));
@@ -88,8 +166,6 @@ class _HomeScreenState extends State<HomeScreen> {
         for (var y = 0; y < 224; y++) {
           final pixel = resizedImage.getPixel(x, y);
 
-          // ĐÃ FIX: Chỉ lấy giá trị gốc và chuyển sang Double.
-          // Mô hình TFLite sẽ tự động chia 255 ở bên trong nhờ lớp Rescaling.
           input[0][x][y][0] = pixel.r.toDouble();
           input[0][x][y][1] = pixel.g.toDouble();
           input[0][x][y][2] = pixel.b.toDouble();
@@ -105,23 +181,30 @@ class _HomeScreenState extends State<HomeScreen> {
       String originalLabel = _labels[maxScoreIndex].trim();
       originalLabel = originalLabel.replaceFirst(RegExp(r'^\d+\s+'), '');
 
-      if (maxScore * 100 < 40) return 'Lỗi: Độ tin cậy thấp.';
-
       final translatedLabel = _labelTranslations[originalLabel] ?? originalLabel;
       final classification = _getClassification(originalLabel);
 
-      return '''**Loại rác**: $translatedLabel ($originalLabel)\n**Phân loại**: $classification\n**Độ tin cậy**: ${(maxScore * 100).toStringAsFixed(2)}%''';
+      final confidencePct = maxScore * 100;
+      final lowConfidence = confidencePct < 80;
+
+      final markdown = _buildLocalGuidanceMarkdown(
+        translatedLabel: translatedLabel,
+        originalLabel: originalLabel,
+        classification: classification,
+        confidencePct: confidencePct,
+        lowConfidence: lowConfidence,
+      );
+
+      return (markdown: markdown, isLowConfidence: lowConfidence, isReady: true, confidencePct: confidencePct);
     } catch (e) {
-      return 'Lỗi: $e';
+      return (markdown: 'Lỗi: $e', isLowConfidence: true, isReady: true, confidencePct: 0.0);
     }
   }
 
-  // 2. Cập nhật logic phân loại cho đúng 10 nhãn mới
   String _getClassification(String label) {
     final l = label.toLowerCase();
-    // Danh sách tái chế mới: gộp glass thay cho 3 loại glass cũ
     const recyclable = ['glass', 'cardboard', 'paper', 'plastic', 'metal', 'clothes', 'shoes'];
-    
+
     if (l.contains('battery')) return 'nguy hại';
     if (l.contains('biological')) return 'hữu cơ';
     if (recyclable.any((item) => l.contains(item))) return 'tái chế';
@@ -132,15 +215,28 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final XFile? pickedFile = await _picker.pickImage(source: source);
       if (pickedFile == null) return;
+
       setState(() => _processingMessage = 'Đang chuẩn bị...');
       File? processedFile = await _convertToJpg(File(pickedFile.path));
       if (!mounted) return;
-      setState(() { _image = processedFile; _processingMessage = 'Đang phân tích...'; });
-      String result = await _classifyWithTFLite(_image!);
-      if (result.startsWith('Lỗi')) {
-        setState(() => _processingMessage = 'Đang dùng AI Gemini...');
-        result = await _geminiService.processImageAndGetGuidance(_image!);
+
+      setState(() {
+        _image = processedFile;
+        _processingMessage = 'Đang phân tích Offline (TFLite)...';
+      });
+
+      final offline = await _classifyWithTFLite(_image!);
+      String result;
+
+      if (!offline.isReady || offline.isLowConfidence) {
+        setState(() => _processingMessage = 'Đang phân tích Online (Gemini)...');
+        final geminiFile = await _prepareForGemini(_image!);
+        final gemini = await _geminiService.processImageAndGetGuidance(geminiFile);
+        result = gemini.startsWith('Lỗi') ? offline.markdown : gemini;
+      } else {
+        result = offline.markdown;
       }
+
       if (!mounted) return;
       Navigator.push(context, MaterialPageRoute(builder: (context) => ResultScreen(image: _image!, processingResult: result)));
     } catch (e) {
@@ -180,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(16),
-                                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 4))],
+                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 15, offset: const Offset(0, 4))],
                               ),
                               child: IconButton(
                                 icon: Icon(Icons.notifications_none_rounded, color: theme.primaryColor),
@@ -192,11 +288,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 32),
                         _buildHeroBanner(theme),
                         const SizedBox(height: 40),
-                        Text('Dịch vụ', style: theme.textTheme.titleLarge),
+
+                        Text('Dịch vụ', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                         const SizedBox(height: 20),
                         _buildActionGrid(theme),
-                        const SizedBox(height: 32),
-                        if (_processingMessage.isNotEmpty) _buildLoadingStatus(theme),
+
+                        if (_processingMessage.isNotEmpty) ...[
+                          const SizedBox(height: 24),
+                          _buildLoadingStatus(theme),
+                        ],
+
+                        const SizedBox(height: 40),
+                        // 1. Vị trí tinh tế: Đặt dưới các dịch vụ chính
+                        _buildMiniGameSection(theme),
+
                         const SizedBox(height: 120),
                       ],
                     ),
@@ -217,14 +322,14 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [theme.primaryColor, theme.primaryColor.withOpacity(0.85)],
+          colors: [theme.primaryColor, theme.primaryColor.withValues(alpha: 0.85)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: theme.primaryColor.withOpacity(0.3),
+            color: theme.primaryColor.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           )
@@ -235,14 +340,14 @@ class _HomeScreenState extends State<HomeScreen> {
           Positioned(
             right: -20,
             top: -20,
-            child: Icon(Icons.eco_rounded, size: 120, color: Colors.white.withOpacity(0.1)),
+            child: Icon(Icons.eco_rounded, size: 120, color: Colors.white.withValues(alpha: 0.1)),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
                 child: const Text('AI Powered', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(height: 20),
@@ -253,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 12),
               Text(
                 'Phân loại đúng để tái chế hiệu quả hơn.',
-                style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 14),
               ),
             ],
           ),
@@ -278,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: _buildActionCard(
             title: 'Thư viện',
-            subtitle: 'Chọn ảnh sẵn',
+            subtitle: 'Chọn ảnh có sẵn',
             icon: Icons.photo_library_rounded,
             color: Colors.blue.shade600,
             onTap: () => _processImage(ImageSource.gallery),
@@ -297,15 +402,15 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: Colors.black.withOpacity(0.03)),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 8))],
+          border: Border.all(color: Colors.black.withValues(alpha: 0.03)),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 20, offset: const Offset(0, 8))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
               child: Icon(icon, color: color, size: 28),
             ),
             const SizedBox(height: 20),
@@ -318,15 +423,175 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // GIAO DIỆN MINI GAME MỚI ĐƯỢC THÊM VÀO
+  Widget _buildMiniGameSection(ThemeData theme) {
+    final game = context.watch<GameProvider>();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Thử thách & Học tập', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 20),
+        InkWell(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const GameScreen()),
+          ),
+          borderRadius: BorderRadius.circular(28),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              // 2. Thiết kế nổi bật: Orange Gradient
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFF9000), Color(0xFFFFB75E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                // 2. Thiết kế nổi bật: Đổ bóng mềm mại (Soft Shadow) màu cam
+                BoxShadow(
+                  color: Colors.orange.withValues(alpha: 0.35),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                )
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text('Mới', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Chiến binh\nPhân loại',
+                        style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, height: 1.2),
+                      ),
+                      const SizedBox(height: 12),
+                      // 3. Thông tin hữu ích: Điểm số hiện tại của người dùng
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.stars_rounded, color: Colors.orange, size: 16),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Điểm của bạn: ${game.score}',
+                            style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (game.earnedBadges.isNotEmpty)
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          children: game.earnedBadges.take(3).map((badgeName) {
+                            final icon = game.badgeIcons[badgeName] ?? '🏅';
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.22),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Text(
+                                '$icon $badgeName',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        )
+                      else
+                        Text(
+                          'Chưa có huy hiệu - chơi game để mở khóa!',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      const SizedBox(height: 12),
+                      InkWell(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const BadgeInventoryScreen()),
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 16),
+                              SizedBox(width: 6),
+                              Text(
+                                'Kho huy hiệu',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // 2. Thiết kế nổi bật: Icon máy chơi game lớn
+                Icon(
+                  Icons.sports_esports_rounded,
+                  size: 80,
+                  color: Colors.white.withValues(alpha: 0.8),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildLoadingStatus(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: theme.primaryColor.withOpacity(0.05), borderRadius: BorderRadius.circular(24)),
+      decoration: BoxDecoration(
+          color: theme.primaryColor.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(24)
+      ),
       child: Row(
         children: [
           const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3)),
           const SizedBox(width: 16),
-          Text(_processingMessage, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Expanded(
+            child: Text(
+              _processingMessage,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );
@@ -342,7 +607,7 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: BoxDecoration(
           color: const Color(0xFF1A1C1E),
           borderRadius: BorderRadius.circular(32),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 25, offset: const Offset(0, 10))],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 25, offset: const Offset(0, 10))],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

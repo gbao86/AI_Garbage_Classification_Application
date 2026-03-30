@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:mime/mime.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/utils/env.dart';
@@ -6,7 +7,7 @@ import 'package:phan_loai_rac_qua_hinh_anh/utils/env.dart';
 class GeminiService {
   // Sử dụng API Key từ file Env bảo mật
   final GenerativeModel _model = GenerativeModel(
-    model: 'gemini-2.0-flash', 
+    model: 'gemini-flash-latest',
     apiKey: Env.geminiApiKey,
   );
 
@@ -50,7 +51,7 @@ Dựa trên ảnh được cung cấp, hãy thực hiện các bước sau:
       final response = await _model.generateContent(content);
       return response.text?.trim() ?? 'Không nhận được kết quả từ Gemini.';
     } catch (e) {
-      print('Lỗi khi xử lý ảnh với Gemini 2.0: $e');
+      debugPrint('Lỗi khi xử lý ảnh với Gemini: $e');
       return 'Lỗi phân tích Gemini AI: $e';
     }
   }

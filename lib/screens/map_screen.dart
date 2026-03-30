@@ -181,7 +181,9 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       if (permission == LocationPermission.denied) return;
     }
 
-    final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    final position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+    );
     if (mounted) {
       setState(() {
         _userLocation = LatLng(position.latitude, position.longitude);

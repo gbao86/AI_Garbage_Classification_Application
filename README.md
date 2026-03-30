@@ -1,6 +1,6 @@
 # ♻️ EcoSort by Bao - Ứng Dụng Phân Loại Rác Thông Minh
 
-[![Version](https://img.shields.io/badge/version-1.0.6-green.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.7-green.svg)](./CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Flutter-blue.svg)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](./LICENSE)
 
@@ -16,20 +16,23 @@
 
 ## 🎥 Video Demo
 
-> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v1.0.1**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v1.0.6**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
+> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v1.0.1**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v1.0.7**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
 
 👉 [Xem Video Demo trên YouTube (v1.0.1)](https://youtu.be/YuI4tK1fNLU?si=LTzk0kVj0328i7m5)
 
 ---
 
-## 🚀 Tính năng nổi bật (v1.0.6)
+## 🚀 Tính năng nổi bật (v1.0.7)
 
 - 📷 **Nhận diện thông minh**: Chụp ảnh hoặc chọn từ thư viện để AI phân tích loại rác.
 - 🗺️ **Bản đồ điểm bỏ rác**: Tìm kiếm các điểm thu gom rác công cộng gần bạn thông qua OpenStreetMap hoàn toàn miễn phí.
 - 📍 **Định vị GPS**: Tự động xác định vị trí thực tế của người dùng trên bản đồ.
 - 🌍 **Đa ngôn ngữ**: Toàn bộ dữ liệu được ánh xạ sang Tiếng Việt chuẩn, dễ hiểu.
 - 📱 **Hỗ trợ HEIC**: Xử lý mượt mà các định dạng ảnh chất lượng cao từ iPhone.
-- 🧠 **Cơ chế xử lý kép**: Ưu tiên phân tích Offline bằng TFLite và dự phòng bằng Gemini 2.0 Online (API Key Gemini được mã hóa để tăng bảo mật).
+- 🧠 **Cơ chế xử lý kép**: Ưu tiên phân tích Offline bằng TFLite và tự động dùng Gemini Flash Online khi TFLite chưa sẵn sàng hoặc độ tin cậy dưới 80% (API Key Gemini được mã hóa để tăng bảo mật).
+- 🎮 **Thử thách & Học tập 2.0**: Mini game chuyên nghiệp với 200 câu hỏi random, ảnh minh họa online, timer/streak/combo và cộng điểm chính xác sau mỗi lượt chơi.
+- 🏅 **Kho huy hiệu riêng**: Hiển thị đầy đủ huy hiệu đã mở/chưa mở cùng tiến độ mở khóa badge kế tiếp ngay trên app.
+- 📱 **UI/UX đa thiết bị**: Giao diện game responsive theo từng thiết bị, khắc phục tràn layout trên màn hình nhỏ.
 - 🎨 **Giao diện Modern UI**: Thiết kế hiện đại, sạch sẽ và tối ưu trải nghiệm người dùng (UX).
 
 ---

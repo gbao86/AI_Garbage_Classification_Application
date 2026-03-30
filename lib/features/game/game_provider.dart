@@ -20,18 +20,43 @@ class GameProvider with ChangeNotifier {
     'Bậc thầy Phân loại': 1000,
   };
 
+  final Map<String, String> badgeIcons = {
+    'Mầm Xanh': '🌱',
+    'Chiến binh Eco': '🛡️',
+    'Đại sứ Môi trường': '🏅',
+    'Bậc thầy Phân loại': '👑',
+  };
+
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
     _score = prefs.getInt('user_score') ?? 0;
     _earnedBadges = prefs.getStringList('user_badges') ?? [];
+    await _syncBadgesByScore();
     notifyListeners();
   }
 
   Future<void> addScore(int points) async {
+    if (points <= 0) return;
     _score += points;
+    await _syncBadgesByScore();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('user_score', _score);
     notifyListeners();
+  }
+
+  Future<void> _syncBadgesByScore() async {
+    bool changed = false;
+    for (final entry in availableBadges.entries) {
+      if (_score >= entry.value && !_earnedBadges.contains(entry.key)) {
+        _earnedBadges.add(entry.key);
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('user_badges', _earnedBadges);
+    }
   }
 
   bool canRedeem(int cost) => _score >= cost;

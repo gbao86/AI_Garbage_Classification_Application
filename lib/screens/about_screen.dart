@@ -22,7 +22,7 @@ class _AboutScreenState extends State<AboutScreen> {
     final info = await PackageInfo.fromPlatform();
     if (mounted) {
       setState(() {
-        _version = info.version;
+        _version = info.version.split('+').first;
       });
     }
   }
@@ -57,7 +57,7 @@ class _AboutScreenState extends State<AboutScreen> {
                   Positioned(
                     bottom: -20,
                     right: -20,
-                    child: Icon(Icons.eco_rounded, size: 200, color: Colors.white.withOpacity(0.1)),
+                    child: Icon(Icons.eco_rounded, size: 200, color: Colors.white.withValues(alpha: 0.1)),
                   ),
                   Center(
                     child: Column(
@@ -66,9 +66,9 @@ class _AboutScreenState extends State<AboutScreen> {
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 2),
                           ),
                           child: const Icon(Icons.auto_awesome, size: 60, color: Colors.white),
                         ),
@@ -152,7 +152,7 @@ class _AboutScreenState extends State<AboutScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,13 +177,13 @@ class _AboutScreenState extends State<AboutScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.black.withOpacity(0.05)),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(14)),
             child: Icon(icon, color: color, size: 22),
           ),
           const SizedBox(width: 16),
