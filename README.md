@@ -52,16 +52,21 @@
 ```text
 phan_loai_rac_qua_hinh_anh/
 ├── android/                  # Cấu hình dự án Android
-├── assets/                   # Tài nguyên ứng dụng (Images, Models)
+├── assets/                   # Tài nguyên ứng dụng
+│   ├── images/               # Hình ảnh minh họa
+│   └── models/               # Mô hình AI (.tflite) & nhãn (.txt)
 ├── ios/                      # Cấu hình dự án iOS
 ├── lib/                      # Mã nguồn chính (Dart)
-│   ├── models/               # Định nghĩa các lớp dữ liệu
-│   ├── screens/              # Các màn hình giao diện chính
-│   ├── services/             # Xử lý Logic AI & API
-│   ├── theme/                # Cấu hình giao diện (Styles)
-│   ├── utils/                # Hàm tiện ích & Hằng số
-│   ├── widgets/              # Thành phần UI dùng chung
-│   └── main.dart             # tđiểm bắt đầu của ứng dụng
+│   ├── features/             # Các tính năng mở rộng
+│   │   └── game/             # Mini-game "Sorting Master" (Logic, UI, Models)
+│   ├── models/               # Định nghĩa các lớp dữ liệu toàn cục
+│   ├── screens/              # Các màn hình giao diện chính (Home, Map, About, Result)
+│   ├── services/             # Xử lý Logic AI & API (Gemini, TFLite)
+│   ├── theme/                # Cấu hình giao diện và Styles
+│   ├── utils/                # Hàm tiện ích, Hằng số & Cấu hình môi trường (.env)
+│   ├── widgets/              # Các thành phần giao diện dùng chung
+│   ├── app_theme.dart        # Định nghĩa Theme chi tiết cho App
+│   └── main.dart             # Điểm khởi đầu của ứng dụng
 ├── pubspec.yaml              # Quản lý thư viện & tài nguyên
 └── README.md                 # Tài liệu hướng dẫn dự án
 ```
@@ -87,7 +92,12 @@ phan_loai_rac_qua_hinh_anh/
    flutter pub get
    ```
 
-3. **Chạy ứng dụng**:
+3. **Tạo file mã hóa môi trường**:
+   ```bash
+   dart run build_runner build --delete-conflicting-outputs
+   ```
+
+4. **Chạy ứng dụng**:
    ```bash
    flutter run
    ```
