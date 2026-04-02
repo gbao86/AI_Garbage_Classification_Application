@@ -115,7 +115,7 @@ Mọi đóng góp từ cộng đồng đều được trân trọng! Nếu bạn
 4. Push lên nhánh: `git push origin feature/tinh-nang-moi`.
 5. Tạo Pull Request.
 
-📥 **Trải nghiệm nhanh**: [Tải file APK cài đặt tại đây](https://drive.google.com/file/d/1okqqBoyKYe-C7K0x8KeuPH2-L9plZdWq/view?usp=sharing)
+📥 **Trải nghiệm nhanh**: [Tải file APK cài đặt tại đây](https://drive.google.com/file/d/1Bx9xzlBwJToTYMj50hDGFpsETBDBLDlY/view?usp=sharing)
 
 ---
 
