@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
-import 'package:image/image.dart' as img;
-import 'package:phan_loai_rac_qua_hinh_anh/screens/result_screen.dart';
-import 'package:phan_loai_rac_qua_hinh_anh/services/gemini_service.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/screens/scanning_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/screens/about_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/screens/map_screen.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -26,7 +24,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   File? _image;
   String _processingMessage = '';
-  final GeminiService _geminiService = GeminiService();
   final ImagePicker _picker = ImagePicker();
   Interpreter? _interpreter;
   List<String> _labels = [];
@@ -45,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'trash': 'Rác thông thường',
   };
 
-  String _buildLocalGuidanceMarkdown({
+  static String buildLocalGuidanceMarkdown({
     required String translatedLabel,
     required String originalLabel,
     required String classification,
@@ -121,94 +118,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<File?> _convertToJpg(File file) async {
-    final String extension = p.extension(file.path).toLowerCase();
-    if (extension == '.heic' || extension == '.heif') {
-      final tempDir = await getTemporaryDirectory();
-      final targetPath = p.join(tempDir.path, "${DateTime.now().millisecondsSinceEpoch}.jpg");
-      final result = await FlutterImageCompress.compressAndGetFile(
-        file.absolute.path, targetPath, format: CompressFormat.jpeg, quality: 90,
-      );
-      return result != null ? File(result.path) : file;
-    }
-    return file;
-  }
-
-  Future<File> _prepareForGemini(File file) async {
-    final tempDir = await getTemporaryDirectory();
-    final targetPath = p.join(tempDir.path, "gemini_${DateTime.now().millisecondsSinceEpoch}.jpg");
-    final result = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      targetPath,
-      format: CompressFormat.jpeg,
-      quality: 75,
-      minWidth: 1024,
-      minHeight: 1024,
-    );
-    return result != null ? File(result.path) : file;
-  }
-
-  Future<({String markdown, bool isLowConfidence, bool isReady, double confidencePct})> _classifyWithTFLite(File imageFile) async {
-    if (_interpreter == null || _labels.isEmpty) {
-      return (markdown: 'Lỗi: Mô hình chưa sẵn sàng.', isLowConfidence: true, isReady: false, confidencePct: 0.0);
-    }
+  // --- SỬA LỖI Ở ĐÂY: Hàm nén ảnh siêu nhẹ để chống tràn RAM ---
+  Future<File?> _optimizeImage(File file) async {
     try {
-      final imageBytes = await imageFile.readAsBytes();
-      final image = img.decodeImage(imageBytes);
-      if (image == null) {
-        return (markdown: 'Lỗi: Không thể giải mã ảnh.', isLowConfidence: true, isReady: true, confidencePct: 0.0);
-      }
+      final tempDir = await getTemporaryDirectory();
+      final targetPath = p.join(tempDir.path, "optimized_${DateTime.now().millisecondsSinceEpoch}.jpg");
 
-      final resizedImage = img.copyResize(image, width: 224, height: 224);
-      final input = List.generate(1, (_) => List.generate(224, (_) => List.generate(224, (_) => List.filled(3, 0.0))));
-
-      for (var x = 0; x < 224; x++) {
-        for (var y = 0; y < 224; y++) {
-          final pixel = resizedImage.getPixel(x, y);
-
-          input[0][x][y][0] = pixel.r.toDouble();
-          input[0][x][y][1] = pixel.g.toDouble();
-          input[0][x][y][2] = pixel.b.toDouble();
-        }
-      }
-
-      final output = List.generate(1, (_) => List.filled(_labels.length, 0.0));
-      _interpreter!.run(input, output);
-
-      final maxScore = output[0].reduce((a, b) => a > b ? a : b);
-      final maxScoreIndex = output[0].indexOf(maxScore);
-
-      String originalLabel = _labels[maxScoreIndex].trim();
-      originalLabel = originalLabel.replaceFirst(RegExp(r'^\d+\s+'), '');
-
-      final translatedLabel = _labelTranslations[originalLabel] ?? originalLabel;
-      final classification = _getClassification(originalLabel);
-
-      final confidencePct = maxScore * 100;
-      final lowConfidence = confidencePct < 80;
-
-      final markdown = _buildLocalGuidanceMarkdown(
-        translatedLabel: translatedLabel,
-        originalLabel: originalLabel,
-        classification: classification,
-        confidencePct: confidencePct,
-        lowConfidence: lowConfidence,
+      // Ép khung tối đa 1080x1080 cho mọi loại ảnh
+      final result = await FlutterImageCompress.compressAndGetFile(
+        file.absolute.path,
+        targetPath,
+        format: CompressFormat.jpeg,
+        quality: 85,
+        minWidth: 1080,
+        minHeight: 1080,
       );
 
-      return (markdown: markdown, isLowConfidence: lowConfidence, isReady: true, confidencePct: confidencePct);
+      return result != null ? File(result.path) : file;
     } catch (e) {
-      return (markdown: 'Lỗi: $e', isLowConfidence: true, isReady: true, confidencePct: 0.0);
+      debugPrint("Lỗi nén ảnh: $e");
+      return file;
     }
-  }
-
-  String _getClassification(String label) {
-    final l = label.toLowerCase();
-    const recyclable = ['glass', 'cardboard', 'paper', 'plastic', 'metal', 'clothes', 'shoes'];
-
-    if (l.contains('battery')) return 'nguy hại';
-    if (l.contains('biological')) return 'hữu cơ';
-    if (recyclable.any((item) => l.contains(item))) return 'tái chế';
-    return 'không tái chế';
   }
 
   Future<void> _processImage(ImageSource source) async {
@@ -217,28 +147,30 @@ class _HomeScreenState extends State<HomeScreen> {
       if (pickedFile == null) return;
 
       setState(() => _processingMessage = 'Đang chuẩn bị...');
-      File? processedFile = await _convertToJpg(File(pickedFile.path));
+
+      // --- SỬA Ở ĐÂY: Gọi hàm _optimizeImage thay vì _convertToJpg ---
+      File? processedFile = await _optimizeImage(File(pickedFile.path));
       if (!mounted) return;
 
       setState(() {
         _image = processedFile;
-        _processingMessage = 'Đang phân tích Offline (TFLite)...';
+        _processingMessage = '';
       });
 
-      final offline = await _classifyWithTFLite(_image!);
-      String result;
-
-      if (!offline.isReady || offline.isLowConfidence) {
-        setState(() => _processingMessage = 'Đang phân tích Online (Gemini)...');
-        final geminiFile = await _prepareForGemini(_image!);
-        final gemini = await _geminiService.processImageAndGetGuidance(geminiFile);
-        result = gemini.startsWith('Lỗi') ? offline.markdown : gemini;
-      } else {
-        result = offline.markdown;
+      if (_image != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ScanningScreen(
+              image: _image!,
+              classifierInterpreter: _interpreter,
+              labels: _labels,
+              labelTranslations: _labelTranslations,
+              buildLocalGuidanceMarkdown: buildLocalGuidanceMarkdown,
+            ),
+          ),
+        );
       }
-
-      if (!mounted) return;
-      Navigator.push(context, MaterialPageRoute(builder: (context) => ResultScreen(image: _image!, processingResult: result)));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
     } finally {
@@ -299,7 +231,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
 
                         const SizedBox(height: 40),
-                        // 1. Vị trí tinh tế: Đặt dưới các dịch vụ chính
                         _buildMiniGameSection(theme),
 
                         const SizedBox(height: 120),
@@ -423,7 +354,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // GIAO DIỆN MINI GAME MỚI ĐƯỢC THÊM VÀO
   Widget _buildMiniGameSection(ThemeData theme) {
     final game = context.watch<GameProvider>();
     return Column(
@@ -440,7 +370,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              // 2. Thiết kế nổi bật: Orange Gradient
               gradient: const LinearGradient(
                 colors: [Color(0xFFFF9000), Color(0xFFFFB75E)],
                 begin: Alignment.topLeft,
@@ -448,7 +377,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
-                // 2. Thiết kế nổi bật: Đổ bóng mềm mại (Soft Shadow) màu cam
                 BoxShadow(
                   color: Colors.orange.withValues(alpha: 0.35),
                   blurRadius: 20,
@@ -476,7 +404,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, height: 1.2),
                       ),
                       const SizedBox(height: 12),
-                      // 3. Thông tin hữu ích: Điểm số hiện tại của người dùng
                       Row(
                         children: [
                           Container(
@@ -560,7 +487,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                // 2. Thiết kế nổi bật: Icon máy chơi game lớn
                 Icon(
                   Icons.sports_esports_rounded,
                   size: 80,

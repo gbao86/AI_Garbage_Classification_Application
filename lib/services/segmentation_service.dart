@@ -1,85 +1,84 @@
 import 'dart:io';
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
-import 'package:tflite_flutter/tflite_flutter.dart';
-import 'package:image/image.dart' as img;
+import 'package:flutter/foundation.dart';
+import 'package:google_mlkit_subject_segmentation/google_mlkit_subject_segmentation.dart';
 
 class SegmentationService {
-  Interpreter? _interpreter;
-  static const int _inputSize = 257;
+  final SubjectSegmenter _segmenter = SubjectSegmenter(
+    options: SubjectSegmenterOptions(
+      enableForegroundConfidenceMask: true,
+      enableForegroundBitmap: false,
+      enableMultipleSubjects: SubjectResultOptions(
+        enableConfidenceMask: false,
+        enableSubjectBitmap: false,
+      ),
+    ),
+  );
 
-  Future<void> init() async {
+  Future<void> init() async {}
+
+  // CHỈ NHẬN KÍCH THƯỚC CHUẨN ĐÃ XOAY EXIF TỪ GIAO DIỆN
+  Future<ui.Image?> getMask(File imageFile, int width, int height) async {
     try {
-      _interpreter = await Interpreter.fromAsset('assets/models/lite-model_deeplabv3_1_metadata_2.tflite');
+      final inputImage = InputImage.fromFile(imageFile);
+      final result = await _segmenter.processImage(inputImage);
+
+      final confidences = result.foregroundConfidenceMask;
+      if (confidences == null || confidences.isEmpty) return null;
+
+      final pixels = await compute(_generatePixelArray, {
+        'confidences': confidences,
+        'width': width,
+        'height': height,
+      });
+
+      final completer = Completer<ui.Image>();
+      ui.decodeImageFromPixels(
+        pixels,
+        width,
+        height,
+        ui.PixelFormat.rgba8888,
+            (img) => completer.complete(img),
+      );
+
+      return await completer.future;
     } catch (e) {
-      debugPrint('Lỗi khởi tạo DeepLabV3: $e');
-    }
-  }
-
-  Future<ui.Image?> getMask(File imageFile) async {
-    if (_interpreter == null) await init();
-    if (_interpreter == null) return null;
-
-    try {
-      final imageBytes = await imageFile.readAsBytes();
-      final originalImage = img.decodeImage(imageBytes);
-      if (originalImage == null) return null;
-
-      final inputImage = img.copyResize(originalImage, width: _inputSize, height: _inputSize);
-      
-      // Chuyển đổi ảnh sang tensor input [1, 257, 257, 3]
-      var input = Float32List(_inputSize * _inputSize * 3);
-      var buffer = input.buffer;
-      int pixelIndex = 0;
-      for (var y = 0; y < _inputSize; y++) {
-        for (var x = 0; x < _inputSize; x++) {
-          final pixel = inputImage.getPixel(x, y);
-          input[pixelIndex++] = (pixel.r - 127.5) / 127.5;
-          input[pixelIndex++] = (pixel.g - 127.5) / 127.5;
-          input[pixelIndex++] = (pixel.b - 127.5) / 127.5;
-        }
-      }
-
-      // Output tensor: [1, 257, 257, 21]
-      var output = List.filled(1 * _inputSize * _inputSize * 21, 0.0).reshape([1, _inputSize, _inputSize, 21]);
-      
-      _interpreter!.run(buffer.asFloat32List().reshape([1, _inputSize, _inputSize, 3]), output);
-
-      // Tạo mask từ output (argmax)
-      final maskImg = img.Image(width: _inputSize, height: _inputSize);
-      for (int y = 0; y < _inputSize; y++) {
-        for (int x = 0; x < _inputSize; x++) {
-          int maxClass = 0;
-          double maxVal = output[0][y][x][0];
-          for (int c = 1; c < 21; c++) {
-            if (output[0][y][x][c] > maxVal) {
-              maxVal = output[0][y][x][c];
-              maxClass = c;
-            }
-          }
-          // maxClass > 0 nghĩa là có vật thể (0 là background)
-          if (maxClass > 0) {
-            maskImg.setPixel(x, y, img.ColorRgba8(255, 255, 255, 255));
-          } else {
-            maskImg.setPixel(x, y, img.ColorRgba8(0, 0, 0, 0));
-          }
-        }
-      }
-
-      // Chuyển img.Image sang ui.Image
-      final ui.ImmutableBuffer immutableBuffer = await ui.ImmutableBuffer.fromUint8List(Uint8List.fromList(img.encodePng(maskImg)));
-      final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(immutableBuffer);
-      final ui.Codec codec = await descriptor.instantiateCodec();
-      final ui.FrameInfo frameInfo = await codec.getNextFrame();
-      return frameInfo.image;
-    } catch (e) {
-      debugPrint('Lỗi xử lý Segmentation: $e');
+      debugPrint('Lỗi ML Kit Subject Segmentation: $e');
       return null;
     }
   }
 
+  static Uint8List _generatePixelArray(Map<String, dynamic> data) {
+    final List<double> confidences = data['confidences'];
+    final int width = data['width'];
+    final int height = data['height'];
+
+    final pixels = Uint8List(width * height * 4);
+    int pIndex = 0;
+
+    final int maxPixels = width * height;
+    final int loopCount = confidences.length < maxPixels ? confidences.length : maxPixels;
+
+    for (int i = 0; i < loopCount; i++) {
+      // Hạ ngưỡng xuống 0.3 để nhận diện tốt hơn chai lọ nhựa, đồ trong suốt
+      if (confidences[i] > 0.3) {
+        pixels[pIndex++] = 255;
+        pixels[pIndex++] = 255;
+        pixels[pIndex++] = 255;
+        pixels[pIndex++] = 255; // Trắng đặc để đục lỗ
+      } else {
+        pixels[pIndex++] = 0;
+        pixels[pIndex++] = 0;
+        pixels[pIndex++] = 0;
+        pixels[pIndex++] = 0;   // Trong suốt
+      }
+    }
+    return pixels;
+  }
+
   void dispose() {
-    _interpreter?.close();
+    _segmenter.close();
   }
 }

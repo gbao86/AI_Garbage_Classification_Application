@@ -1,6 +1,6 @@
 # ♻️ EcoSort by Bao - Ứng Dụng Phân Loại Rác Thông Minh
 
-[![Version](https://img.shields.io/badge/version-1.0.7-green.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.8-green.svg)](./CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Flutter-blue.svg)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](./LICENSE)
 
@@ -10,25 +10,26 @@
 
 ## 📌 Giới thiệu
 
-**EcoSort by Bao** là giải pháp công nghệ nhằm hỗ trợ cộng đồng phân loại rác tại nguồn một cách dễ dàng và chính xác. Bằng cách kết hợp sức mạnh của mô hình **TFLite (Offline)** và **Gemini AI (Online)**, ứng dụng cung cấp khả năng nhận diện đa dạng các loại rác thải và đưa ra hướng dẫn xử lý chi tiết theo tiêu chuẩn môi trường.
+**EcoSort by Bao** là giải pháp công nghệ nhằm hỗ trợ cộng đồng phân loại rác tại nguồn một cách dễ dàng và chính xác. Bằng cách kết hợp sức mạnh của mô hình **TFLite (Offline)**, **Google ML Kit** và **Gemini AI (Online)**, ứng dụng cung cấp khả năng nhận diện đa dạng các loại rác thải, bóc tách vật thể thông minh và đưa ra hướng dẫn xử lý chi tiết theo tiêu chuẩn môi trường.
 
 ---
 
 ## 🎥 Video Demo
 
-> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v1.0.1**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v1.0.7**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
+> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v1.0.1**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v1.0.8**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
 
 👉 [Xem Video Demo trên YouTube (v1.0.1)](https://youtu.be/YuI4tK1fNLU?si=LTzk0kVj0328i7m5)
 
 ---
 
-## 🚀 Tính năng nổi bật (v1.0.7)
+## 🚀 Tính năng nổi bật (v1.0.8)
 
 - 📷 **Nhận diện thông minh**: Chụp ảnh hoặc chọn từ thư viện để AI phân tích loại rác.
+- 🛸 **Quét & Phân tách Vật thể**: Sử dụng hoạt ảnh tia laser và AI bóc tách phông nền, làm nổi bật rác thải bằng hiệu ứng gradient phát sáng chuyên nghiệp. Chạy ngầm AI mượt mà không gây giật lag UI.
 - 🗺️ **Bản đồ điểm bỏ rác**: Tìm kiếm các điểm thu gom rác công cộng gần bạn thông qua OpenStreetMap hoàn toàn miễn phí.
 - 📍 **Định vị GPS**: Tự động xác định vị trí thực tế của người dùng trên bản đồ.
 - 🌍 **Đa ngôn ngữ**: Toàn bộ dữ liệu được ánh xạ sang Tiếng Việt chuẩn, dễ hiểu.
-- 📱 **Hỗ trợ HEIC**: Xử lý mượt mà các định dạng ảnh chất lượng cao từ iPhone.
+- 📱 **Tối ưu Hình ảnh (Anti-OOM)**: Ép khung tự động và xử lý mượt mà mọi định dạng ảnh, bao gồm cả ảnh HEIC từ iPhone, giúp chống tràn bộ nhớ RAM.
 - 🧠 **Cơ chế xử lý kép**: Ưu tiên phân tích Offline bằng TFLite và tự động dùng Gemini Flash Online khi TFLite chưa sẵn sàng hoặc độ tin cậy dưới 80% (API Key Gemini được mã hóa để tăng bảo mật).
 - 🎮 **Thử thách & Học tập 2.0**: Mini game chuyên nghiệp với 200 câu hỏi random, ảnh minh họa online, timer/streak/combo và cộng điểm chính xác sau mỗi lượt chơi.
 - 🏅 **Kho huy hiệu riêng**: Hiển thị đầy đủ huy hiệu đã mở/chưa mở cùng tiến độ mở khóa badge kế tiếp ngay trên app.
@@ -41,6 +42,7 @@
 
 - **Flutter & Dart**: Nền tảng phát triển ứng dụng đa nền tảng.
 - **TensorFlow Lite**: Chạy mô hình AI nhận diện rác thải ngay trên thiết bị (Offline).
+- **Google ML Kit**: Sử dụng Subject Segmentation bóc tách phông nền và nhận diện vật thể nổi bật.
 - **Google Gemini API**: Phân tích chuyên sâu cho các trường hợp hình ảnh phức tạp.
 - **OpenStreetMap**: Hệ thống bản đồ mở và hoàn toàn miễn phí.
 - **Markdown Support**: Hiển thị kết quả hướng dẫn xử lý chuyên nghiệp.
@@ -60,8 +62,8 @@ phan_loai_rac_qua_hinh_anh/
 │   ├── features/             # Các tính năng mở rộng
 │   │   └── game/             # Mini-game "Sorting Master" (Logic, UI, Models)
 │   ├── models/               # Định nghĩa các lớp dữ liệu toàn cục
-│   ├── screens/              # Các màn hình giao diện chính (Home, Map, About, Result)
-│   ├── services/             # Xử lý Logic AI & API (Gemini, TFLite)
+│   ├── screens/              # Các màn hình giao diện chính (Home, Map, About, Result, Scanning)
+│   ├── services/             # Xử lý Logic AI & API (Gemini, TFLite, ML Kit)
 │   ├── theme/                # Cấu hình giao diện và Styles
 │   ├── utils/                # Hàm tiện ích, Hằng số & Cấu hình môi trường (.env)
 │   ├── widgets/              # Các thành phần giao diện dùng chung

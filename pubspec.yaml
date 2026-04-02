@@ -2,7 +2,7 @@ name: phan_loai_rac_qua_hinh_anh
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.7+1
+version: 1.0.8+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -37,6 +37,7 @@ dependencies:
   url_launcher: ^6.3.1
   path: ^1.9.0
   envied: ^0.5.4+1
+  google_mlkit_subject_segmentation: ^0.0.3
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +51,4 @@ flutter:
     - assets/images/
     - assets/models/model_unquant.tflite
     - assets/models/labels.txt
-    - assets/images/battery.png
-    - assets/images/plastic_bottle.png
   uses-material-design: true

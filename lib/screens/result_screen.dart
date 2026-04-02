@@ -15,11 +15,11 @@ class ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Logic xác định màu sắc dựa trên kết quả phân loại
     Color statusColor = Colors.green;
     IconData statusIcon = Icons.recycling_rounded;
-    
+
     if (processingResult.contains('nguy hại')) {
       statusColor = Colors.redAccent;
       statusIcon = Icons.warning_amber_rounded;
@@ -96,9 +96,9 @@ class ResultScreen extends StatelessWidget {
                 children: [
                   // Thẻ Tóm tắt Phân loại
                   _buildSummaryCard(statusColor, statusIcon),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Thẻ Chi tiết (Sử dụng Markdown)
                   Container(
                     width: double.infinity,
@@ -150,9 +150,9 @@ class ResultScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 30),
-                  
+
                   // Nút hành động
                   SizedBox(
                     width: double.infinity,

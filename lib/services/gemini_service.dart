@@ -5,7 +5,6 @@ import 'package:mime/mime.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/utils/env.dart';
 
 class GeminiService {
-  // Sử dụng API Key từ file Env bảo mật
   final GenerativeModel _model = GenerativeModel(
     model: 'gemini-flash-latest',
     apiKey: Env.geminiApiKey,
@@ -30,7 +29,7 @@ Dựa trên ảnh được cung cấp, hãy thực hiện các bước sau:
 3. Cung cấp hướng dẫn xử lý ngắn gọn, chuyên nghiệp.
 
 Định dạng kết quả (Bắt buộc dùng Markdown):
-**Loại rác**: [Tên tiếng Việt] ([nhãn tiếng Anh tương ứng])
+**Loại rác**: [Tên tiếng Việt] ([nhãn tiếng Anh tương ứng])  
 **Phân loại**: [Tái chế/Hữu cơ/Nguy hại/Không tái chế]
 
 **Hướng dẫn xử lý**:

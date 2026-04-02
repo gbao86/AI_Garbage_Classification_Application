@@ -2,6 +2,28 @@
 
 Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
+
+---
+
+## [1.0.8] - 2026-04-02
+
+### ✨ Tính năng Hình ảnh & Hiệu ứng AI (Visual & AI Effects)
+- 🛸 **Hoạt ảnh Quét Laser**: Thêm tia laser quét ảnh từ trên xuống, tạo cảm giác công nghệ và "đánh lừa thị giác" giúp người dùng không có cảm giác phải chờ đợi AI phân tích.
+- 🎯 **Phân tách Vật thể (Subject Segmentation)**: Tích hợp `Google ML Kit Subject Segmentation` để nhận diện, bóc tách chính xác hình dáng vật thể/rác thải ra khỏi phông nền.
+- 🌌 **Hiệu ứng Thị giác Nâng cao (Visual FX)**:
+  - Tự động làm mờ (Blur) phần phông nền xung quanh bằng GPU siêu mượt.
+  - Giữ độ sắc nét tuyệt đối cho vật thể được nhận diện.
+  - Áp dụng dải sáng gradient xanh lướt liên tục trên vật thể để làm nổi bật tâm điểm.
+
+### ⚡ Tối ưu Hiệu năng & UI/UX
+- 🔄 **Xử lý AI Đa luồng (Background Processing)**: Mô hình TFLite và Gemini API được đẩy xuống chạy ngầm hoàn toàn độc lập với giao diện, đảm bảo UI không bao giờ bị giật lag (freeze) trong quá trình quét.
+- 🔤 **Văn bản Chuyển động Mượt mà**: Trạng thái và kết quả phân tích (khi Gemini trả về sau) được tự động cập nhật với hiệu ứng chuyển đổi êm ái (Fade & Slide) bằng `AnimatedSwitcher`.
+- 🗜️ **Chống Tràn Bộ Nhớ (OOM Protection)**: Ép khung và nén mọi loại ảnh (không chỉ HEIC) về kích thước an toàn (~1080p) trước khi đưa qua ML Kit, triệt tiêu hoàn toàn lỗi văng app do tràn RAM (Out of Memory).
+
+### 🛠️ Hệ thống & Sửa lỗi (Bug Fixes)
+- 🧭 **Sửa lỗi Hướng ảnh (EXIF)**: Đọc chính xác chiều xoay dọc/ngang của ảnh từ camera, khắc phục triệt để lỗi vật thể bị nhận diện méo mó, cắt xéo.
+- ⚙️ **Sửa lỗi Render Đồ họa Android**: Tạm tắt engine Impeller trên Android để chuyển về Skia, khắc phục hoàn toàn lỗi sọc nhằng màn hình và lỗi từ chối cấp phát bộ nhớ GPU (`GraphicBufferAllocator`) khi render nhiều lớp BlendMode phức tạp.
+
 ---
 
 ## [1.0.7] - 2026-03-31
