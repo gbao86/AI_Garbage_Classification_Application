@@ -7,8 +7,19 @@ import 'package:phan_loai_rac_qua_hinh_anh/screens/home_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/screens/about_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/screens/map_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/app_theme.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/utils/env.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/widgets/auth_gate.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: Env.supabaseUrl,
+    anonKey: Env.supabasePublishableKey,
+    authOptions: const FlutterAuthClientOptions(authFlowType: AuthFlowType.pkce),
+  );
+
   runApp(const MyApp());
 }
 
@@ -23,7 +34,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'EcoSort by Bao',
         theme: AppTheme.lightTheme,
-        home: const HomeScreen(),
+        home: const AuthGate(),
         routes: {
           '/home': (context) => const HomeScreen(),
           '/about': (context) => const AboutScreen(),

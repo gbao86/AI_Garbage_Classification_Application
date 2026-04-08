@@ -11,6 +11,11 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+.agents/
+.continue/
+.kiro/
+/skill-lock.json
+
 
 # IntelliJ related
 *.iml
@@ -48,3 +53,10 @@ app.*.map.json
 .env
 .env.*
 .clean
+/android/app/google-services.json
+
+# Node (web_admin / JS tooling)
+web_admin/node_modules/
+web_admin/src/
+web_admin/js/
+supabase/

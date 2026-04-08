@@ -1,12 +1,12 @@
-// Obfuscated configuration using Base64
+// web_admin/js/config.js — KHÔNG commit key thật lên Git. Nên copy thành config.local.js (đã ignore) hoặc biến môi trường build.
 export const config = {
-    // URL: https://gbao86.supabase.co
-    u: 'aHR0cHM6Ly9nYmFvODYuc3VwYWJhc2UuY28=',
-    // Key anon eyJ...
-    k: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdiYW84NiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzc1MTIyNjU1LCJleHAiOjIwOTA2OTg2NTV9.6JYYGAsas6DJDDCT3cinkSNX24MpqnHOmQCuwsf7yUc'
+    // URL của bạn
+    u: 'https://nabkjjxkaudsyudhnkdp.supabase.co',
+    // Anon Key của bạn (Dán mã eyJ... vào đây)
+    k: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hYmtqanhrYXVkc3l1ZGhua2RwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxMjI2NTUsImV4cCI6MjA5MDY5ODY1NX0.6JYYGAsas6DJDDCT3cinkSNX24MpqnHOmQCuwsf7yUc'
 };
 
 export const getSupabaseConfig = () => ({
-    url: atob(config.u),
+    url: config.u,
     key: config.k
 });

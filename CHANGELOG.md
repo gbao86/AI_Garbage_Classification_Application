@@ -5,6 +5,28 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
+## [1.0.9] - 2026-04-08
+
+### 🛡️ Bảo mật & Chống Spam (Security & Anti-Spam)
+- 🔐 **Chính sách Bảo mật (SECURITY.md)**: Thiết lập chính sách bảo mật chính thức cho dự án, cam kết bảo vệ dữ liệu người dùng và quy trình báo cáo lỗ hổng.
+- 🧬 **Định danh ảnh bằng MD5 Hash**: Tích hợp thuật toán MD5 để tạo "dấu vân tay" duy nhất cho mỗi ảnh báo cáo.
+- 🚫 **Chống Spam Báo cáo triệt để**:
+    - Ngăn chặn việc gửi nhiều báo cáo cho cùng một tấm ảnh bằng cách kiểm tra mã băm trên cả Local và Server.
+    - Sử dụng cơ chế `upsert` trên Supabase Storage để ghi đè thay vì tạo file mới khi trùng mã băm.
+- 📑 **Chống gửi trùng dữ liệu Database**: Tự động khóa nút báo cáo và hiển thị trạng thái "Đã gửi" ngay khi phát hiện ảnh đã tồn tại trong hệ thống.
+
+### 🎮 Nâng cấp Hệ thống Game (Game System 2.0)
+- ☁️ **Dữ liệu Game Động (Dynamic Data)**: Chuyển toàn bộ database câu hỏi từ code cứng (hardcoded) lên Supabase.
+- 🔄 **Đồng bộ hóa thời gian thực**: Game tự động cập nhật câu hỏi, link ảnh và fun fact mới nhất ngay khi Admin phê duyệt đóng góp từ cộng đồng.
+- 🧹 **Bộ lọc Dữ liệu Sạch**: Tự động loại bỏ các câu hỏi thiếu thông tin hoặc chưa được Admin chuẩn hóa để đảm bảo trải nghiệm người chơi.
+
+### 💼 Quản trị Hệ thống (Admin Dashboard 3.0)
+- 🖥️ **Web Admin Hiện đại**: Nâng cấp giao diện quản trị với phong cách thiết kế mới, sử dụng Modal thay cho các hộp thoại cũ.
+- ✍️ **Quy trình Phê duyệt Chuẩn**: Admin có thể chỉnh sửa tên rác, thêm Fun Fact và tạo Slug định danh ngay trong quá trình duyệt báo cáo rác sai từ người dùng.
+- 🚀 **Sẵn sàng Deploy**: Tối ưu hóa mã nguồn Web Admin để triển khai lên các nền tảng như Vercel/GitHub Pages.
+
+---
+
 ## [1.0.8] - 2026-04-02
 
 ### ✨ Tính năng Hình ảnh & Hiệu ứng AI (Visual & AI Effects)

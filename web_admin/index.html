@@ -1,0 +1,36 @@
+<!-- web_admin/index.html -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>EcoSort Admin - Đăng nhập</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-6">
+<div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center mb-8">EcoSort Admin Login</h1>
+    <div class="space-y-4">
+        <input type="email" id="email" placeholder="Email" class="w-full p-3 border rounded-xl">
+        <input type="password" id="pass" placeholder="Mật khẩu" class="w-full p-3 border rounded-xl">
+        <button onclick="handleEmailLogin()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold">Đăng nhập</button>
+        <div class="text-center text-gray-400 py-2">hoặc</div>
+        <button onclick="handleGoogleLogin()" class="w-full border py-3 rounded-xl flex items-center justify-center gap-2 font-semibold">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5"> Google
+        </button>
+    </div>
+</div>
+<script type="module">
+    import { loginWithEmail, loginWithGoogle } from './js/auth.js';
+    window.handleEmailLogin = async () => {
+        try {
+            await loginWithEmail(document.getElementById('email').value, document.getElementById('pass').value);
+            window.location.href = 'dashboard.html';
+        } catch (e) { alert(e.message); }
+    };
+    window.handleGoogleLogin = async () => {
+        try { await loginWithGoogle(); } catch (e) { alert(e.message); }
+    };
+</script>
+</body>
+</html>

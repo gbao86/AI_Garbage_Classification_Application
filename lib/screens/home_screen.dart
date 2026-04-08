@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/game_provider.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/services/auth_service.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/game_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/badge_inventory_screen.dart';
 
@@ -102,6 +103,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _initializeModelAndLabels();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<GameProvider>().syncFromSupabase();
+    });
   }
 
   Future<void> _initializeModelAndLabels() async {
@@ -139,6 +144,57 @@ class _HomeScreenState extends State<HomeScreen> {
       debugPrint("Lỗi nén ảnh: $e");
       return file;
     }
+  }
+
+  Future<void> _openAccountSheet(BuildContext context) async {
+    final theme = Theme.of(context);
+    final auth = AuthService.instance;
+    final user = auth.currentUser;
+    final profile = await auth.fetchMyProfile();
+    if (!context.mounted) return;
+
+    final displayName = profile?['display_name']?.toString().trim();
+    final subtitle = (displayName != null && displayName.isNotEmpty) ? displayName : 'EcoSort';
+
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Tài khoản', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.email_outlined),
+                title: Text(user?.email ?? '—'),
+                subtitle: Text(subtitle),
+              ),
+              if (profile != null) ...[
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.stars_outlined),
+                  title: Text('Cấp ${profile['level'] ?? '—'} · ${profile['xp_total'] ?? 0} XP'),
+                ),
+              ],
+              const SizedBox(height: 8),
+              FilledButton.tonalIcon(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  await auth.signOut();
+                },
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text('Đăng xuất'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _processImage(ImageSource source) async {
@@ -197,24 +253,60 @@ class _HomeScreenState extends State<HomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Hành động nhỏ, lợi ích lớn',
+                                    style: theme.textTheme.bodyLarge,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    'EcoSort by Bao',
+                                    style: theme.textTheme.headlineMedium?.copyWith(
+                                      color: theme.primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text('Hành động nhỏ, lợi ích lớn', style: theme.textTheme.bodyLarge),
-                                Text('EcoSort by Bao', style: theme.textTheme.headlineMedium?.copyWith(color: theme.primaryColor)),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 15, offset: const Offset(0, 4)),
+                                    ],
+                                  ),
+                                  child: IconButton(
+                                    icon: Icon(Icons.person_outline_rounded, color: theme.primaryColor),
+                                    tooltip: 'Tài khoản',
+                                    onPressed: () => _openAccountSheet(context),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 15, offset: const Offset(0, 4)),
+                                    ],
+                                  ),
+                                  child: IconButton(
+                                    icon: Icon(Icons.notifications_none_rounded, color: theme.primaryColor),
+                                    onPressed: () {},
+                                  ),
+                                ),
                               ],
                             ),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 15, offset: const Offset(0, 4))],
-                              ),
-                              child: IconButton(
-                                icon: Icon(Icons.notifications_none_rounded, color: theme.primaryColor),
-                                onPressed: () {},
-                              ),
-                            )
                           ],
                         ),
                         const SizedBox(height: 32),

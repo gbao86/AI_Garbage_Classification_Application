@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSort Admin - Hệ thống Quản trị</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hidden { display: none !important; }
+        .sidebar-active { background-color: #f1f5f9; color: #1e293b; border-left: 4px solid #16a34a; }
+        @keyframes modal-in {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-modal { animation: modal-in 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans">
+    <div class="flex min-h-screen">
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-white border-r border-slate-200 p-6 flex flex-col shadow-sm fixed h-full z-10">
+            <div class="flex items-center gap-3 mb-10 px-2">
+                <div class="bg-green-600 p-2 rounded-lg">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04m17.236 0a11.955 11.955 0 01-11 11.21 11.955 11.955 0 01-11-11.21M3 7l9 6 9-6"></path></svg>
+                </div>
+                <h1 class="text-xl font-black text-slate-800 tracking-tight">EcoSort AD</h1>
+            </div>
+
+            <nav class="flex-1 space-y-1">
+                <button onclick="switchTab('submissions')" id="btn-submissions" class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition sidebar-active hover:bg-slate-50">Duyệt rác</button>
+                <button onclick="switchTab('users')" id="btn-users" class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition hover:bg-slate-50">Người dùng</button>
+                <button onclick="switchTab('config')" id="btn-config" class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition hover:bg-slate-50">Cấu hình hệ thống</button>
+                <button onclick="switchTab('audit')" id="btn-audit" class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition hover:bg-slate-50">Nhật ký (Audit)</button>
+            </nav>
+
+            <div class="mt-auto pt-6 border-t border-slate-100">
+                <p id="admin-email" class="text-xs text-slate-400 font-medium mb-3 truncate"></p>
+                <button onclick="handleLogout()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl font-bold text-sm hover:bg-red-50 hover:text-red-600 transition">Đăng xuất</button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 ml-64 p-10">
+            <!-- TAB 1: DUYỆT RÁC -->
+            <section id="tab-submissions" class="tab-content">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl font-black text-slate-800">Báo cáo rác thải</h2>
+                    <button onclick="fetchSubmissions()" class="bg-green-600 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition">Làm mới</button>
+                </div>
+                <div id="loader-submissions" class="text-center py-20 hidden">Đang tải...</div>
+                <div id="grid-submissions" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
+            </section>
+
+            <!-- TAB 2: NGƯỜI DÙNG -->
+            <section id="tab-users" class="tab-content hidden">
+                <h2 class="text-2xl font-black text-slate-800 mb-8">Quản lý người dùng</h2>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 text-slate-400 text-xs font-black uppercase tracking-widest border-b border-slate-100">
+                            <tr>
+                                <th class="p-5">Họ tên</th>
+                                <th class="p-5">Email (Auth)</th>
+                                <th class="p-5">Cấp độ / XP</th>
+                                <th class="p-5">Trạng thái</th>
+                                <th class="p-5 text-right">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-users" class="text-slate-600 font-medium text-sm"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 3: CẤU HÌNH HỆ THỐNG -->
+            <section id="tab-config" class="tab-content hidden">
+                <h2 class="text-2xl font-black text-slate-800 mb-8">Cấu hình nóng (Kill Switch)</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Maintenance -->
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                        <h3 class="font-black text-slate-800 mb-6 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-orange-500 rounded-full"></span>
+                            Chế độ bảo trì
+                        </h3>
+                        <div class="space-y-6">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-slate-600">Trạng thái (Maintenance)</span>
+                                <input type="checkbox" id="config-maintenance" class="w-12 h-6 bg-slate-200 rounded-full appearance-none checked:bg-orange-500 transition-colors cursor-pointer relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-transform checked:after:translate-x-6">
+                            </div>
+                            <input type="text" id="config-message" placeholder="Thông báo cho người dùng..." class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-orange-500 transition">
+                            <button onclick="saveConfig('maintenance')" class="bg-slate-800 text-white px-6 py-2.5 rounded-xl font-bold w-full shadow-lg">Cập nhật ngay</button>
+                        </div>
+                    </div>
+                    <!-- Gemini/Version -->
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                        <h3 class="font-black text-slate-800 mb-6 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-blue-500 rounded-full"></span>
+                            Tham số App
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-400">Min App Version</label>
+                                <input type="text" id="config-version" class="w-full p-3 bg-slate-50 border rounded-xl mt-1">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-400">Gemini Quota (Lượt/Ngày)</label>
+                                <input type="number" id="config-gemini" class="w-full p-3 bg-slate-50 border rounded-xl mt-1">
+                            </div>
+                            <button onclick="saveConfig('gemini')" class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold w-full shadow-lg mt-4">Lưu cấu hình</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: AUDIT LOGS -->
+            <section id="tab-audit" class="tab-content hidden">
+                <h2 class="text-2xl font-black text-slate-800 mb-8">Nhật ký hành động</h2>
+                <div id="list-audit" class="space-y-3"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- APPROVE MODAL -->
+    <div id="approve-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-50 hidden flex">
+        <div class="bg-white rounded-[2rem] p-8 w-full max-w-lg shadow-2xl animate-modal">
+            <h3 class="text-2xl font-black mb-6 text-slate-800 flex items-center gap-3">
+                <div class="bg-green-100 p-2 rounded-lg"><svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
+                Duyệt & Thêm Game
+            </h3>
+            <div class="space-y-5">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tên vật phẩm chuẩn</label>
+                    <input type="text" id="m-name" placeholder="Ví dụ: Vỏ chai nhựa PET" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl mt-1 outline-none focus:border-green-500 transition-all font-bold">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fun Fact / Kiến thức</label>
+                    <textarea id="m-fact" rows="3" placeholder="Nhập kiến thức thú vị..." class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl mt-1 outline-none focus:border-green-500 transition-all text-sm"></textarea>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Slug định danh (Duy nhất)</label>
+                    <input type="text" id="m-slug" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl mt-1 font-mono text-xs text-slate-400">
+                </div>
+            </div>
+            <div class="flex gap-4 mt-8">
+                <button onclick="closeModal()" class="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-bold hover:bg-slate-200 transition">Hủy</button>
+                <button id="btn-confirm-approve" class="flex-[2] bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 hover:scale-[1.02] active:scale-95 transition-all">XÁC NHẬN DUYỆT</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, handleLogout, checkAdminPermissions } from './js/auth.js';
+
+        window.handleLogout = handleLogout;
+        window.db = db;
+
+        let currentSubmittingId = null;
+
+        // AUTH CHECK
+        db.auth.getUser().then(({ data }) => {
+            if (!data.user) return window.location.href = 'index.html';
+            checkAdminPermissions(data.user).then(u => {
+                document.getElementById('admin-email').innerText = u.email;
+                fetchSubmissions();
+            }).catch(e => { alert(e.message); window.location.href = 'index.html'; });
+        });
+
+        // TABS NAVIGATION
+        window.switchTab = (tabName) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('sidebar-active'));
+
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            document.getElementById('btn-' + tabName).classList.add('sidebar-active');
+
+            if (tabName === 'users') fetchUsers();
+            if (tabName === 'config') fetchConfigs();
+            if (tabName === 'audit') fetchAuditLogs();
+        };
+
+        // --- HÀM CHO TAB DUYỆT RÁC ---
+        window.fetchSubmissions = async () => {
+            const loader = document.getElementById('loader-submissions');
+            const grid = document.getElementById('grid-submissions');
+            loader.classList.remove('hidden'); grid.innerHTML = '';
+
+            const { data } = await db.from('waste_submissions').select('*').eq('status', 'pending_review').order('created_at', { ascending: false });
+            loader.classList.add('hidden');
+            if (!data || data.length === 0) { grid.innerHTML = '<div class="col-span-full py-20 text-center text-slate-400 font-bold">Không có báo cáo nào!</div>'; return; }
+
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden group hover:shadow-xl transition-all duration-300';
+                const imgUrl = item.scan_image_path || '';
+                card.innerHTML = `
+                    <div class="relative overflow-hidden h-52">
+                        ${imgUrl ? `<img src="${imgUrl}" class="w-full h-full object-cover cursor-pointer group-hover:scale-110 transition duration-500" onclick="window.open('${imgUrl}')">` : '<div class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 text-xs">KHÔNG CÓ ẢNH</div>'}
+                    </div>
+                    <div class="p-8">
+                        <h3 class="font-black text-slate-800 text-lg mb-1 truncate">${item.suggested_name_vi || 'Yêu cầu mới'}</h3>
+                        <p class="text-[10px] text-slate-400 mb-2 font-bold uppercase tracking-tight italic">${item.rejection_reason || 'Báo cáo từ AI/User'}</p>
+                        <p class="text-xs text-slate-500 mb-6 line-clamp-2 leading-relaxed">${item.gemini_payload?.result_text || ''}</p>
+                        <div class="flex gap-2">
+                            <button onclick="openApproveModal('${item.id}', '${item.suggested_name_vi || ''}')" class="flex-[2] bg-green-600 text-white py-3 rounded-2xl font-black text-xs shadow-md shadow-green-100 hover:bg-green-700 transition">Duyệt & Thêm Game</button>
+                            <button onclick="approveSub('${item.id}', 'reject')" class="flex-1 bg-slate-50 text-slate-400 py-3 rounded-2xl font-bold text-xs hover:bg-red-50 hover:text-red-500 transition">Từ chối</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        window.openApproveModal = (id, currentName) => {
+            currentSubmittingId = id;
+            document.getElementById('m-name').value = (currentName === 'Báo cáo rác sai từ người dùng' || !currentName) ? '' : currentName;
+            document.getElementById('m-fact').value = '';
+            document.getElementById('m-slug').value = 'item-' + id.slice(0, 8) + '-' + Math.floor(Math.random() * 1000);
+            document.getElementById('approve-modal').classList.remove('hidden');
+            document.getElementById('approve-modal').classList.add('flex');
+        };
+
+        window.closeModal = () => {
+            document.getElementById('approve-modal').classList.add('hidden');
+            document.getElementById('approve-modal').classList.remove('flex');
+        };
+
+        document.getElementById('btn-confirm-approve').onclick = async () => {
+            const btn = document.getElementById('btn-confirm-approve');
+            const originalText = btn.innerText;
+
+            const newName = document.getElementById('m-name').value.trim();
+            const funFact = document.getElementById('m-fact').value.trim();
+            const slug = document.getElementById('m-slug').value.trim();
+
+            if (!newName) return alert('Vui lòng nhập tên vật phẩm');
+
+            try {
+                btn.disabled = true; btn.innerText = 'ĐANG XỬ LÝ...';
+
+                // 1. Cập nhật thông tin Admin đã sửa vào submission
+                const { error: updateErr } = await db.from('waste_submissions').update({
+                    suggested_name_vi: newName,
+                    suggested_fun_fact: funFact
+                }).eq('id', currentSubmittingId);
+
+                if (updateErr) throw updateErr;
+
+                // 2. Gọi RPC để chính thức đưa vào từ điển và game
+                const { error: rpcErr } = await db.rpc('admin_approve_waste_submission', {
+                    p_submission_id: currentSubmittingId,
+                    p_slug: slug,
+                    p_merge_existing_id: null
+                });
+
+                if (rpcErr) throw rpcErr;
+
+                closeModal();
+                fetchSubmissions();
+            } catch (e) {
+                alert('Lỗi: ' + e.message);
+            } finally {
+                btn.disabled = false; btn.innerText = originalText;
+            }
+        };
+
+        window.approveSub = async (id, action) => {
+            if (action === 'reject') {
+                const reason = prompt('Lý do từ chối:');
+                if (reason === null) return;
+                const { data: { user } } = await db.auth.getUser();
+                const { error } = await db.from('waste_submissions').update({
+                    status: 'rejected',
+                    rejection_reason: reason || 'Từ chối',
+                    reviewed_at: new Date().toISOString(),
+                    reviewer_id: user?.id || null
+                }).eq('id', id);
+                if (error) { alert(error.message); return; }
+                fetchSubmissions();
+            }
+        };
+
+        // --- HÀM CHO TAB USER ---
+        window.fetchUsers = async () => {
+            const tbody = document.getElementById('table-users'); tbody.innerHTML = '';
+            const { data } = await db.from('profiles').select('*').order('xp_total', { ascending: false });
+            data.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-slate-50 hover:bg-slate-50/50 transition';
+                tr.innerHTML = `
+                    <td class="p-5 font-bold text-slate-800">${u.display_name || 'Anonymous'}</td>
+                    <td class="p-5 text-slate-400 font-mono text-xs">${u.id.substring(0,8)}...</td>
+                    <td class="p-5"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded-lg text-[10px] font-black">LV ${u.level} · ${u.xp_total} XP</span></td>
+                    <td class="p-5">${u.is_locked ? '<span class="text-red-500">Bị khóa</span>' : '<span class="text-green-500">Hoạt động</span>'}</td>
+                    <td class="p-5 text-right font-black">
+                        <button onclick="toggleBan('${u.id}', ${u.is_locked})" class="${u.is_locked ? 'text-blue-500' : 'text-red-500'} uppercase text-xs tracking-tighter">${u.is_locked ? 'Mở khóa' : 'Khóa'}</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        window.toggleBan = async (id, currentLocked) => {
+            const reason = currentLocked ? null : prompt('Lý do khóa tài khoản:');
+            if (!currentLocked && !reason) return;
+            await db.from('profiles').update({ is_locked: !currentLocked, locked_reason: reason }).eq('id', id);
+            fetchUsers();
+        };
+
+        // --- HÀM CHO TAB CONFIG ---
+        window.fetchConfigs = async () => {
+            const { data, error } = await db.from('system_settings').select('*');
+            if (error) { alert(error.message); return; }
+            const maintenance = data.find(d => d.key === 'maintenance')?.value || {};
+            const gemini = data.find(d => d.key === 'gemini')?.value || {};
+            document.getElementById('config-maintenance').checked = maintenance.enabled || false;
+            document.getElementById('config-message').value = maintenance.message || '';
+            document.getElementById('config-gemini').value = gemini.daily_limit ?? gemini.gemini_quota_limit ?? 100;
+            document.getElementById('config-version').value = gemini.min_app_version || '';
+        };
+
+        window.saveConfig = async (type) => {
+            if (type === 'maintenance') {
+                const { data: row } = await db.from('system_settings').select('value').eq('key', 'maintenance').maybeSingle();
+                const prev = row?.value || {};
+                const enabled = document.getElementById('config-maintenance').checked;
+                const message = document.getElementById('config-message').value;
+                const { error } = await db.from('system_settings').update({
+                    value: { ...prev, enabled, message, kill_switch: prev.kill_switch ?? false }
+                }).eq('key', 'maintenance');
+                if (error) { alert(error.message); return; }
+            } else if (type === 'gemini') {
+                const { data: row } = await db.from('system_settings').select('value').eq('key', 'gemini').maybeSingle();
+                const prev = row?.value || {};
+                const limit = parseInt(document.getElementById('config-gemini').value, 10) || 100;
+                const minVer = document.getElementById('config-version').value.trim();
+                const { error } = await db.from('system_settings').update({
+                    value: {
+                        ...prev,
+                        model: prev.model || 'gemini-flash-latest',
+                        daily_limit: limit,
+                        gemini_quota_limit: limit,
+                        min_app_version: minVer
+                    }
+                }).eq('key', 'gemini');
+                if (error) { alert(error.message); return; }
+            }
+            alert('Đã cập nhật cấu hình hệ thống!');
+        };
+
+        window.fetchAuditLogs = async () => {
+            const el = document.getElementById('list-audit');
+            el.innerHTML = '<p class="text-slate-400 py-8 text-center">Đang tải...</p>';
+            const { data, error } = await db.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(80);
+            if (error) { el.innerHTML = '<p class="text-red-500 p-4">' + error.message + '</p>'; return; }
+            el.innerHTML = '';
+            if (!data || data.length === 0) {
+                el.innerHTML = '<p class="text-slate-400 py-8 text-center">Chưa có bản ghi.</p>';
+                return;
+            }
+            data.forEach(row => {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-6 rounded-2xl border border-slate-100 text-sm flex justify-between items-center';
+                div.innerHTML = `
+                    <div>
+                        <div class="font-black text-slate-800 uppercase text-[10px] tracking-widest text-green-600 mb-1">${row.action}</div>
+                        <div class="text-slate-600 font-bold">${row.entity_type || ''}: ${row.entity_id || ''}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] text-slate-300 font-mono">${new Date(row.created_at).toLocaleString('vi-VN')}</div>
+                    </div>`;
+                el.appendChild(div);
+            });
+        };
+    </script>
+</body>
+</html>

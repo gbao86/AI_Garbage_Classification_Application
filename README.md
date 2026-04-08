@@ -1,8 +1,9 @@
 # ♻️ EcoSort by Bao - Ứng Dụng Phân Loại Rác Thông Minh
 
-[![Version](https://img.shields.io/badge/version-1.0.8-green.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.9-green.svg)](./CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Flutter-blue.svg)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](./LICENSE)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-red.svg)](./SECURITY.md)
 
 Ứng dụng sử dụng trí tuệ nhân tạo (AI) tiên tiến để nhận diện và phân loại rác thải qua hình ảnh, giúp người dùng xử lý rác đúng cách và bảo vệ môi trường.
 
@@ -16,36 +17,36 @@
 
 ## 🎥 Video Demo
 
-> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v1.0.1**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v1.0.8**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
+> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v1.0.1**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v1.0.9**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
 
 👉 [Xem Video Demo trên YouTube (v1.0.1)](https://youtu.be/YuI4tK1fNLU?si=LTzk0kVj0328i7m5)
 
 ---
 
-## 🚀 Tính năng nổi bật (v1.0.8)
+## 🚀 Tính năng nổi bật (v1.0.9)
 
 - 📷 **Nhận diện thông minh**: Chụp ảnh hoặc chọn từ thư viện để AI phân tích loại rác.
-- 🛸 **Quét & Phân tách Vật thể**: Sử dụng hoạt ảnh tia laser và AI bóc tách phông nền, làm nổi bật rác thải bằng hiệu ứng gradient phát sáng chuyên nghiệp. Chạy ngầm AI mượt mà không gây giật lag UI.
+- 🛸 **Quét & Phân tách Vật thể**: Sử dụng hoạt ảnh tia laser và AI bóc tách phông nền, làm nổi bật rác thải bằng hiệu ứng gradient phát sáng chuyên nghiệp.
+- 🔐 **Bảo mật & Chống Spam**: Tích hợp mã băm **MD5 Hash** định danh ảnh, ngăn chặn spam báo cáo và tối ưu hóa tài nguyên lưu trữ.
+- 🎮 **Game Hệ thống 2.0**: Toàn bộ câu hỏi, ảnh và kiến thức được đồng bộ thời gian thực từ Supabase. Chế độ lọc dữ liệu sạch đảm bảo chất lượng câu hỏi.
 - 🗺️ **Bản đồ điểm bỏ rác**: Tìm kiếm các điểm thu gom rác công cộng gần bạn thông qua OpenStreetMap hoàn toàn miễn phí.
 - 📍 **Định vị GPS**: Tự động xác định vị trí thực tế của người dùng trên bản đồ.
-- 🌍 **Đa ngôn ngữ**: Toàn bộ dữ liệu được ánh xạ sang Tiếng Việt chuẩn, dễ hiểu.
-- 📱 **Tối ưu Hình ảnh (Anti-OOM)**: Ép khung tự động và xử lý mượt mà mọi định dạng ảnh, bao gồm cả ảnh HEIC từ iPhone, giúp chống tràn bộ nhớ RAM.
-- 🧠 **Cơ chế xử lý kép**: Ưu tiên phân tích Offline bằng TFLite và tự động dùng Gemini Flash Online khi TFLite chưa sẵn sàng hoặc độ tin cậy dưới 80% (API Key Gemini được mã hóa để tăng bảo mật).
-- 🎮 **Thử thách & Học tập 2.0**: Mini game chuyên nghiệp với 200 câu hỏi random, ảnh minh họa online, timer/streak/combo và cộng điểm chính xác sau mỗi lượt chơi.
-- 🏅 **Kho huy hiệu riêng**: Hiển thị đầy đủ huy hiệu đã mở/chưa mở cùng tiến độ mở khóa badge kế tiếp ngay trên app.
-- 📱 **UI/UX đa thiết bị**: Giao diện game responsive theo từng thiết bị, khắc phục tràn layout trên màn hình nhỏ.
-- 🎨 **Giao diện Modern UI**: Thiết kế hiện đại, sạch sẽ và tối ưu trải nghiệm người dùng (UX).
+- 🧠 **Cơ chế xử lý kép**: Ưu tiên phân tích Offline bằng TFLite và tự động dùng Gemini Flash Online khi cần thiết.
+- 🏅 **Hệ thống Huy hiệu**: Theo dõi tiến trình và mở khóa các danh hiệu môi trường dựa trên điểm tích lũy (XP).
+- 🖥️ **Web Admin Dashboard**: Hệ thống quản trị mạnh mẽ giúp duyệt báo cáo cộng đồng và cập nhật database rác thải tức thì.
+- 🎨 **Giao diện Modern UI**: Thiết kế hiện đại, responsive và tối ưu hóa trải nghiệm trên nhiều loại màn hình.
 
 ---
 
 ## 🛠️ Công nghệ sử dụng
 
-- **Flutter & Dart**: Nền tảng phát triển ứng dụng đa nền tảng.
+- **Flutter & Dart**: Nền tảng phát triển ứng dụng di động.
+- **Supabase**: Backend-as-a-Service (Auth, Database, Storage, Realtime, Edge Functions).
 - **TensorFlow Lite**: Chạy mô hình AI nhận diện rác thải ngay trên thiết bị (Offline).
-- **Google ML Kit**: Sử dụng Subject Segmentation bóc tách phông nền và nhận diện vật thể nổi bật.
-- **Google Gemini API**: Phân tích chuyên sâu cho các trường hợp hình ảnh phức tạp.
-- **OpenStreetMap**: Hệ thống bản đồ mở và hoàn toàn miễn phí.
-- **Markdown Support**: Hiển thị kết quả hướng dẫn xử lý chuyên nghiệp.
+- **Google ML Kit**: Bóc tách vật thể (Subject Segmentation).
+- **Google Gemini API**: Phân tích chuyên sâu hình ảnh bằng mô hình ngôn ngữ lớn (VLM).
+- **Crypto (MD5)**: Định danh và bảo mật dữ liệu hình ảnh.
+- **OpenStreetMap**: Hệ thống bản đồ mở.
 
 ---
 
@@ -53,24 +54,17 @@
 
 ```text
 phan_loai_rac_qua_hinh_anh/
-├── android/                  # Cấu hình dự án Android
-├── assets/                   # Tài nguyên ứng dụng
-│   ├── images/               # Hình ảnh minh họa
-│   └── models/               # Mô hình AI (.tflite) & nhãn (.txt)
-├── ios/                      # Cấu hình dự án iOS
-├── lib/                      # Mã nguồn chính (Dart)
-│   ├── features/             # Các tính năng mở rộng
-│   │   └── game/             # Mini-game "Sorting Master" (Logic, UI, Models)
-│   ├── models/               # Định nghĩa các lớp dữ liệu toàn cục
-│   ├── screens/              # Các màn hình giao diện chính (Home, Map, About, Result, Scanning)
-│   ├── services/             # Xử lý Logic AI & API (Gemini, TFLite, ML Kit)
-│   ├── theme/                # Cấu hình giao diện và Styles
-│   ├── utils/                # Hàm tiện ích, Hằng số & Cấu hình môi trường (.env)
-│   ├── widgets/              # Các thành phần giao diện dùng chung
-│   ├── app_theme.dart        # Định nghĩa Theme chi tiết cho App
-│   └── main.dart             # Điểm khởi đầu của ứng dụng
-├── pubspec.yaml              # Quản lý thư viện & tài nguyên
-└── README.md                 # Tài liệu hướng dẫn dự án
+├── lib/                      # Mã nguồn ứng dụng Flutter
+│   ├── features/             # Các tính năng (Game, Quiz, v.v.)
+│   ├── models/               # Cấu trúc dữ liệu
+│   ├── screens/              # Giao diện người dùng
+│   ├── services/             # Logic AI, Supabase & API
+│   └── utils/                # Tiện ích & Cấu hình (Env, Constants)
+├── web_admin/                # Mã nguồn Web Quản trị (HTML/JS/Supabase)
+├── assets/                   # Tài nguyên (Ảnh, Models AI)
+├── SECURITY.md               # Chính sách bảo mật dự án
+├── CHANGELOG.md              # Nhật ký thay đổi phiên bản
+└── README.md                 # Hướng dẫn này
 ```
 
 ---
@@ -80,7 +74,7 @@ phan_loai_rac_qua_hinh_anh/
 ### Yêu cầu hệ thống
 - Flutter SDK 3.x
 - Dart SDK
-- Android Studio / VS Code
+- Tài khoản Supabase (để cấu hình Database/Auth)
 
 ### Các bước cài đặt
 1. **Clone repository**:
@@ -94,7 +88,8 @@ phan_loai_rac_qua_hinh_anh/
    flutter pub get
    ```
 
-3. **Tạo file mã hóa môi trường**:
+3. **Cấu hình môi trường**:
+   Tạo file `.env` và chạy lệnh sau để mã hóa:
    ```bash
    dart run build_runner build --delete-conflicting-outputs
    ```
@@ -106,30 +101,16 @@ phan_loai_rac_qua_hinh_anh/
 
 ---
 
-## 🤝 Đóng góp
+## 🛡️ Bảo mật
+Dự án áp dụng các tiêu chuẩn bảo mật nghiêm ngặt. Vui lòng xem chi tiết tại [SECURITY.md](./SECURITY.md).
 
-Mọi đóng góp từ cộng đồng đều được trân trọng! Nếu bạn có ý tưởng cải thiện ứng dụng:
-1. Fork dự án.
-2. Tạo nhánh tính năng: `git checkout -b feature/tinh-nang-moi`.
-3. Commit thay đổi: `git commit -m 'Thêm tính năng mới'`.
-4. Push lên nhánh: `git push origin feature/tinh-nang-moi`.
-5. Tạo Pull Request.
+---
+
+## 🤝 Đóng góp
+Mọi đóng góp từ cộng đồng đều được trân trọng! Nếu bạn có ý tưởng cải thiện ứng dụng, vui lòng tạo Pull Request hoặc Issue.
 
 📥 **Trải nghiệm nhanh**: [Tải file APK cài đặt tại đây](https://drive.google.com/file/d/1Bx9xzlBwJToTYMj50hDGFpsETBDBLDlY/view?usp=sharing)
 
 ---
-
-## 🕒 Lịch sử cập nhật
-Xem chi tiết các thay đổi qua từng phiên bản tại [CHANGELOG.md](./CHANGELOG.md).
-
-## 📄 Giấy phép
-Dự án được phát hành theo giấy phép **GNU General Public License v3**. Xem chi tiết tại file [LICENSE](./LICENSE).
-
----
-
-## ❗ Báo lỗi & Đề xuất
-Nếu bạn gặp sự cố hoặc có ý tưởng mới, hãy tạo một [Issue tại đây](https://github.com/gbao86/AI_Garbage_Classification_Application/issues).
-
----
-**Phát triển bởi Trịnh Gia Bảo (gbao86)**  
+**Phát triển bởi Trịnh Gia Bao (gbao86)**
 📧 Liên hệ: tiktokthu10@gmail.com

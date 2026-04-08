@@ -1,0 +1,9 @@
+{
+  "name": "ecosort-web-admin",
+  "private": true,
+  "type": "module",
+  "description": "Supabase client (JS) cho web quản trị — tách khỏi app Flutter",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.101.1"
+  }
+}
