@@ -16,7 +16,7 @@ Chúng tôi chỉ cung cấp các bản vá bảo mật cho các phiên bản ch
 **Vui lòng KHÔNG công khai các vấn đề bảo mật trong mục "Issues" của GitHub.**
 
 Nếu bạn phát hiện bất kỳ lỗ hổng bảo mật nào, vui lòng báo cáo theo quy trình sau:
-1. Gửi email trực tiếp đến: `tiktokthu10@gmail.vn` (Hoặc email quản trị viên của bạn).
+1. Gửi email trực tiếp đến: `tiktokthu10@gmail.vn` .
 2. Mô tả chi tiết lỗ hổng và các bước để tái hiện lỗi (Proof of Concept).
 3. Chúng tôi sẽ xác nhận báo cáo trong vòng **48 giờ** và phản hồi về lộ trình khắc phục.
 
