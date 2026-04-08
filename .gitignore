@@ -58,5 +58,5 @@ app.*.map.json
 # Node (web_admin / JS tooling)
 web_admin/node_modules/
 web_admin/src/
-web_admin/js/
+web_admin/js/config.js
 supabase/
