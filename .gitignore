@@ -14,7 +14,7 @@ migrate_working_dir/
 .agents/
 .continue/
 .kiro/
-/skill-lock.json
+/skills-lock.json
 
 
 # IntelliJ related
