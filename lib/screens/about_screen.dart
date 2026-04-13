@@ -28,20 +28,25 @@ class _AboutScreenState extends State<AboutScreen> {
     }
   }
 
+  String? _encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map((MapEntry<String, String> e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+  }
+
   Future<void> _launchEmail() async {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: 'tiktokthu10@gmail.com',
-      queryParameters: {
-        'subject': 'Contact from EcoSort App User',
+      query: _encodeQueryParameters(<String, String>{
+        'subject': 'Contact from EcoSort by Bao App User',
         'body': 'Hi Trinh Gia Bao,\n\nI am using your EcoSort app and would like to...'
-      },
+      }),
     );
 
     try {
-      // Encode các ký tự đặc biệt trong query
-      final String urlString = emailLaunchUri.toString();
-      await launchUrl(Uri.parse(urlString));
+      await launchUrl(emailLaunchUri);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -59,7 +64,6 @@ class _AboutScreenState extends State<AboutScreen> {
     final Uri url = Uri.parse(fbUrl);
     
     try {
-      // LaunchMode.externalApplication giúp ưu tiên mở app Facebook nếu có
       final bool launched = await launchUrl(
         url, 
         mode: LaunchMode.externalApplication,
