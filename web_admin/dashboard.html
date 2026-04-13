@@ -14,6 +14,9 @@
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
         .animate-modal { animation: modal-in 0.3s ease-out forwards; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
     </style>
 </head>
 <body class="bg-slate-50 font-sans">
@@ -119,6 +122,43 @@
         </main>
     </div>
 
+    <!-- DETAIL MODAL -->
+    <div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-50 hidden flex">
+        <div class="bg-white rounded-[2rem] p-8 w-full max-w-2xl shadow-2xl animate-modal overflow-y-auto max-h-[90vh] custom-scrollbar">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-slate-800 flex items-center gap-3">
+                    <div class="bg-blue-100 p-2 rounded-lg"><svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                    Chi tiết báo cáo
+                </h3>
+                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <div class="space-y-4">
+                <div class="flex justify-center bg-slate-50 rounded-xl overflow-hidden h-64 border border-slate-100">
+                    <img id="detail-img" src="" class="object-contain h-full w-full hidden">
+                    <div id="detail-no-img" class="flex items-center justify-center text-slate-400 font-bold uppercase w-full h-full">Không có ảnh</div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tên đề xuất</span>
+                        <div id="detail-name" class="font-bold text-slate-800"></div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nhãn AI</span>
+                        <div id="detail-ai-label" class="font-bold text-slate-800"></div>
+                    </div>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Phân tích Gemini</span>
+                    <p id="detail-gemini" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Kiến thức / Fun fact</span>
+                    <p id="detail-fact" class="text-sm text-slate-600 leading-relaxed"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- APPROVE MODAL -->
     <div id="approve-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-50 hidden flex">
         <div class="bg-white rounded-[2rem] p-8 w-full max-w-lg shadow-2xl animate-modal">
@@ -187,6 +227,8 @@
             loader.classList.add('hidden');
             if (!data || data.length === 0) { grid.innerHTML = '<div class="col-span-full py-20 text-center text-slate-400 font-bold">Không có báo cáo nào!</div>'; return; }
 
+            window.allSubmissions = data;
+
             data.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden group hover:shadow-xl transition-all duration-300';
@@ -202,6 +244,9 @@
                         <div class="flex gap-2">
                             <button onclick="openApproveModal('${item.id}', '${item.suggested_name_vi || ''}')" class="flex-[2] bg-green-600 text-white py-3 rounded-2xl font-black text-xs shadow-md shadow-green-100 hover:bg-green-700 transition">Duyệt & Thêm Game</button>
                             <button onclick="approveSub('${item.id}', 'reject')" class="flex-1 bg-slate-50 text-slate-400 py-3 rounded-2xl font-bold text-xs hover:bg-red-50 hover:text-red-500 transition">Từ chối</button>
+                        </div>
+                        <div class="mt-2 text-center pointer-events-auto">
+                            <button onclick="openDetailModal('${item.id}')" class="w-full bg-blue-50 text-blue-600 py-3 rounded-2xl font-bold text-xs hover:bg-blue-100 active:scale-95 transition">🔍 Xem chi tiết báo cáo</button>
                         </div>
                     </div>
                 `;
@@ -221,6 +266,35 @@
         window.closeModal = () => {
             document.getElementById('approve-modal').classList.add('hidden');
             document.getElementById('approve-modal').classList.remove('flex');
+        };
+
+        window.openDetailModal = (id) => {
+            const item = window.allSubmissions?.find(s => s.id === id);
+            if (!item) return;
+            
+            const img = document.getElementById('detail-img');
+            const noImg = document.getElementById('detail-no-img');
+            if (item.scan_image_path) {
+                img.src = item.scan_image_path;
+                img.classList.remove('hidden');
+                noImg.classList.add('hidden');
+            } else {
+                img.classList.add('hidden');
+                noImg.classList.remove('hidden');
+            }
+            
+            document.getElementById('detail-name').innerText = item.suggested_name_vi || 'N/A';
+            document.getElementById('detail-ai-label').innerText = `${item.tflite_top_label || 'N/A'} (Độ tin cậy: ${item.tflite_confidence || 0})`;
+            document.getElementById('detail-gemini').innerText = item.gemini_payload?.result_text || JSON.stringify(item.gemini_payload, null, 2);
+            document.getElementById('detail-fact').innerText = item.suggested_fun_fact || 'Chưa có Fun Fact';
+            
+            document.getElementById('detail-modal').classList.remove('hidden');
+            document.getElementById('detail-modal').classList.add('flex');
+        };
+
+        window.closeDetailModal = () => {
+            document.getElementById('detail-modal').classList.add('hidden');
+            document.getElementById('detail-modal').classList.remove('flex');
         };
 
         document.getElementById('btn-confirm-approve').onclick = async () => {
@@ -301,7 +375,14 @@
         window.toggleBan = async (id, currentLocked) => {
             const reason = currentLocked ? null : prompt('Lý do khóa tài khoản:');
             if (!currentLocked && !reason) return;
-            await db.from('profiles').update({ is_locked: !currentLocked, locked_reason: reason }).eq('id', id);
+            
+            const { data: { user } } = await db.auth.getUser();
+            const updatePayload = currentLocked 
+                ? { is_locked: false, locked_reason: null, locked_at: null, locked_by: null }
+                : { is_locked: true, locked_reason: reason, locked_at: new Date().toISOString(), locked_by: user?.id || null };
+                
+            const { error } = await db.from('profiles').update(updatePayload).eq('id', id);
+            if (error) alert('Lỗi khóa/mở khóa: ' + error.message);
             fetchUsers();
         };
 
