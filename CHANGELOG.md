@@ -5,7 +5,7 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
-## [1.1.0-demo] - 2026-04-08
+## [1.1.0-demo] - 2026-04-13
 
 ### 🛠️ Sửa lỗi & Cải thiện liên lạc (Hotfix & Connectivity)
 - 📧 **Sửa lỗi Gửi Email**: Khai báo `mailto` scheme trong AndroidManifest để mở ứng dụng Email ổn định trên Android 11+.
