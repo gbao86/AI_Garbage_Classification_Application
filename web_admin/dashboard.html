@@ -195,13 +195,51 @@
 
         let currentSubmittingId = null;
 
-        // AUTH CHECK
-        db.auth.getUser().then(({ data }) => {
-            if (!data.user) return window.location.href = 'index.html';
-            checkAdminPermissions(data.user).then(u => {
-                document.getElementById('admin-email').innerText = u.email;
-                fetchSubmissions();
-            }).catch(e => { alert(e.message); window.location.href = 'index.html'; });
+        function showAuthError(msg) {
+            document.body.innerHTML = `
+                <div class="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 z-[10000] fixed inset-0">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md text-center">
+                        <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <h2 class="text-2xl font-black text-slate-800 mb-2">Lỗi Xác Thực</h2>
+                        <p class="text-slate-600 mb-8 font-medium">${msg}</p>
+                        <button onclick="window.location.replace('index.html')" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold hover:bg-slate-700 transition">Quay lại đăng nhập</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // AUTH CHECK - Lắng nghe thay đổi thay vì chỉ lấy ngay lập tức để nhận token của Google
+        db.auth.onAuthStateChange(async (event, session) => {
+            if (session) {
+                if (window.adminVerified) return;
+                window.adminVerified = true;
+                
+                document.body.insertAdjacentHTML('afterbegin', '<div id="auth-loader" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center"><div class="w-10 h-10 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mb-4"></div><p class="text-slate-500 font-bold">Đang tải và xác thực quyền Admin...</p></div>');
+
+                try {
+                    const u = await checkAdminPermissions(session.user);
+                    document.getElementById('auth-loader')?.remove();
+                    document.getElementById('admin-email').innerText = u.email;
+                    fetchSubmissions();
+                } catch(e) {
+                    window.adminVerified = false;
+                    document.getElementById('auth-loader')?.remove();
+                    showAuthError(e.message);
+                }
+            } else if (event === 'INITIAL_SESSION') {
+                // PKCE magic link dùng ?code= trên query, không phải #access_token — đừng redirect trước khi client đổi code
+                const q = new URLSearchParams(window.location.search);
+                const finishingOAuth =
+                    q.has('code') ||
+                    q.has('error') ||
+                    window.location.hash.includes('access_token') ||
+                    window.location.hash.includes('type=recovery');
+                if (!finishingOAuth) {
+                    window.location.replace('index.html');
+                }
+            }
         });
 
         // TABS NAVIGATION

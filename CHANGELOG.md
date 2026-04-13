@@ -5,6 +5,16 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
+## [1.1.0-demo] - 2026-04-08
+
+### 🛠️ Sửa lỗi & Cải thiện liên lạc (Hotfix & Connectivity)
+- 📧 **Sửa lỗi Gửi Email**: Khai báo `mailto` scheme trong AndroidManifest để mở ứng dụng Email ổn định trên Android 11+.
+- 🌐 **Sửa lỗi Mở Facebook**: Khai báo `https` scheme và tối ưu hóa logic `launchUrl` để ưu tiên mở ứng dụng Facebook thay vì trình duyệt.
+- 💬 **Tối ưu hóa UX Email**: Tự động điền Tiêu đề và Nội dung mẫu khi người dùng nhấn liên hệ Admin.
+- 🎨 **Cải thiện UI Liên hệ**: Thêm hiệu ứng gợn sóng (Ripple) và icon chỉ báo cho các nút liên lạc trên màn hình About.
+
+---
+
 ## [1.0.9] - 2026-04-08
 
 ### 🛡️ Bảo mật & Chống Spam (Security & Anti-Spam)
@@ -52,7 +62,7 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ### 🚀 Nâng cấp Thương hiệu & Bảo mật
 - 🎨 **Biểu tượng ứng dụng mới**: Cập nhật Icon app chính thức theo phong cách hiện đại, tăng tính nhận diện thương hiệu.
-- 🔐 **Bảo mật API Key**: 
+- 🔐 **Bật mật API Key**:
     - Triển khai thư viện `Envied` để mã hóa và giấu API Key.
     - Chuyển toàn bộ cấu hình nhạy cảm sang file `.env` (đã được cấu hình gitignore).
 - 🧠 **Cơ chế xử lý kép (TFLite → Gemini Flash)**:

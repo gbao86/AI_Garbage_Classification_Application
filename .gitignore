@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 .agents/
+.cursor/
 .continue/
 .kiro/
 /skills-lock.json

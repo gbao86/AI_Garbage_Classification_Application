@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -24,6 +25,57 @@ class _AboutScreenState extends State<AboutScreen> {
       setState(() {
         _version = info.version.split('+').first;
       });
+    }
+  }
+
+  Future<void> _launchEmail() async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'tiktokthu10@gmail.com',
+      queryParameters: {
+        'subject': 'Contact from EcoSort App User',
+        'body': 'Hi Trinh Gia Bao,\n\nI am using your EcoSort app and would like to...'
+      },
+    );
+
+    try {
+      // Encode các ký tự đặc biệt trong query
+      final String urlString = emailLaunchUri.toString();
+      await launchUrl(Uri.parse(urlString));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Không tìm thấy ứng dụng Email trên thiết bị này'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _launchFacebook() async {
+    const String fbUrl = "https://www.facebook.com/BaOU.me/";
+    final Uri url = Uri.parse(fbUrl);
+    
+    try {
+      // LaunchMode.externalApplication giúp ưu tiên mở app Facebook nếu có
+      final bool launched = await launchUrl(
+        url, 
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && mounted) {
+        throw Exception('Could not launch FB');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Không thể mở liên kết Facebook'),
+            backgroundColor: Colors.blueAccent,
+          ),
+        );
+      }
     }
   }
 
@@ -114,6 +166,7 @@ class _AboutScreenState extends State<AboutScreen> {
                     label: 'Email',
                     value: 'tiktokthu10@gmail.com',
                     color: Colors.redAccent,
+                    onTap: _launchEmail,
                   ),
                   const SizedBox(height: 12),
                   _buildContactTile(
@@ -122,6 +175,7 @@ class _AboutScreenState extends State<AboutScreen> {
                     label: 'Facebook',
                     value: 'Trinh Gia Bao',
                     color: Colors.blueAccent,
+                    onTap: _launchFacebook,
                   ),
                   const SizedBox(height: 48),
                   Center(
@@ -171,30 +225,45 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  Widget _buildContactTile(ThemeData theme, {required IconData icon, required String label, required String value, required Color color}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
+  Widget _buildContactTile(ThemeData theme, {
+    required IconData icon, 
+    required String label, 
+    required String value, 
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(14)),
-            child: Icon(icon, color: color, size: 22),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
           ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(label, style: const TextStyle(color: Colors.black38, fontSize: 11, fontWeight: FontWeight.bold)),
-              Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(14)),
+                child: Icon(icon, color: color, size: 22),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: const TextStyle(color: Colors.black38, fontSize: 11, fontWeight: FontWeight.bold)),
+                    Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey.withValues(alpha: 0.5)),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

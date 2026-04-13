@@ -1,45 +1,66 @@
 import { getSupabaseConfig } from './config.js';
 
 const { url, key } = getSupabaseConfig();
-// Khởi tạo client dùng chung cho toàn bộ web admin
-export const db = supabase.createClient(url, key);
 
-export async function loginWithEmail(email, password) {
-    const { data, error } = await db.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-
-    // Kiểm tra quyền Admin ngay lập tức
-    const { data: profile, error: profileError } = await db.from('profiles').select('role').eq('id', data.user.id).single();
-    if (profileError || !profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
-        await db.auth.signOut();
-        throw new Error('Truy cập bị từ chối: Bạn không có quyền Admin!');
-    }
-    return data.user;
+// Đảm bảo thư viện Supabase đã sẵn sàng
+if (typeof supabase === 'undefined') {
+    console.error('[admin-auth] THIẾU THƯ VIỆN: supabase-js chưa được nạp từ CDN!');
 }
 
-export async function loginWithGoogle() {
-    const { error } = await db.auth.signInWithOAuth({
-        provider: 'google',
+export const db = supabase.createClient(url, key);
+
+async function getUserRole(userId) {
+    try {
+        console.log('[admin-auth] Đang lấy role cho user:', userId);
+        const { data, error } = await db.from('profiles').select('role').eq('id', userId).maybeSingle();
+        if (error) {
+            console.error('[admin-auth] Lỗi query profile:', error);
+            return null;
+        }
+        return data ? data.role : null;
+    } catch (e) {
+        console.error('[admin-auth] Ngoại lệ khi lấy role:', e);
+        return null;
+    }
+}
+
+export async function loginWithEmail(email, password) {
+    console.log('[admin-auth] Bắt đầu signInWithPassword cho:', email);
+    try {
+        const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+        if (error) {
+            console.error('[admin-auth] Supabase trả về lỗi đăng nhập:', error.message);
+            throw error;
+        }
+
+        console.log('[admin-auth] Đăng nhập thành công, đang kiểm tra quyền...');
+        const role = await getUserRole(data.user.id);
+        console.log('[admin-auth] Role tìm thấy:', role);
+
+        if (role !== 'admin' && role !== 'super_admin') {
+            console.warn('[admin-auth] User không phải admin, đang đăng xuất...');
+            await db.auth.signOut();
+            throw new Error('Tài khoản của bạn không có quyền Admin!');
+        }
+
+        return data.user;
+    } catch (e) {
+        console.error('[admin-auth] Lỗi thực thi loginWithEmail:', e.message);
+        throw e;
+    }
+}
+
+export async function loginWithMagicLink(email) {
+    console.log('[admin-auth] Đang gửi Magic Link tới:', email);
+    const { error } = await db.auth.signInWithOtp({
+        email,
         options: {
-            redirectTo: window.location.origin + '/dashboard.html'
+            emailRedirectTo: window.location.origin + window.location.pathname,
+            shouldCreateUser: false
         }
     });
     if (error) throw error;
-}
-
-// Bảo vệ trang: Nếu chưa login hoặc không phải Admin thì đá về index.html
-export async function protectPage() {
-    const { data: { user } } = await db.auth.getUser();
-    if (!user) {
-        window.location.href = 'index.html';
-        return;
-    }
-    const { data: profile } = await db.from('profiles').select('role').eq('id', user.id).single();
-    if (!profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
-        await db.auth.signOut();
-        window.location.href = 'index.html';
-    }
-    return user;
 }
 
 export async function logout() {
@@ -47,15 +68,12 @@ export async function logout() {
     window.location.href = 'index.html';
 }
 
-/** Dùng sau OAuth redirect / getSession — đảm bảo role admin */
 export async function checkAdminPermissions(user) {
-    if (!user?.id) {
-        throw new Error('Chưa đăng nhập');
-    }
-    const { data: profile, error } = await db.from('profiles').select('role').eq('id', user.id).single();
-    if (error || !profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
+    if (!user) throw new Error('Chưa đăng nhập');
+    const role = await getUserRole(user.id);
+    if (role !== 'admin' && role !== 'super_admin') {
         await db.auth.signOut();
-        throw new Error('Truy cập bị từ chối: Bạn không có quyền Admin!');
+        throw new Error('Từ chối: Bạn không phải Admin!');
     }
     return user;
 }
