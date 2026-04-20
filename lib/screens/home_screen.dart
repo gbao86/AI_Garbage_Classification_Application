@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:image_picker/image_picker.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
+import 'package:image/image.dart' as img;
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/game_provider.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/services/auth_service.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/game_screen.dart';
@@ -123,6 +125,39 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<double> _calculateAverageBrightness(File file) async {
+    try {
+      // Tối ưu: Chỉ nén và đọc một bản thu nhỏ của ảnh để tính độ sáng
+      // Giúp tránh lỗi Out Of Memory (OOM) và không làm treo Main Thread
+      final bytes = await FlutterImageCompress.compressWithFile(
+        file.absolute.path,
+        minWidth: 100,
+        minHeight: 100,
+        quality: 20,
+      );
+
+      if (bytes == null) return 0.0;
+      final image = img.decodeImage(bytes);
+      if (image == null) return 0.0;
+
+      double totalLuminance = 0;
+      int count = 0;
+
+      for (int y = 0; y < image.height; y++) {
+        for (int x = 0; x < image.width; x++) {
+          final pixel = image.getPixel(x, y);
+          final luminance = (0.2126 * pixel.r) + (0.7152 * pixel.g) + (0.0722 * pixel.b);
+          totalLuminance += luminance;
+          count++;
+        }
+      }
+      return count > 0 ? totalLuminance / count : 0.0;
+    } catch (e) {
+      debugPrint("Lỗi tính độ sáng: $e");
+      return 100.0; // Mặc định cho qua nếu gặp lỗi kỹ thuật
+    }
+  }
+
   // --- SỬA LỖI Ở ĐÂY: Hàm nén ảnh siêu nhẹ để chống tràn RAM ---
   Future<File?> _optimizeImage(File file) async {
     try {
@@ -200,11 +235,44 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _processImage(ImageSource source) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(source: source);
-      if (pickedFile == null) return;
+      if (pickedFile == null) {
+        if (mounted) setState(() => _processingMessage = '');
+        return;
+      }
 
-      setState(() => _processingMessage = 'Đang chuẩn bị...');
+      setState(() => _processingMessage = 'Đang kiểm tra chất lượng ảnh...');
 
-      // --- SỬA Ở ĐÂY: Gọi hàm _optimizeImage thay vì _convertToJpg ---
+      // 1. Kiểm tra độ sáng trước khi nén/xử lý nặng
+      final brightness = await _calculateAverageBrightness(File(pickedFile.path));
+      
+      // Ngưỡng độ sáng (0-255), thường 40-50 là rất tối
+      if (brightness < 45) {
+        if (mounted) {
+          final proceed = await showDialog<bool>(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: const Text('Ảnh hơi tối'),
+              content: const Text('Ảnh của bạn có vẻ hơi thiếu sáng, điều này có thể làm giảm độ chính xác của AI. Bạn có muốn chụp lại không?'),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Chụp lại')),
+                TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Vẫn dùng')),
+              ],
+            ),
+          );
+          if (proceed == false) {
+             setState(() => _processingMessage = '');
+             // Chờ một chút để Dialog đóng hẳn và giải phóng bộ nhớ trước khi mở lại Camera
+             await Future.delayed(const Duration(milliseconds: 400));
+             if (mounted) _processImage(source);
+             return;
+          }
+        }
+      }
+
+      setState(() => _processingMessage = 'Đang tối ưu ảnh...');
+
+      // 2. Tối ưu ảnh
       File? processedFile = await _optimizeImage(File(pickedFile.path));
       if (!mounted) return;
 
@@ -230,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
     } finally {
-      setState(() => _processingMessage = '');
+      if (mounted) setState(() => _processingMessage = '');
     }
   }
 

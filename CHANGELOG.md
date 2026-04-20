@@ -7,6 +7,28 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ## [1.1.0-demo] - 2026-04-13
 
+### 🧠 Tự động hóa Huấn luyện AI (MLOps & Cloud Training)
+- 🤖 **GitHub Actions Training**: Thiết lập quy trình tự động huấn luyện lại model AI trên đám mây khi đạt ngưỡng dữ liệu mới (50 ảnh được duyệt).
+- 📈 **Chiến lược Huấn luyện Chuyên nghiệp**:
+    - Triển khai kỹ thuật **Transfer Learning** với MobileNetV2.
+    - Quy trình 2 giai đoạn: **Warm-up** (20 epochs) và **Fine-tuning** (50 epochs) với cơ chế **EarlyStopping** để tối ưu độ chính xác.
+    - Tích hợp **Data Augmentation** (nhiễu hạt, biến đổi màu sắc, độ sáng) giúp model bền bỉ hơn trong điều kiện thực tế.
+- 📝 **Đồng bộ hóa Nhãn**: Tự động sinh file `labels.txt` khớp với kiến trúc model mới sau mỗi lần train.
+
+### 💼 Nâng cấp Web Admin UX (Content Editorial)
+- ✍️ **Màn hình Biên tập Chuyên sâu**: Thêm giao diện chỉnh sửa dữ liệu (Tên chuẩn, Fun Fact) trước khi phê duyệt chính thức.
+- 🛠️ **Luồng Duyệt 2 Bước**: Cập nhật thông tin biên tập và tự động "thăng hạng" rác vào Từ điển hệ thống thông qua Database RPC.
+- 📊 **Minh bạch Dữ liệu AI**: Hiển thị nhãn TFLite và phân tích Gemini trực tiếp trong trình biên tập để Admin tham khảo.
+
+### 📸 Tối ưu hóa Trải nghiệm Camera & Báo cáo
+- 💡 **Sửa lỗi Brightness Check**: 
+    - Khắc phục triệt để lỗi kẹt nút "Chụp lại" không phản hồi khi ảnh tối.
+    - Tối ưu hóa thuật toán tính độ sáng bằng cách sử dụng ảnh thumbnail (100x100), giảm 99% tải RAM và triệt tiêu lỗi đồ họa GPU.
+- 🚩 **Nâng cấp Báo cáo Phân loại**: Cho phép người dùng nhập tên vật phẩm đúng khi báo cáo ảnh sai, đồng thời tự động gửi kèm dữ liệu AI (Label, Confidence) về Server.
+- ⚙️ **Hiện đại hóa Hạ tầng**:
+    - Nâng cấp dự án lên **Java 17** và đồng bộ **jvmTarget** để đảm bảo tính ổn định.
+    - Cấu hình **Gradle Toolchain** giúp tự động hóa việc quản lý JDK trên các môi trường khác nhau.
+
 ### 🛠️ Sửa lỗi & Cải thiện liên lạc (Hotfix & Connectivity)
 - 📧 **Sửa lỗi Gửi Email**: Khai báo `mailto` scheme trong AndroidManifest để mở ứng dụng Email ổn định trên Android 11+.
 - 🌐 **Sửa lỗi Mở Facebook**: Khai báo `https` scheme và tối ưu hóa logic `launchUrl` để ưu tiên mở ứng dụng Facebook thay vì trình duyệt.

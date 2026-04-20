@@ -45,6 +45,10 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
 
   String? _label;
   String? _finalMarkdown;
+  
+  // Lưu thông tin TFLite để báo cáo
+  String? _tfliteLabel;
+  double _tfliteConfidence = 0.0;
 
   bool _isScanCompleted = false; // Đánh dấu tia laser đã quét xong
   bool _isGeminiRunning = false;
@@ -56,37 +60,32 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
   void initState() {
     super.initState();
 
-    // 1. Controller tia laser quét 1 lần (3 giây)
     _scanLineController = AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 3000)
     );
 
-    // Lắng nghe khi tia laser quét xong
     _scanLineController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() => _isScanCompleted = true);
-        _runSegmentation(); // Quét xong mới bắt đầu lấy Mask vật thể
+        _runSegmentation();
       }
     });
 
-    // 2. Controller dải sáng chạy liên tục làm nổi bật vật thể
     _shimmerController = AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 2000)
     )..repeat();
 
-    // 3. Chuẩn bị ảnh và chạy ngầm AI TFLite/Gemini lập tức
     _loadSharpImage().then((img) {
       if (mounted) {
         setState(() => _sharpUiImage = img);
-        _scanLineController.forward(); // Bắt đầu quét laser
-        _startBackgroundAI();          // Chạy ngầm phân loại rác
+        _scanLineController.forward();
+        _startBackgroundAI();
       }
     });
   }
 
-  // Lấy ảnh gốc với chuẩn EXIF từ FileImage
   Future<ui.Image> _loadSharpImage() async {
     final completer = Completer<ui.Image>();
     final imageProvider = FileImage(widget.image);
@@ -97,10 +96,8 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
     return completer.future;
   }
 
-  // --- LOGIC 1: CHẠY ML KIT SAU KHI LASER QUÉT XONG ---
   Future<void> _runSegmentation() async {
     if (_sharpUiImage == null) return;
-
     final mask = await _segmentationService.getMask(widget.image, _sharpUiImage!.width, _sharpUiImage!.height);
     if (mounted) {
       setState(() => _maskImage = mask);
@@ -108,27 +105,23 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
     }
   }
 
-  // --- LOGIC 2: CHẠY NGẦM PHÂN LOẠI RÁC & GEMINI ---
   Future<void> _startBackgroundAI() async {
-    // 1. Chạy TFLite Offline trước
     final offlineResult = await _classifyLocal();
-
     if (mounted) {
       setState(() {
         _label = offlineResult.label;
         _finalMarkdown = offlineResult.markdown;
+        _tfliteLabel = offlineResult.originalLabel;
+        _tfliteConfidence = offlineResult.confidence;
       });
     }
 
-    // 2. Nếu độ tin cậy thấp, gọi tiếp Gemini API chạy ngầm
     if (offlineResult.confidence < 0.8) {
       setState(() => _isGeminiRunning = true);
       final geminiResult = await _geminiService.processImageAndGetGuidance(widget.image);
-
       if (mounted) {
         setState(() {
-          // Cập nhật nhãn mới từ Gemini (Nếu muốn, bạn có thể lấy label ngắn gọn từ geminiResult)
-          _label = "Đã phân tích bằng AI"; // Thay bằng logic trích xuất text của Jisy nếu có
+          _label = "Đã phân tích bằng AI";
           _finalMarkdown = geminiResult;
           _isGeminiRunning = false;
         });
@@ -151,14 +144,14 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
     );
   }
 
-  Future<({String label, String markdown, double confidence})> _classifyLocal() async {
+  Future<({String label, String originalLabel, String markdown, double confidence})> _classifyLocal() async {
     if (widget.classifierInterpreter == null || widget.labels.isEmpty) {
-      return (label: 'Lỗi', markdown: 'Mô hình chưa sẵn sàng', confidence: 0.0);
+      return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Mô hình chưa sẵn sàng', confidence: 0.0);
     }
     try {
       final imageBytes = await widget.image.readAsBytes();
       final inputData = await compute(_preprocessForClassifier, imageBytes);
-      if (inputData.isEmpty) return (label: 'Lỗi', markdown: 'Lỗi xử lý ảnh', confidence: 0.0);
+      if (inputData.isEmpty) return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Lỗi xử lý ảnh', confidence: 0.0);
 
       final input = [inputData];
       final output = List.generate(1, (_) => List.filled(widget.labels.length, 0.0));
@@ -177,9 +170,9 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
         confidencePct: maxScore * 100,
         lowConfidence: maxScore < 0.8,
       );
-      return (label: translatedLabel, markdown: markdown, confidence: maxScore);
+      return (label: translatedLabel, originalLabel: originalLabel, markdown: markdown, confidence: maxScore);
     } catch (e) {
-      return (label: 'Lỗi', markdown: 'Lỗi: $e', confidence: 0.0);
+      return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Lỗi: $e', confidence: 0.0);
     }
   }
 
@@ -192,10 +185,8 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
     return 'không tái chế';
   }
 
-  // Điều hướng khi mọi thứ (Quét + Tách nền + AI) đều hoàn tất
   void _checkAndNavigate() {
     if (_isScanCompleted && _maskImage != null && !_isGeminiRunning && _finalMarkdown != null) {
-      // Đợi 2 giây để người dùng kịp ngắm hiệu ứng làm mờ và chữ trước khi chuyển trang
       Future.delayed(const Duration(milliseconds: 2500), () {
         if (mounted) {
           Navigator.pushReplacement(
@@ -203,7 +194,9 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
             MaterialPageRoute(
               builder: (context) => ResultScreen(
                 image: widget.image,
-                processingResult: _finalMarkdown ?? 'Đang xử lý...',
+                processingResult: _finalMarkdown!,
+                tfliteLabel: _tfliteLabel,
+                tfliteConfidence: _tfliteConfidence,
               ),
             ),
           );
@@ -220,11 +213,9 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Nếu ảnh đang nạp, hiện ảnh gốc chống giật
           if (_sharpUiImage == null)
             RepaintBoundary(child: Image.file(widget.image, fit: BoxFit.cover)),
 
-          // Lớp vẽ chính: Quét laser -> Mờ nền -> Đục lỗ sắc nét -> Highlight
           if (_sharpUiImage != null)
             RepaintBoundary(
               child: AnimatedBuilder(
@@ -244,7 +235,6 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
               ),
             ),
 
-          // Tia Laser (Chỉ hiện khi đang quét)
           if (!_isScanCompleted)
             AnimatedBuilder(
               animation: _scanLineController,
@@ -267,7 +257,6 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
               },
             ),
 
-          // Giao diện text bên dưới
           Positioned(
             bottom: 120,
             left: 40,
@@ -275,40 +264,16 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Hiệu ứng chữ đổi mượt mà khi Gemini cập nhật nhãn
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 800),
                   transitionBuilder: (Widget child, Animation<double> animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: Tween<Offset>(begin: const Offset(0.0, 0.2), end: Offset.zero).animate(animation),
-                        child: child,
-                      ),
-                    );
+                    return FadeTransition(opacity: animation, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0.0, 0.2), end: Offset.zero).animate(animation), child: child));
                   },
                   child: _label != null
-                      ? Text(
-                    _label!,
-                    key: ValueKey<String>(_label!), // Key để báo cho Flutter biết chữ đã thay đổi
-                    style: TextStyle(
-                      color: const Color(0xFF6CFFA0),
-                      fontSize: 42,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.2,
-                      shadows: [
-                        Shadow(color: Colors.black.withOpacity(0.9), blurRadius: 15, offset: const Offset(0, 4)),
-                        Shadow(color: const Color(0xFF6CFFA0).withOpacity(0.6), blurRadius: 12),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                  )
+                      ? Text(_label!, key: ValueKey<String>(_label!), style: TextStyle(color: const Color(0xFF6CFFA0), fontSize: 42, fontWeight: FontWeight.w700, letterSpacing: 1.2, shadows: [Shadow(color: Colors.black.withOpacity(0.9), blurRadius: 15, offset: const Offset(0, 4)), Shadow(color: const Color(0xFF6CFFA0).withOpacity(0.6), blurRadius: 12)],), textAlign: TextAlign.center)
                       : const SizedBox.shrink(key: ValueKey('empty_label')),
                 ),
-
                 const SizedBox(height: 20),
-
-                // Trạng thái AI
                 if (_isGeminiRunning || _label == null || (!_isScanCompleted))
                   const TypewriterText(text: "Đang phân tích cấu trúc..."),
               ],
@@ -344,77 +309,37 @@ class SmartScanPainter extends CustomPainter {
   final double shimmerProgress;
   final bool isScanCompleted;
 
-  SmartScanPainter({
-    required this.sharpUiImage,
-    required this.maskImage,
-    required this.scanProgress,
-    required this.shimmerProgress,
-    required this.isScanCompleted,
-  });
+  SmartScanPainter({required this.sharpUiImage, required this.maskImage, required this.scanProgress, required this.shimmerProgress, required this.isScanCompleted});
 
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-
-    // Lớp 0: Luôn vẽ ảnh sắc nét làm nền tảng
     paintImage(canvas: canvas, rect: rect, image: sharpUiImage, fit: BoxFit.cover);
 
-    // Kịch bản 1: Đang quét Laser (Tạo lớp phủ tối dần theo đường quét)
     if (!isScanCompleted) {
       double currentY = size.height * scanProgress;
-      canvas.drawRect(
-          Rect.fromLTWH(0, 0, size.width, currentY),
-          Paint()..color = Colors.black.withOpacity(0.4)
-      );
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, currentY), Paint()..color = Colors.black.withOpacity(0.4));
       return;
     }
 
-    // Kịch bản 2: Quét xong & Đã có Mask từ ML Kit (Làm mờ nền, đục lỗ, bôi gradient)
     if (maskImage != null) {
-      // --- BƯỚC 1: LÀM MỜ NỀN VÀ ĐỤC LỖ VẬT THỂ ---
       canvas.saveLayer(rect, Paint());
-
-      // Vẽ màn sương mờ (Blur) lên toàn bộ khung hình
       final blurPaint = Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12);
       canvas.saveLayer(rect, blurPaint);
       paintImage(canvas: canvas, rect: rect, image: sharpUiImage, fit: BoxFit.cover);
       canvas.restore();
-
-      // Làm tối nền mờ đi một chút để vật thể chói sáng hơn
       canvas.drawRect(rect, Paint()..color = Colors.black.withOpacity(0.45));
-
-      // SỬA LỖI Ở ĐÂY: Tạo một Layer đục lỗ, sau đó vẽ mask vào trong Layer đó
       canvas.saveLayer(rect, Paint()..blendMode = BlendMode.dstOut);
       paintImage(canvas: canvas, rect: rect, image: maskImage!, fit: BoxFit.cover);
-      canvas.restore(); // Kết thúc đục lỗ (Layer này sẽ khoét thủng lớp mờ phía trên)
+      canvas.restore();
+      canvas.restore();
 
-      canvas.restore(); // Kết thúc toàn bộ Bước 1
-
-      // --- BƯỚC 2: BÔI GRADIENT LÀM NỔI BẬT VẬT THỂ ---
       canvas.saveLayer(rect, Paint());
-
-      // Tạo khuôn bằng mask
       paintImage(canvas: canvas, rect: rect, image: maskImage!, fit: BoxFit.cover);
-
-      // Đổ màu vào khuôn (srcIn)
-      final shimmerPaint = Paint()
-        ..blendMode = BlendMode.srcIn
-        ..shader = ui.Gradient.linear(
-          Offset(size.width * (shimmerProgress * 2 - 1.0), 0),
-          Offset(size.width * (shimmerProgress * 2), 0),
-          [
-            const Color(0x006CFFA0),
-            const Color(0xFF6CFFA0).withOpacity(0.6), // Xanh neon cực đẹp
-            const Color(0x006CFFA0),
-          ],
-          [0.0, 0.5, 1.0],
-        );
-
+      final shimmerPaint = Paint()..blendMode = BlendMode.srcIn..shader = ui.Gradient.linear(Offset(size.width * (shimmerProgress * 2 - 1.0), 0), Offset(size.width * (shimmerProgress * 2), 0), [const Color(0x006CFFA0), const Color(0xFF6CFFA0).withOpacity(0.6), const Color(0x006CFFA0)], [0.0, 0.5, 1.0]);
       canvas.drawRect(rect, shimmerPaint);
       canvas.restore();
-    }
-    // Kịch bản 3: Quét xong nhưng ML Kit không tìm thấy vật (Chỉ làm mờ toàn bộ)
-    else {
+    } else {
       final blurPaint = Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12);
       canvas.saveLayer(rect, blurPaint);
       paintImage(canvas: canvas, rect: rect, image: sharpUiImage, fit: BoxFit.cover);
@@ -424,18 +349,12 @@ class SmartScanPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant SmartScanPainter oldDelegate) {
-    return oldDelegate.scanProgress != scanProgress ||
-        oldDelegate.shimmerProgress != shimmerProgress ||
-        oldDelegate.maskImage != maskImage ||
-        oldDelegate.isScanCompleted != isScanCompleted;
-  }
+  bool shouldRepaint(covariant SmartScanPainter oldDelegate) => true;
 }
 
 class TypewriterText extends StatefulWidget {
   final String text;
   const TypewriterText({super.key, required this.text});
-
   @override
   State<TypewriterText> createState() => _TypewriterTextState();
 }
@@ -443,40 +362,19 @@ class TypewriterText extends StatefulWidget {
 class _TypewriterTextState extends State<TypewriterText> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<int> _characterCount;
-
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 2500),
-      vsync: this,
-    )..repeat();
+    _controller = AnimationController(duration: const Duration(milliseconds: 2500), vsync: this)..repeat();
     _characterCount = StepTween(begin: 0, end: widget.text.length).animate(_controller);
   }
-
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _characterCount,
-      builder: (context, child) {
-        String text = widget.text.substring(0, _characterCount.value);
-        return Text(
-          text,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 18,
-            fontWeight: FontWeight.w400,
-            fontStyle: FontStyle.italic,
-            shadows: [Shadow(color: Colors.black, blurRadius: 5)],
-          ),
-        );
-      },
-    );
+    return AnimatedBuilder(animation: _characterCount, builder: (context, child) {
+      String text = widget.text.substring(0, _characterCount.value);
+      return Text(text, style: const TextStyle(color: Colors.white70, fontSize: 18, fontWeight: FontWeight.w400, fontStyle: FontStyle.italic, shadows: [Shadow(color: Colors.black, blurRadius: 5)]));
+    });
   }
-
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  void dispose() { _controller.dispose(); super.dispose(); }
 }

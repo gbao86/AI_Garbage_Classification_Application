@@ -18,7 +18,6 @@
     </div>
 
     <div id="login-form" class="space-y-6">
-        <!-- Password Login Section -->
         <div class="space-y-4">
             <input type="email" id="email" placeholder="Email quản trị" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium">
             <input type="password" id="pass" placeholder="Mật khẩu" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium">
@@ -30,7 +29,6 @@
             <div class="relative flex justify-center text-xs uppercase"><span class="bg-white px-4 text-slate-300 font-bold tracking-widest">Hoặc dùng Magic Link</span></div>
         </div>
 
-        <!-- Magic Link Section -->
         <button onclick="handleMagicLink()" id="btn-magic" class="w-full border-2 border-slate-100 text-slate-600 py-4 rounded-2xl flex items-center justify-center gap-3 font-bold hover:bg-slate-50 transition-all">
             <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
             Gửi Link đăng nhập qua Email
@@ -45,21 +43,16 @@
 <script type="module">
     import { loginWithEmail, loginWithMagicLink, db } from './js/auth.js';
 
-    // Xử lý quay lại từ Magic Link hoặc OAuth (nếu còn sót)
     db.auth.onAuthStateChange(async (event, session) => {
         if (session) {
             try {
-                let profile = null;
-                for (let i = 0; i < 3; i++) {
-                    const { data } = await db.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
-                    if (data) { profile = data; break; }
-                    await new Promise((r) => setTimeout(r, 500));
-                }
-                if (profile && (profile.role === 'admin' || profile.role === 'super_admin')) {
+                const { data, error } = await db.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+                if (data && (data.role === 'admin' || data.role === 'super_admin')) {
                     window.location.replace('dashboard.html');
                 } else {
                     await db.auth.signOut();
                     alert('Từ chối truy cập: Tài khoản của bạn không có quyền quản trị.');
+                    window.location.reload();
                 }
             } catch (e) {
                 console.error(e);
@@ -75,16 +68,17 @@
         if (!email || !pass) return alert('Vui lòng nhập đầy đủ thông tin');
 
         try {
-            console.log('[admin-login] handleEmailLogin:start', { email });
-            btn.disabled = true; btn.innerText = 'ĐANG KIỂM TRA...';
+            btn.disabled = true;
+            btn.innerText = 'ĐANG KIỂM TRA...';
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
             await loginWithEmail(email, pass);
-            // onAuthStateChange sẽ lo việc chuyển hướng và check role
         } catch (e) {
-            console.error('[admin-login] handleEmailLogin:error', e);
-            alert('Lỗi: ' + e.message);
-        } finally {
-            console.log('[admin-login] handleEmailLogin:finally');
-            btn.disabled = false; btn.innerText = 'ĐĂNG NHẬP';
+            console.error('[admin-login] Lỗi:', e);
+            alert('Đăng nhập thất bại: ' + (e.message || 'Lỗi không xác định'));
+            btn.disabled = false;
+            btn.innerText = 'ĐĂNG NHẬP';
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
     };
 

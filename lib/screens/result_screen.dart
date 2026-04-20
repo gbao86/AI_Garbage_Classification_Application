@@ -10,11 +10,15 @@ import 'package:path_provider/path_provider.dart';
 class ResultScreen extends StatefulWidget {
   final File image;
   final String processingResult;
+  final String? tfliteLabel;
+  final double tfliteConfidence;
 
   const ResultScreen({
     super.key,
     required this.image,
     required this.processingResult,
+    this.tfliteLabel,
+    this.tfliteConfidence = 0.0,
   });
 
   @override
@@ -25,6 +29,7 @@ class _ResultScreenState extends State<ResultScreen> {
   bool _isReporting = false;
   bool _hasReported = false;
   String? _imageHash;
+  final TextEditingController _suggestedNameController = TextEditingController();
 
   @override
   void initState() {
@@ -32,7 +37,12 @@ class _ResultScreenState extends State<ResultScreen> {
     _calculateImageHash();
   }
 
-  // Tạo "dấu vân tay" duy nhất cho ảnh để chống spam
+  @override
+  void dispose() {
+    _suggestedNameController.dispose();
+    super.dispose();
+  }
+
   Future<void> _calculateImageHash() async {
     final bytes = await widget.image.readAsBytes();
     setState(() {
@@ -41,7 +51,6 @@ class _ResultScreenState extends State<ResultScreen> {
     _checkExistingReport();
   }
 
-  // Kiểm tra xem trong phiên làm việc hiện tại hoặc trên DB đã có báo cáo này chưa
   Future<void> _checkExistingReport() async {
     if (_imageHash == null) return;
     
@@ -49,8 +58,6 @@ class _ResultScreenState extends State<ResultScreen> {
     if (user == null) return;
 
     try {
-      // Tìm xem đã có bản ghi nào với image hash này của user này chưa
-      // Chúng ta tìm trong cột scan_image_path vì nó chứa hash ở tên file
       final response = await Supabase.instance.client
           .from('waste_submissions')
           .select('id')
@@ -97,17 +104,23 @@ class _ResultScreenState extends State<ResultScreen> {
       return;
     }
 
+    final suggestedName = _suggestedNameController.text.trim();
+    if (suggestedName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập tên đúng của vật phẩm')),
+      );
+      return;
+    }
+
     setState(() => _isReporting = true);
 
     try {
       final supabase = Supabase.instance.client;
       File compressedFile = await _compressForReport(widget.image);
 
-      // SỬ DỤNG HASH LÀM TÊN FILE: Chống spam vật lý trên Storage
       final fileName = '$_imageHash.jpg';
       final imagePath = 'reports/${user.id}/$fileName';
       
-      // Sử dụng upsert: true để nếu có gửi lại cũng chỉ ghi đè đúng file đó, không tạo file mới
       await supabase.storage.from('waste-reports').upload(
         imagePath,
         compressedFile,
@@ -116,13 +129,17 @@ class _ResultScreenState extends State<ResultScreen> {
 
       final String publicUrl = supabase.storage.from('waste-reports').getPublicUrl(imagePath);
 
-      // Kiểm tra lại một lần nữa trước khi insert để tránh race condition
       await supabase.from('waste_submissions').insert({
         'submitter_id': user.id,
         'status': 'pending_review',
-        'gemini_payload': {'result_text': widget.processingResult, 'image_hash': _imageHash},
-        'suggested_name_vi': null,
-        'rejection_reason': 'Người dùng báo cáo phân loại sai',
+        'tflite_top_label': widget.tfliteLabel,
+        'tflite_confidence': widget.tfliteConfidence,
+        'gemini_payload': {
+          'result_text': widget.processingResult, 
+          'image_hash': _imageHash
+        },
+        'suggested_name_vi': suggestedName,
+        'rejection_reason': 'Người dùng báo cáo rác sai',
         'scan_image_path': publicUrl,
       });
 
@@ -136,7 +153,6 @@ class _ResultScreenState extends State<ResultScreen> {
         );
       }
     } catch (e) {
-      // Nếu lỗi là do trùng lặp (Unique constraint) thì cũng coi như đã báo cáo
       if (e.toString().contains('unique') || e.toString().contains('already exists')) {
         setState(() => _hasReported = true);
       } else if (mounted) {
@@ -282,11 +298,31 @@ class _ResultScreenState extends State<ResultScreen> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Xác nhận báo cáo'),
-        content: const Text('Hệ thống sẽ ghi lại hình ảnh này để cải thiện trí tuệ nhân tạo. Mỗi ảnh chỉ cần báo cáo một lần.'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Vui lòng nhập tên đúng của vật phẩm:'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _suggestedNameController,
+              decoration: InputDecoration(
+                hintText: 'Ví dụ: Chai nhựa Aquafina',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+              autofocus: true,
+            ),
+            const SizedBox(height: 12),
+            const Text('Hệ thống sẽ lưu lại ảnh này để cải thiện trí tuệ nhân tạo.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+          ],
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
           ElevatedButton(
             onPressed: _isReporting ? null : () { 
+              if (_suggestedNameController.text.trim().isEmpty) return;
               Navigator.pop(ctx); 
               _reportIncorrectClassification(); 
             }, 

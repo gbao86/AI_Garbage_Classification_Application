@@ -1,3 +1,4 @@
+<!-- web_admin/dashboard.html -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -9,323 +10,188 @@
     <style>
         .hidden { display: none !important; }
         .sidebar-active { background-color: #f1f5f9; color: #1e293b; border-left: 4px solid #16a34a; }
-        @keyframes modal-in {
-            from { opacity: 0; transform: scale(0.95) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
+        @keyframes modal-in { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         .animate-modal { animation: modal-in 0.3s ease-out forwards; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
     </style>
 </head>
 <body class="bg-slate-50 font-sans">
+    <div id="auth-loader" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center">
+        <div class="w-10 h-10 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin mb-4"></div>
+        <p class="text-slate-500 font-bold text-sm tracking-widest uppercase">Đang xác thực hệ thống...</p>
+    </div>
+
     <div class="flex min-h-screen">
         <!-- SIDEBAR -->
         <aside class="w-64 bg-white border-r border-slate-200 p-6 flex flex-col shadow-sm fixed h-full z-10">
             <div class="flex items-center gap-3 mb-10 px-2">
-                <div class="bg-green-600 p-2 rounded-lg">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04m17.236 0a11.955 11.955 0 01-11 11.21 11.955 11.955 0 01-11-11.21M3 7l9 6 9-6"></path></svg>
-                </div>
+                <div class="bg-green-600 p-2 rounded-lg text-white font-black italic">E</div>
                 <h1 class="text-xl font-black text-slate-800 tracking-tight">EcoSort AD</h1>
             </div>
-
             <nav class="flex-1 space-y-1">
-                <button onclick="switchTab('submissions')" id="btn-submissions" class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition sidebar-active hover:bg-slate-50">Duyệt rác</button>
+                <button onclick="switchTab('submissions')" id="btn-submissions" class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition sidebar-active">Báo cáo rác</button>
                 <button onclick="switchTab('users')" id="btn-users" class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition hover:bg-slate-50">Người dùng</button>
-                <button onclick="switchTab('config')" id="btn-config" class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition hover:bg-slate-50">Cấu hình hệ thống</button>
-                <button onclick="switchTab('audit')" id="btn-audit" class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition hover:bg-slate-50">Nhật ký (Audit)</button>
             </nav>
-
             <div class="mt-auto pt-6 border-t border-slate-100">
-                <p id="admin-email" class="text-xs text-slate-400 font-medium mb-3 truncate"></p>
-                <button onclick="handleLogout()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-xl font-bold text-sm hover:bg-red-50 hover:text-red-600 transition">Đăng xuất</button>
+                <p id="admin-email" class="text-[10px] text-slate-400 font-bold mb-3 truncate uppercase"></p>
+                <button onclick="handleLogout()" class="w-full bg-slate-100 text-slate-600 py-3 rounded-xl font-bold text-xs hover:bg-red-50 hover:text-red-600 transition">Đăng xuất</button>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT -->
+        <!-- MAIN -->
         <main class="flex-1 ml-64 p-10">
-            <!-- TAB 1: DUYỆT RÁC -->
             <section id="tab-submissions" class="tab-content">
                 <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-black text-slate-800">Báo cáo rác thải</h2>
-                    <button onclick="fetchSubmissions()" class="bg-green-600 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition">Làm mới</button>
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-800">Duyệt rác</h2>
+                        <p class="text-slate-400 text-sm font-medium">Quản lý các báo cáo từ AI & Người dùng</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="filter-status" onchange="fetchSubmissions()" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-green-500">
+                            <option value="pending_review">Chờ duyệt</option>
+                            <option value="approved">Đã duyệt</option>
+                            <option value="rejected">Đã từ chối</option>
+                        </select>
+                        <button onclick="fetchSubmissions()" class="bg-slate-800 text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-slate-900 transition">Làm mới</button>
+                    </div>
                 </div>
-                <div id="loader-submissions" class="text-center py-20 hidden">Đang tải...</div>
+
+                <div id="loader-submissions" class="text-center py-20 hidden">
+                    <div class="animate-spin inline-block w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full mb-4"></div>
+                    <p class="text-slate-400 font-bold">Đang lấy dữ liệu...</p>
+                </div>
                 <div id="grid-submissions" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
-            </section>
-
-            <!-- TAB 2: NGƯỜI DÙNG -->
-            <section id="tab-users" class="tab-content hidden">
-                <h2 class="text-2xl font-black text-slate-800 mb-8">Quản lý người dùng</h2>
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-slate-50 text-slate-400 text-xs font-black uppercase tracking-widest border-b border-slate-100">
-                            <tr>
-                                <th class="p-5">Họ tên</th>
-                                <th class="p-5">Email (Auth)</th>
-                                <th class="p-5">Cấp độ / XP</th>
-                                <th class="p-5">Trạng thái</th>
-                                <th class="p-5 text-right">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-users" class="text-slate-600 font-medium text-sm"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- TAB 3: CẤU HÌNH HỆ THỐNG -->
-            <section id="tab-config" class="tab-content hidden">
-                <h2 class="text-2xl font-black text-slate-800 mb-8">Cấu hình nóng (Kill Switch)</h2>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Maintenance -->
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                        <h3 class="font-black text-slate-800 mb-6 flex items-center gap-2">
-                            <span class="w-2 h-6 bg-orange-500 rounded-full"></span>
-                            Chế độ bảo trì
-                        </h3>
-                        <div class="space-y-6">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-slate-600">Trạng thái (Maintenance)</span>
-                                <input type="checkbox" id="config-maintenance" class="w-12 h-6 bg-slate-200 rounded-full appearance-none checked:bg-orange-500 transition-colors cursor-pointer relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-transform checked:after:translate-x-6">
-                            </div>
-                            <input type="text" id="config-message" placeholder="Thông báo cho người dùng..." class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-orange-500 transition">
-                            <button onclick="saveConfig('maintenance')" class="bg-slate-800 text-white px-6 py-2.5 rounded-xl font-bold w-full shadow-lg">Cập nhật ngay</button>
-                        </div>
-                    </div>
-                    <!-- Gemini/Version -->
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                        <h3 class="font-black text-slate-800 mb-6 flex items-center gap-2">
-                            <span class="w-2 h-6 bg-blue-500 rounded-full"></span>
-                            Tham số App
-                        </h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="text-xs font-bold text-slate-400">Min App Version</label>
-                                <input type="text" id="config-version" class="w-full p-3 bg-slate-50 border rounded-xl mt-1">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-slate-400">Gemini Quota (Lượt/Ngày)</label>
-                                <input type="number" id="config-gemini" class="w-full p-3 bg-slate-50 border rounded-xl mt-1">
-                            </div>
-                            <button onclick="saveConfig('gemini')" class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold w-full shadow-lg mt-4">Lưu cấu hình</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB 4: AUDIT LOGS -->
-            <section id="tab-audit" class="tab-content hidden">
-                <h2 class="text-2xl font-black text-slate-800 mb-8">Nhật ký hành động</h2>
-                <div id="list-audit" class="space-y-3"></div>
             </section>
         </main>
     </div>
 
     <!-- DETAIL MODAL -->
     <div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-50 hidden flex">
-        <div class="bg-white rounded-[2rem] p-8 w-full max-w-2xl shadow-2xl animate-modal overflow-y-auto max-h-[90vh] custom-scrollbar">
+        <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-black text-slate-800 flex items-center gap-3">
-                    <div class="bg-blue-100 p-2 rounded-lg"><svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
-                    Chi tiết báo cáo
-                </h3>
-                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                <h3 class="text-2xl font-black text-slate-800">Chi tiết báo cáo</h3>
+                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition">Đóng</button>
             </div>
-            <div class="space-y-4">
-                <div class="flex justify-center bg-slate-50 rounded-xl overflow-hidden h-64 border border-slate-100">
-                    <img id="detail-img" src="" class="object-contain h-full w-full hidden">
-                    <div id="detail-no-img" class="flex items-center justify-center text-slate-400 font-bold uppercase w-full h-full">Không có ảnh</div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tên đề xuất</span>
-                        <div id="detail-name" class="font-bold text-slate-800"></div>
-                    </div>
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nhãn AI</span>
-                        <div id="detail-ai-label" class="font-bold text-slate-800"></div>
-                    </div>
-                </div>
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Phân tích Gemini</span>
-                    <p id="detail-gemini" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p>
-                </div>
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Kiến thức / Fun fact</span>
-                    <p id="detail-fact" class="text-sm text-slate-600 leading-relaxed"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- APPROVE MODAL -->
-    <div id="approve-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-50 hidden flex">
-        <div class="bg-white rounded-[2rem] p-8 w-full max-w-lg shadow-2xl animate-modal">
-            <h3 class="text-2xl font-black mb-6 text-slate-800 flex items-center gap-3">
-                <div class="bg-green-100 p-2 rounded-lg"><svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                Duyệt & Thêm Game
-            </h3>
-            <div class="space-y-5">
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tên vật phẩm chuẩn</label>
-                    <input type="text" id="m-name" placeholder="Ví dụ: Vỏ chai nhựa PET" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl mt-1 outline-none focus:border-green-500 transition-all font-bold">
-                </div>
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fun Fact / Kiến thức</label>
-                    <textarea id="m-fact" rows="3" placeholder="Nhập kiến thức thú vị..." class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl mt-1 outline-none focus:border-green-500 transition-all text-sm"></textarea>
-                </div>
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Slug định danh (Duy nhất)</label>
-                    <input type="text" id="m-slug" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl mt-1 font-mono text-xs text-slate-400">
-                </div>
-            </div>
-            <div class="flex gap-4 mt-8">
-                <button onclick="closeModal()" class="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-bold hover:bg-slate-200 transition">Hủy</button>
-                <button id="btn-confirm-approve" class="flex-[2] bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 hover:scale-[1.02] active:scale-95 transition-all">XÁC NHẬN DUYỆT</button>
+            <div id="detail-content" class="space-y-6">
+                <!-- Nội dung sẽ được nạp qua JS -->
             </div>
         </div>
     </div>
 
     <script type="module">
         import { db, handleLogout, checkAdminPermissions } from './js/auth.js';
-
         window.handleLogout = handleLogout;
         window.db = db;
 
-        let currentSubmittingId = null;
+        let allSubmissions = [];
 
-        function showAuthError(msg) {
-            document.body.innerHTML = `
-                <div class="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 z-[10000] fixed inset-0">
-                    <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md text-center">
-                        <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        // AUTH & INIT
+        (async function init() {
+            try {
+                const { data: { session } } = await db.auth.getSession();
+                if (!session) return window.location.replace('index.html');
+
+                const user = await checkAdminPermissions(session.user);
+                document.getElementById('admin-email').innerText = user.email;
+                document.getElementById('auth-loader').classList.add('hidden');
+                fetchSubmissions();
+            } catch (e) {
+                alert('Phiên đăng nhập hết hạn hoặc lỗi: ' + e.message);
+                window.location.replace('index.html');
+            }
+        })();
+
+        // FETCH DATA
+        window.fetchSubmissions = async () => {
+            const grid = document.getElementById('grid-submissions');
+            const loader = document.getElementById('loader-submissions');
+            const status = document.getElementById('filter-status').value;
+
+            loader.classList.remove('hidden');
+            grid.innerHTML = '';
+
+            try {
+                const { data, error } = await db.from('waste_submissions')
+                    .select('*')
+                    .eq('status', status)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                loader.classList.add('hidden');
+                allSubmissions = data || [];
+
+                if (allSubmissions.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-300 font-bold">Không có báo cáo nào ở trạng thái ${status}</div>`;
+                    return;
+                }
+
+                allSubmissions.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300';
+                    card.innerHTML = `
+                        <div class="h-44 bg-slate-50 relative group">
+                            ${item.scan_image_path ? `<img src="${item.scan_image_path}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-slate-300 text-[10px] font-bold">NO IMAGE</div>'}
                         </div>
-                        <h2 class="text-2xl font-black text-slate-800 mb-2">Lỗi Xác Thực</h2>
-                        <p class="text-slate-600 mb-8 font-medium">${msg}</p>
-                        <button onclick="window.location.replace('index.html')" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold hover:bg-slate-700 transition">Quay lại đăng nhập</button>
+                        <div class="p-8">
+                            <h3 class="font-black text-slate-800 text-lg truncate">${item.suggested_name_vi || 'Yêu cầu mới'}</h3>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 mb-6 italic">${item.tflite_top_label || 'AI chưa phân loại'}</p>
+
+                            <div class="flex gap-2">
+                                <button onclick="showDetail('${item.id}')" class="flex-1 bg-slate-800 text-white py-3 rounded-2xl text-xs font-black hover:bg-slate-900 transition">CHI TIẾT</button>
+                                ${status === 'pending_review' ? `
+                                    <button onclick="updateStatus('${item.id}', 'rejected')" class="bg-red-50 text-red-500 px-4 rounded-2xl font-bold text-xs hover:bg-red-100 transition">HỦY</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (e) {
+                loader.classList.add('hidden');
+                grid.innerHTML = `<div class="col-span-full p-10 bg-red-50 text-red-500 rounded-3xl text-sm font-bold">Lỗi: ${e.message}</div>`;
+            }
+        };
+
+        window.showDetail = (id) => {
+            const item = allSubmissions.find(s => s.id === id);
+            if (!item) return;
+
+            const content = document.getElementById('detail-content');
+            content.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-50 rounded-[2rem] overflow-hidden border border-slate-100">
+                        ${item.scan_image_path ? `<img src="${item.scan_image_path}" class="w-full h-full object-contain">` : '<p class="p-20 text-center text-slate-300 font-bold">KHÔNG CÓ ẢNH</p>'}
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-slate-50 p-6 rounded-3xl">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tên đề xuất</span>
+                            <p class="text-xl font-black text-slate-800">${item.suggested_name_vi || 'N/A'}</p>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-3xl">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nhãn AI (TFLite)</span>
+                            <p class="font-bold text-slate-800">${item.tflite_top_label || 'N/A'} (${(item.tflite_confidence * 100).toFixed(1)}%)</p>
+                        </div>
+                         <div class="bg-slate-50 p-6 rounded-3xl">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trạng thái</span>
+                            <p class="font-bold text-green-600 uppercase">${item.status}</p>
+                        </div>
                     </div>
                 </div>
+                <div class="bg-slate-50 p-6 rounded-3xl">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phân tích Gemini</span>
+                    <p class="text-slate-600 text-sm mt-2 leading-relaxed">${item.gemini_payload?.result_text || 'Chưa có phân tích'}</p>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-3xl">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kiến thức bổ sung (Fun Fact)</span>
+                    <p class="text-slate-600 text-sm mt-2">${item.suggested_fun_fact || 'N/A'}</p>
+                </div>
+                ${item.status === 'pending_review' ? `
+                    <div class="pt-6 border-t border-slate-100 flex gap-4">
+                        <button onclick="approveWithData('${item.id}')" class="flex-[2] bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition">DUYỆT VÀO HỆ THỐNG</button>
+                        <button onclick="updateStatus('${item.id}', 'rejected')" class="flex-1 bg-red-50 text-red-500 py-4 rounded-2xl font-bold hover:bg-red-100 transition">TỪ CHỐI</button>
+                    </div>
+                ` : ''}
             `;
-        }
 
-        // AUTH CHECK - Lắng nghe thay đổi thay vì chỉ lấy ngay lập tức để nhận token của Google
-        db.auth.onAuthStateChange(async (event, session) => {
-            if (session) {
-                if (window.adminVerified) return;
-                window.adminVerified = true;
-                
-                document.body.insertAdjacentHTML('afterbegin', '<div id="auth-loader" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center"><div class="w-10 h-10 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mb-4"></div><p class="text-slate-500 font-bold">Đang tải và xác thực quyền Admin...</p></div>');
-
-                try {
-                    const u = await checkAdminPermissions(session.user);
-                    document.getElementById('auth-loader')?.remove();
-                    document.getElementById('admin-email').innerText = u.email;
-                    fetchSubmissions();
-                } catch(e) {
-                    window.adminVerified = false;
-                    document.getElementById('auth-loader')?.remove();
-                    showAuthError(e.message);
-                }
-            } else if (event === 'INITIAL_SESSION') {
-                // PKCE magic link dùng ?code= trên query, không phải #access_token — đừng redirect trước khi client đổi code
-                const q = new URLSearchParams(window.location.search);
-                const finishingOAuth =
-                    q.has('code') ||
-                    q.has('error') ||
-                    window.location.hash.includes('access_token') ||
-                    window.location.hash.includes('type=recovery');
-                if (!finishingOAuth) {
-                    window.location.replace('index.html');
-                }
-            }
-        });
-
-        // TABS NAVIGATION
-        window.switchTab = (tabName) => {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('nav button').forEach(el => el.classList.remove('sidebar-active'));
-
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-            document.getElementById('btn-' + tabName).classList.add('sidebar-active');
-
-            if (tabName === 'users') fetchUsers();
-            if (tabName === 'config') fetchConfigs();
-            if (tabName === 'audit') fetchAuditLogs();
-        };
-
-        // --- HÀM CHO TAB DUYỆT RÁC ---
-        window.fetchSubmissions = async () => {
-            const loader = document.getElementById('loader-submissions');
-            const grid = document.getElementById('grid-submissions');
-            loader.classList.remove('hidden'); grid.innerHTML = '';
-
-            const { data } = await db.from('waste_submissions').select('*').eq('status', 'pending_review').order('created_at', { ascending: false });
-            loader.classList.add('hidden');
-            if (!data || data.length === 0) { grid.innerHTML = '<div class="col-span-full py-20 text-center text-slate-400 font-bold">Không có báo cáo nào!</div>'; return; }
-
-            window.allSubmissions = data;
-
-            data.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden group hover:shadow-xl transition-all duration-300';
-                const imgUrl = item.scan_image_path || '';
-                card.innerHTML = `
-                    <div class="relative overflow-hidden h-52">
-                        ${imgUrl ? `<img src="${imgUrl}" class="w-full h-full object-cover cursor-pointer group-hover:scale-110 transition duration-500" onclick="window.open('${imgUrl}')">` : '<div class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 text-xs">KHÔNG CÓ ẢNH</div>'}
-                    </div>
-                    <div class="p-8">
-                        <h3 class="font-black text-slate-800 text-lg mb-1 truncate">${item.suggested_name_vi || 'Yêu cầu mới'}</h3>
-                        <p class="text-[10px] text-slate-400 mb-2 font-bold uppercase tracking-tight italic">${item.rejection_reason || 'Báo cáo từ AI/User'}</p>
-                        <p class="text-xs text-slate-500 mb-6 line-clamp-2 leading-relaxed">${item.gemini_payload?.result_text || ''}</p>
-                        <div class="flex gap-2">
-                            <button onclick="openApproveModal('${item.id}', '${item.suggested_name_vi || ''}')" class="flex-[2] bg-green-600 text-white py-3 rounded-2xl font-black text-xs shadow-md shadow-green-100 hover:bg-green-700 transition">Duyệt & Thêm Game</button>
-                            <button onclick="approveSub('${item.id}', 'reject')" class="flex-1 bg-slate-50 text-slate-400 py-3 rounded-2xl font-bold text-xs hover:bg-red-50 hover:text-red-500 transition">Từ chối</button>
-                        </div>
-                        <div class="mt-2 text-center pointer-events-auto">
-                            <button onclick="openDetailModal('${item.id}')" class="w-full bg-blue-50 text-blue-600 py-3 rounded-2xl font-bold text-xs hover:bg-blue-100 active:scale-95 transition">🔍 Xem chi tiết báo cáo</button>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        };
-
-        window.openApproveModal = (id, currentName) => {
-            currentSubmittingId = id;
-            document.getElementById('m-name').value = (currentName === 'Báo cáo rác sai từ người dùng' || !currentName) ? '' : currentName;
-            document.getElementById('m-fact').value = '';
-            document.getElementById('m-slug').value = 'item-' + id.slice(0, 8) + '-' + Math.floor(Math.random() * 1000);
-            document.getElementById('approve-modal').classList.remove('hidden');
-            document.getElementById('approve-modal').classList.add('flex');
-        };
-
-        window.closeModal = () => {
-            document.getElementById('approve-modal').classList.add('hidden');
-            document.getElementById('approve-modal').classList.remove('flex');
-        };
-
-        window.openDetailModal = (id) => {
-            const item = window.allSubmissions?.find(s => s.id === id);
-            if (!item) return;
-            
-            const img = document.getElementById('detail-img');
-            const noImg = document.getElementById('detail-no-img');
-            if (item.scan_image_path) {
-                img.src = item.scan_image_path;
-                img.classList.remove('hidden');
-                noImg.classList.add('hidden');
-            } else {
-                img.classList.add('hidden');
-                noImg.classList.remove('hidden');
-            }
-            
-            document.getElementById('detail-name').innerText = item.suggested_name_vi || 'N/A';
-            document.getElementById('detail-ai-label').innerText = `${item.tflite_top_label || 'N/A'} (Độ tin cậy: ${item.tflite_confidence || 0})`;
-            document.getElementById('detail-gemini').innerText = item.gemini_payload?.result_text || JSON.stringify(item.gemini_payload, null, 2);
-            document.getElementById('detail-fact').innerText = item.suggested_fun_fact || 'Chưa có Fun Fact';
-            
             document.getElementById('detail-modal').classList.remove('hidden');
             document.getElementById('detail-modal').classList.add('flex');
         };
@@ -335,159 +201,40 @@
             document.getElementById('detail-modal').classList.remove('flex');
         };
 
-        document.getElementById('btn-confirm-approve').onclick = async () => {
-            const btn = document.getElementById('btn-confirm-approve');
-            const originalText = btn.innerText;
+        window.approveWithData = async (id) => {
+             const item = allSubmissions.find(s => s.id === id);
+             const slug = 'item-' + id.slice(0, 8);
 
-            const newName = document.getElementById('m-name').value.trim();
-            const funFact = document.getElementById('m-fact').value.trim();
-            const slug = document.getElementById('m-slug').value.trim();
+             if (!confirm('Bạn muốn duyệt vật phẩm này vào từ điển hệ thống?')) return;
 
-            if (!newName) return alert('Vui lòng nhập tên vật phẩm');
-
-            try {
-                btn.disabled = true; btn.innerText = 'ĐANG XỬ LÝ...';
-
-                // 1. Cập nhật thông tin Admin đã sửa vào submission
-                const { error: updateErr } = await db.from('waste_submissions').update({
-                    suggested_name_vi: newName,
-                    suggested_fun_fact: funFact
-                }).eq('id', currentSubmittingId);
-
-                if (updateErr) throw updateErr;
-
-                // 2. Gọi RPC để chính thức đưa vào từ điển và game
-                const { error: rpcErr } = await db.rpc('admin_approve_waste_submission', {
-                    p_submission_id: currentSubmittingId,
-                    p_slug: slug,
-                    p_merge_existing_id: null
+             try {
+                const { error } = await db.rpc('admin_approve_waste_submission', {
+                    p_submission_id: id,
+                    p_slug: slug
                 });
-
-                if (rpcErr) throw rpcErr;
-
-                closeModal();
+                if (error) throw error;
+                alert('Đã duyệt thành công!');
+                closeDetailModal();
                 fetchSubmissions();
-            } catch (e) {
-                alert('Lỗi: ' + e.message);
-            } finally {
-                btn.disabled = false; btn.innerText = originalText;
-            }
+             } catch (e) {
+                 alert('Lỗi: ' + e.message);
+             }
         };
 
-        window.approveSub = async (id, action) => {
-            if (action === 'reject') {
-                const reason = prompt('Lý do từ chối:');
-                if (reason === null) return;
-                const { data: { user } } = await db.auth.getUser();
-                const { error } = await db.from('waste_submissions').update({
-                    status: 'rejected',
-                    rejection_reason: reason || 'Từ chối',
-                    reviewed_at: new Date().toISOString(),
-                    reviewer_id: user?.id || null
-                }).eq('id', id);
-                if (error) { alert(error.message); return; }
+        window.updateStatus = async (id, newStatus) => {
+            const { error } = await db.from('waste_submissions').update({ status: newStatus }).eq('id', id);
+            if (error) alert(error.message); else {
+                closeDetailModal();
                 fetchSubmissions();
             }
         };
 
-        // --- HÀM CHO TAB USER ---
-        window.fetchUsers = async () => {
-            const tbody = document.getElementById('table-users'); tbody.innerHTML = '';
-            const { data } = await db.from('profiles').select('*').order('xp_total', { ascending: false });
-            data.forEach(u => {
-                const tr = document.createElement('tr');
-                tr.className = 'border-b border-slate-50 hover:bg-slate-50/50 transition';
-                tr.innerHTML = `
-                    <td class="p-5 font-bold text-slate-800">${u.display_name || 'Anonymous'}</td>
-                    <td class="p-5 text-slate-400 font-mono text-xs">${u.id.substring(0,8)}...</td>
-                    <td class="p-5"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded-lg text-[10px] font-black">LV ${u.level} · ${u.xp_total} XP</span></td>
-                    <td class="p-5">${u.is_locked ? '<span class="text-red-500">Bị khóa</span>' : '<span class="text-green-500">Hoạt động</span>'}</td>
-                    <td class="p-5 text-right font-black">
-                        <button onclick="toggleBan('${u.id}', ${u.is_locked})" class="${u.is_locked ? 'text-blue-500' : 'text-red-500'} uppercase text-xs tracking-tighter">${u.is_locked ? 'Mở khóa' : 'Khóa'}</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        };
-
-        window.toggleBan = async (id, currentLocked) => {
-            const reason = currentLocked ? null : prompt('Lý do khóa tài khoản:');
-            if (!currentLocked && !reason) return;
-            
-            const { data: { user } } = await db.auth.getUser();
-            const updatePayload = currentLocked 
-                ? { is_locked: false, locked_reason: null, locked_at: null, locked_by: null }
-                : { is_locked: true, locked_reason: reason, locked_at: new Date().toISOString(), locked_by: user?.id || null };
-                
-            const { error } = await db.from('profiles').update(updatePayload).eq('id', id);
-            if (error) alert('Lỗi khóa/mở khóa: ' + error.message);
-            fetchUsers();
-        };
-
-        // --- HÀM CHO TAB CONFIG ---
-        window.fetchConfigs = async () => {
-            const { data, error } = await db.from('system_settings').select('*');
-            if (error) { alert(error.message); return; }
-            const maintenance = data.find(d => d.key === 'maintenance')?.value || {};
-            const gemini = data.find(d => d.key === 'gemini')?.value || {};
-            document.getElementById('config-maintenance').checked = maintenance.enabled || false;
-            document.getElementById('config-message').value = maintenance.message || '';
-            document.getElementById('config-gemini').value = gemini.daily_limit ?? gemini.gemini_quota_limit ?? 100;
-            document.getElementById('config-version').value = gemini.min_app_version || '';
-        };
-
-        window.saveConfig = async (type) => {
-            if (type === 'maintenance') {
-                const { data: row } = await db.from('system_settings').select('value').eq('key', 'maintenance').maybeSingle();
-                const prev = row?.value || {};
-                const enabled = document.getElementById('config-maintenance').checked;
-                const message = document.getElementById('config-message').value;
-                const { error } = await db.from('system_settings').update({
-                    value: { ...prev, enabled, message, kill_switch: prev.kill_switch ?? false }
-                }).eq('key', 'maintenance');
-                if (error) { alert(error.message); return; }
-            } else if (type === 'gemini') {
-                const { data: row } = await db.from('system_settings').select('value').eq('key', 'gemini').maybeSingle();
-                const prev = row?.value || {};
-                const limit = parseInt(document.getElementById('config-gemini').value, 10) || 100;
-                const minVer = document.getElementById('config-version').value.trim();
-                const { error } = await db.from('system_settings').update({
-                    value: {
-                        ...prev,
-                        model: prev.model || 'gemini-flash-latest',
-                        daily_limit: limit,
-                        gemini_quota_limit: limit,
-                        min_app_version: minVer
-                    }
-                }).eq('key', 'gemini');
-                if (error) { alert(error.message); return; }
-            }
-            alert('Đã cập nhật cấu hình hệ thống!');
-        };
-
-        window.fetchAuditLogs = async () => {
-            const el = document.getElementById('list-audit');
-            el.innerHTML = '<p class="text-slate-400 py-8 text-center">Đang tải...</p>';
-            const { data, error } = await db.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(80);
-            if (error) { el.innerHTML = '<p class="text-red-500 p-4">' + error.message + '</p>'; return; }
-            el.innerHTML = '';
-            if (!data || data.length === 0) {
-                el.innerHTML = '<p class="text-slate-400 py-8 text-center">Chưa có bản ghi.</p>';
-                return;
-            }
-            data.forEach(row => {
-                const div = document.createElement('div');
-                div.className = 'bg-white p-6 rounded-2xl border border-slate-100 text-sm flex justify-between items-center';
-                div.innerHTML = `
-                    <div>
-                        <div class="font-black text-slate-800 uppercase text-[10px] tracking-widest text-green-600 mb-1">${row.action}</div>
-                        <div class="text-slate-600 font-bold">${row.entity_type || ''}: ${row.entity_id || ''}</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-[10px] text-slate-300 font-mono">${new Date(row.created_at).toLocaleString('vi-VN')}</div>
-                    </div>`;
-                el.appendChild(div);
-            });
+        window.switchTab = (tab) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('sidebar-active', 'hover:bg-slate-50'));
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+            document.getElementById('btn-' + tab).classList.add('sidebar-active');
+            if (tab === 'submissions') fetchSubmissions();
         };
     </script>
 </body>

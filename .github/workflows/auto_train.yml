@@ -1,0 +1,34 @@
+name: Auto Train Waste Model
+
+on:
+  repository_dispatch:
+    types: [submission_approved]
+  workflow_dispatch: # Cho phép bấm nút chạy tay nếu muốn
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install tensorflow pillow requests supabase-py
+
+      - name: Run Training Script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: python scripts/train_model.py
+
+      - name: Upload Model to Supabase Storage
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/upload_model.py
