@@ -1,98 +1,122 @@
 <!-- web_admin/index.html -->
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>EcoSort Admin - Đăng nhập Bảo mật</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./src/tailwind.css">
 </head>
+
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-6 font-sans">
-<div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md border border-slate-100">
-    <div class="text-center mb-10">
-        <div class="bg-green-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-green-200">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04m17.236 0a11.955 11.955 0 01-11 11.21 11.955 11.955 0 01-11-11.21M3 7l9 6 9-6"></path></svg>
+    <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md border border-slate-100">
+        <div class="text-center mb-10">
+            <div
+                class="bg-green-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-green-200">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04m17.236 0a11.955 11.955 0 01-11 11.21 11.955 11.955 0 01-11-11.21M3 7l9 6 9-6">
+                    </path>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight">EcoSort by Bao Admin</h1>
+            <p class="text-slate-400 mt-2 font-medium">Hệ thống quản trị nội bộ</p>
         </div>
-        <h1 class="text-3xl font-black text-slate-800 tracking-tight">EcoSort Admin</h1>
-        <p class="text-slate-400 mt-2 font-medium">Hệ thống quản trị nội bộ</p>
+
+        <div id="login-form" class="space-y-6">
+            <div class="space-y-4">
+                <input type="email" id="email" placeholder="Email quản trị"
+                    class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium">
+                <input type="password" id="pass" placeholder="Mật khẩu"
+                    class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium">
+                <button onclick="handleEmailLogin()" id="btn-login"
+                    class="w-full bg-slate-800 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-slate-900 transition-all active:scale-95">ĐĂNG
+                    NHẬP</button>
+            </div>
+
+            <div class="relative py-4">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-slate-100"></div>
+                </div>
+                <div class="relative flex justify-center text-xs uppercase"><span
+                        class="bg-white px-4 text-slate-300 font-bold tracking-widest">Hoặc dùng Magic Link</span></div>
+            </div>
+
+            <button onclick="handleMagicLink()" id="btn-magic"
+                class="w-full border-2 border-slate-100 text-slate-600 py-4 rounded-2xl flex items-center justify-center gap-3 font-bold hover:bg-slate-50 transition-all">
+                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                    </path>
+                </svg>
+                Gửi Link đăng nhập qua Email
+            </button>
+
+            <p class="text-[10px] text-center text-slate-400 leading-relaxed uppercase tracking-tighter font-bold">
+                Chỉ dành cho tài khoản có quyền Admin.<br>Hệ thống tự động từ chối truy cập trái phép.
+            </p>
+        </div>
     </div>
 
-    <div id="login-form" class="space-y-6">
-        <div class="space-y-4">
-            <input type="email" id="email" placeholder="Email quản trị" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium">
-            <input type="password" id="pass" placeholder="Mật khẩu" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium">
-            <button onclick="handleEmailLogin()" id="btn-login" class="w-full bg-slate-800 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-slate-900 transition-all active:scale-95">ĐĂNG NHẬP</button>
-        </div>
+    <script type="module">
+        import { loginWithEmail, loginWithMagicLink, db } from './js/auth.js';
 
-        <div class="relative py-4">
-            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-100"></div></div>
-            <div class="relative flex justify-center text-xs uppercase"><span class="bg-white px-4 text-slate-300 font-bold tracking-widest">Hoặc dùng Magic Link</span></div>
-        </div>
-
-        <button onclick="handleMagicLink()" id="btn-magic" class="w-full border-2 border-slate-100 text-slate-600 py-4 rounded-2xl flex items-center justify-center gap-3 font-bold hover:bg-slate-50 transition-all">
-            <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-            Gửi Link đăng nhập qua Email
-        </button>
-
-        <p class="text-[10px] text-center text-slate-400 leading-relaxed uppercase tracking-tighter font-bold">
-            Chỉ dành cho tài khoản có quyền Admin.<br>Hệ thống tự động từ chối truy cập trái phép.
-        </p>
-    </div>
-</div>
-
-<script type="module">
-    import { loginWithEmail, loginWithMagicLink, db } from './js/auth.js';
-
-    db.auth.onAuthStateChange(async (event, session) => {
-        if (session) {
-            try {
-                const { data, error } = await db.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
-                if (data && (data.role === 'admin' || data.role === 'super_admin')) {
-                    window.location.replace('dashboard.html');
-                } else {
-                    await db.auth.signOut();
-                    alert('Từ chối truy cập: Tài khoản của bạn không có quyền quản trị.');
-                    window.location.reload();
+        db.auth.onAuthStateChange(async (event, session) => {
+            if (session) {
+                try {
+                    const { data, error } = await db.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+                    if (data && (data.role === 'admin' || data.role === 'super_admin')) {
+                        window.location.replace('dashboard.html');
+                    } else {
+                        await db.auth.signOut();
+                        alert('Từ chối truy cập: Tài khoản của bạn không có quyền quản trị.');
+                        window.location.reload();
+                    }
+                } catch (e) {
+                    console.error(e);
                 }
-            } catch (e) {
-                console.error(e);
             }
-        }
-    });
+        });
 
-    window.handleEmailLogin = async () => {
-        const btn = document.getElementById('btn-login');
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('pass').value;
+        window.handleEmailLogin = async () => {
+            const btn = document.getElementById('btn-login');
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
 
-        if (!email || !pass) return alert('Vui lòng nhập đầy đủ thông tin');
+            if (!email || !pass) return alert('Vui lòng nhập đầy đủ thông tin');
 
-        try {
-            btn.disabled = true;
-            btn.innerText = 'ĐANG KIỂM TRA...';
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            try {
+                btn.disabled = true;
+                btn.innerText = 'ĐANG KIỂM TRA...';
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            await loginWithEmail(email, pass);
-        } catch (e) {
-            console.error('[admin-login] Lỗi:', e);
-            alert('Đăng nhập thất bại: ' + (e.message || 'Lỗi không xác định'));
-            btn.disabled = false;
-            btn.innerText = 'ĐĂNG NHẬP';
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-    };
+                console.log('[DEBUG] Bắt đầu gọi loginWithEmail...');
+                await loginWithEmail(email, pass);
+                console.log('[DEBUG] loginWithEmail hoàn tất!');
+                
+                // Cưỡng chế chuyển trang nếu onAuthStateChange không hoạt động
+                window.location.replace('dashboard.html');
+            } catch (e) {
+                console.error('[admin-login] Lỗi thật sự:', e);
+                alert('Đăng nhập thất bại: ' + (e.message || JSON.stringify(e)));
+                btn.disabled = false;
+                btn.innerText = 'ĐĂNG NHẬP (LỖI)';
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        };
 
-    window.handleMagicLink = async () => {
-        const email = document.getElementById('email').value;
-        if (!email) return alert('Vui lòng nhập Email trước khi gửi Magic Link');
+        window.handleMagicLink = async () => {
+            const email = document.getElementById('email').value;
+            if (!email) return alert('Vui lòng nhập Email trước khi gửi Magic Link');
 
-        try {
-            await loginWithMagicLink(email);
-            alert('Đã gửi link đăng nhập! Vui lòng kiểm tra hòm thư của bạn.');
-        } catch (e) {
-            alert('Lỗi: ' + e.message);
-        }
-    };
-</script>
+            try {
+                await loginWithMagicLink(email);
+                alert('Đã gửi link đăng nhập! Vui lòng kiểm tra hòm thư của bạn.');
+            } catch (e) {
+                alert('Lỗi: ' + e.message);
+            }
+        };
+    </script>
 </body>
+
 </html>

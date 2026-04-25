@@ -19,7 +19,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install tensorflow pillow requests supabase-py
+          pip install tensorflow pillow requests supabase
 
       - name: Run Training Script
         env:

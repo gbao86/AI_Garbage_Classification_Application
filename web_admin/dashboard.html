@@ -1,19 +1,41 @@
 <!-- web_admin/dashboard.html -->
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoSort Admin - Hệ thống Quản trị</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>EcoSort by Bao Admin - Hệ thống Quản trị</title>
+    <link rel="stylesheet" href="./src/tailwind.css">
     <style>
-        .hidden { display: none !important; }
-        .sidebar-active { background-color: #f1f5f9; color: #1e293b; border-left: 4px solid #16a34a; }
-        @keyframes modal-in { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-        .animate-modal { animation: modal-in 0.3s ease-out forwards; }
+        .hidden {
+            display: none !important;
+        }
+
+        .sidebar-active {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            border-left: 4px solid #16a34a;
+        }
+
+        @keyframes modal-in {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .animate-modal {
+            animation: modal-in 0.3s ease-out forwards;
+        }
     </style>
 </head>
+
 <body class="bg-slate-50 font-sans">
     <div id="auth-loader" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center">
         <div class="w-10 h-10 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin mb-4"></div>
@@ -25,15 +47,21 @@
         <aside class="w-64 bg-white border-r border-slate-200 p-6 flex flex-col shadow-sm fixed h-full z-10">
             <div class="flex items-center gap-3 mb-10 px-2">
                 <div class="bg-green-600 p-2 rounded-lg text-white font-black italic">E</div>
-                <h1 class="text-xl font-black text-slate-800 tracking-tight">EcoSort AD</h1>
+                <h1 class="text-xl font-black text-slate-800 tracking-tight">EcoSort by Bao Admin Dashboard</h1>
             </div>
             <nav class="flex-1 space-y-1">
-                <button onclick="switchTab('submissions')" id="btn-submissions" class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition sidebar-active">Báo cáo rác</button>
-                <button onclick="switchTab('users')" id="btn-users" class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition hover:bg-slate-50">Người dùng</button>
+                <button onclick="switchTab('submissions')" id="btn-submissions"
+                    class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition sidebar-active">Báo
+                    cáo rác</button>
+                <button onclick="switchTab('users')" id="btn-users"
+                    class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition hover:bg-slate-50">Người
+                    dùng</button>
             </nav>
             <div class="mt-auto pt-6 border-t border-slate-100">
                 <p id="admin-email" class="text-[10px] text-slate-400 font-bold mb-3 truncate uppercase"></p>
-                <button onclick="handleLogout()" class="w-full bg-slate-100 text-slate-600 py-3 rounded-xl font-bold text-xs hover:bg-red-50 hover:text-red-600 transition">Đăng xuất</button>
+                <button onclick="handleLogout()"
+                    class="w-full bg-slate-100 text-slate-600 py-3 rounded-xl font-bold text-xs hover:bg-red-50 hover:text-red-600 transition">Đăng
+                    xuất</button>
             </div>
         </aside>
 
@@ -46,33 +74,208 @@
                         <p class="text-slate-400 text-sm font-medium">Quản lý các báo cáo từ AI & Người dùng</p>
                     </div>
                     <div class="flex gap-2">
-                        <select id="filter-status" onchange="fetchSubmissions()" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-green-500">
+                        <select id="filter-status" onchange="fetchSubmissions()"
+                            class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-green-500">
                             <option value="pending_review">Chờ duyệt</option>
                             <option value="approved">Đã duyệt</option>
                             <option value="rejected">Đã từ chối</option>
                         </select>
-                        <button onclick="fetchSubmissions()" class="bg-slate-800 text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-slate-900 transition">Làm mới</button>
+                        <button onclick="fetchSubmissions()"
+                            class="bg-slate-800 text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-slate-900 transition">Làm
+                            mới</button>
                     </div>
                 </div>
 
                 <div id="loader-submissions" class="text-center py-20 hidden">
-                    <div class="animate-spin inline-block w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full mb-4"></div>
+                    <div
+                        class="animate-spin inline-block w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full mb-4">
+                    </div>
                     <p class="text-slate-400 font-bold">Đang lấy dữ liệu...</p>
                 </div>
                 <div id="grid-submissions" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
+            </section>
+
+            <!-- TAB USERS -->
+            <section id="tab-users" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-800">Quản lý Người dùng</h2>
+                        <p class="text-slate-400 text-sm font-medium">Hệ thống phân quyền & kiểm soát truy cập</p>
+                    </div>
+                </div>
+
+                <!-- Toolbar -->
+                <div
+                    class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap gap-4 justify-between items-center mb-6">
+                    <div class="flex gap-2 flex-1 min-w-[300px]">
+                        <input type="text" id="filter-user-search" placeholder="Tìm theo Email, Tên hiển thị..."
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 outline-none focus:border-green-500 transition">
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="filter-user-role"
+                            class="bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 outline-none focus:border-green-500">
+                            <option value="">Tất cả Vai trò</option>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                            <option value="super_admin">Super Admin</option>
+                        </select>
+                        <select id="filter-user-status"
+                            class="bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 outline-none focus:border-green-500">
+                            <option value="">Tất cả Trạng thái</option>
+                            <option value="active">Đang hoạt động</option>
+                            <option value="locked">Bị khóa (Banned)</option>
+                        </select>
+                        <button onclick="fetchUsers(1)"
+                            class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-900 transition flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            Lọc
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                                <tr
+                                    class="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400 border-b border-slate-100">
+                                    <th class="p-6 font-bold">Người dùng</th>
+                                    <th class="p-6 font-bold text-center">Vai trò</th>
+                                    <th class="p-6 font-bold text-center">Trạng thái</th>
+                                    <th class="p-6 font-bold">Đăng nhập lân cuối</th>
+                                    <th class="p-6 font-bold text-right">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-users" class="divide-y divide-slate-100">
+                                <!-- Dữ liệu sẽ được load qua JS -->
+                            </tbody>
+                        </table>
+                        <div id="loader-users" class="text-center py-20 hidden">
+                            <div
+                                class="animate-spin inline-block w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full mb-4">
+                            </div>
+                            <p class="text-slate-400 font-bold">Đang tải danh sách người dùng...</p>
+                        </div>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="p-6 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                        <span id="user-page-info"
+                            class="text-xs font-bold text-slate-400 uppercase tracking-widest">Đang tải...</span>
+                        <div class="flex gap-2">
+                            <button onclick="changeUserPage(-1)" id="btn-user-prev" disabled
+                                class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm">Trước</button>
+                            <button onclick="changeUserPage(1)" id="btn-user-next" disabled
+                                class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm">Sau</button>
+                        </div>
+                    </div>
+                </div>
             </section>
         </main>
     </div>
 
     <!-- DETAIL MODAL -->
-    <div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-50 hidden flex">
-        <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
+    <div id="detail-modal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-50 hidden flex">
+        <div
+            class="bg-white rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-black text-slate-800">Chi tiết báo cáo</h3>
-                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition">Đóng</button>
+                <button onclick="closeDetailModal()"
+                    class="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition">Đóng</button>
             </div>
             <div id="detail-content" class="space-y-6">
                 <!-- Nội dung sẽ được nạp qua JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- APPROVE MODAL -->
+    <div id="approve-modal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-[60] hidden flex">
+        <div
+            class="bg-white rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-slate-800">Duyệt vào từ điển</h3>
+                <button onclick="closeApproveModal()"
+                    class="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition">Đóng</button>
+            </div>
+            <form id="approve-form" class="space-y-4" onsubmit="event.preventDefault(); window.submitApproveData();">
+                <input type="hidden" id="approve-id">
+                <input type="hidden" id="approve-image-url">
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tên loại
+                        rác (Tiếng Việt)</label>
+                    <input type="text" id="approve-name" required
+                        class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium text-slate-800">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Nhóm
+                        rác</label>
+                    <select id="approve-group" required
+                        class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium text-slate-800">
+                        <option value="">-- Chọn nhóm rác --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Fun Fact
+                        (Kiến thức bổ sung)</label>
+                    <textarea id="approve-funfact" rows="3"
+                        class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium text-slate-800 resize-none"></textarea>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" id="btn-submit-approve"
+                        class="w-full bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition">XÁC
+                        NHẬN LƯU VÀO TỪ ĐIỂN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- USER ACTION MODAL -->
+    <div id="user-action-modal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-[70] hidden flex">
+        <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl animate-modal overflow-hidden relative">
+            <button onclick="closeUserActionModal()"
+                class="absolute top-6 right-6 text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition">Đóng</button>
+            <h3 class="text-2xl font-black text-slate-800 mb-1">Quản lý User</h3>
+            <p id="user-action-email" class="text-slate-500 text-sm font-bold mb-6"></p>
+
+            <input type="hidden" id="action-user-id">
+            <input type="hidden" id="action-user-locked">
+
+            <div class="space-y-4">
+                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Tác vụ Bảo mật</h4>
+                    <button onclick="resetUserPassword()"
+                        class="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-500 hover:shadow-md transition text-slate-700 font-bold text-sm mb-3">
+                        <span>Gửi link Reset Password (Email)</span>
+                        <span class="text-blue-500">→</span>
+                    </button>
+                    <button onclick="viewUserAuditLogs()"
+                        class="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-slate-500 hover:shadow-md transition text-slate-700 font-bold text-sm">
+                        <span>Xem Lịch sử Hoạt động (Audit Logs)</span>
+                        <span class="text-slate-400">→</span>
+                    </button>
+                </div>
+
+                <div class="p-5 bg-red-50 rounded-2xl border border-red-100">
+                    <h4 class="text-[10px] font-black text-red-400 uppercase tracking-widest mb-3">Tác vụ Kiểm soát</h4>
+
+                    <div id="ban-section" class="mb-4">
+                        <input type="text" id="ban-reason" placeholder="Nhập lý do khóa (Bắt buộc nếu Ban)..."
+                            class="w-full p-4 bg-white border border-red-200 rounded-xl outline-none focus:border-red-500 mb-3 text-sm font-medium">
+                        <button onclick="toggleBanUser()" id="btn-toggle-ban"
+                            class="w-full bg-red-600 text-white py-4 rounded-xl font-black shadow-lg shadow-red-200 hover:bg-red-700 transition">KHÓA
+                            TÀI KHOẢN (BAN)</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -82,7 +285,14 @@
         window.handleLogout = handleLogout;
         window.db = db;
 
+        window.db = db;
+
         let allSubmissions = [];
+        let wasteGroups = [];
+
+        function slugify(str) {
+            return String(str).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+        }
 
         // AUTH & INIT
         (async function init() {
@@ -92,7 +302,9 @@
 
                 const user = await checkAdminPermissions(session.user);
                 document.getElementById('admin-email').innerText = user.email;
+                currentUserRole = user.role || 'admin';
                 document.getElementById('auth-loader').classList.add('hidden');
+                fetchWasteGroups();
                 fetchSubmissions();
             } catch (e) {
                 alert('Phiên đăng nhập hết hạn hoặc lỗi: ' + e.message);
@@ -201,24 +413,91 @@
             document.getElementById('detail-modal').classList.remove('flex');
         };
 
-        window.approveWithData = async (id) => {
-             const item = allSubmissions.find(s => s.id === id);
-             const slug = 'item-' + id.slice(0, 8);
+        window.fetchWasteGroups = async () => {
+            const { data, error } = await db.from('waste_groups').select('id, name_vi').order('sort_order');
+            if (error) {
+                console.error('Lỗi tải nhóm rác:', error);
+                return;
+            }
+            wasteGroups = data || [];
+            const select = document.getElementById('approve-group');
+            select.innerHTML = '<option value="">-- Chọn nhóm rác --</option>';
+            wasteGroups.forEach(g => {
+                select.innerHTML += `<option value="${g.id}">${g.name_vi}</option>`;
+            });
+        };
 
-             if (!confirm('Bạn muốn duyệt vật phẩm này vào từ điển hệ thống?')) return;
+        window.approveWithData = (id) => {
+            const item = allSubmissions.find(s => s.id === id);
+            if (!item) return;
 
-             try {
-                const { error } = await db.rpc('admin_approve_waste_submission', {
-                    p_submission_id: id,
-                    p_slug: slug
+            document.getElementById('approve-id').value = item.id;
+            document.getElementById('approve-image-url').value = item.scan_image_path || '';
+            document.getElementById('approve-name').value = item.suggested_name_vi || '';
+            document.getElementById('approve-funfact').value = item.suggested_fun_fact || '';
+
+            // Guess group based on AI label if possible, or leave empty
+            document.getElementById('approve-group').value = '';
+
+            document.getElementById('approve-modal').classList.remove('hidden');
+            document.getElementById('approve-modal').classList.add('flex');
+        };
+
+        window.closeApproveModal = () => {
+            document.getElementById('approve-modal').classList.add('hidden');
+            document.getElementById('approve-modal').classList.remove('flex');
+        };
+
+        window.submitApproveData = async () => {
+            const btn = document.getElementById('btn-submit-approve');
+            const id = document.getElementById('approve-id').value;
+            const imageUrl = document.getElementById('approve-image-url').value;
+            const nameVi = document.getElementById('approve-name').value.trim();
+            const groupId = document.getElementById('approve-group').value;
+            const funFact = document.getElementById('approve-funfact').value.trim();
+
+            if (!nameVi || !groupId) return alert('Vui lòng nhập tên và chọn nhóm rác!');
+
+            let slug = slugify(nameVi);
+            // Append random string to prevent duplication
+            slug += '-' + Math.random().toString(36).substring(2, 6);
+
+            btn.disabled = true;
+            btn.innerText = 'ĐANG LƯU...';
+
+            try {
+                // Lấy user ID hiện tại
+                const { data: { session } } = await db.auth.getSession();
+                const userId = session?.user?.id;
+
+                // 1. Thêm vào waste_dictionary
+                const { error: insertError } = await db.from('waste_dictionary').insert({
+                    slug: slug,
+                    name_vi: nameVi,
+                    fun_fact: funFact || null,
+                    image_url: imageUrl || null,
+                    waste_group_id: parseInt(groupId),
+                    created_by: userId,
+                    is_active: true
                 });
-                if (error) throw error;
-                alert('Đã duyệt thành công!');
+
+                if (insertError) throw new Error('Lỗi lưu từ điển: ' + insertError.message);
+
+                // 2. Cập nhật trạng thái báo cáo
+                const { error: updateError } = await db.from('waste_submissions').update({ status: 'approved' }).eq('id', id);
+                if (updateError) throw new Error('Lỗi cập nhật báo cáo: ' + updateError.message);
+
+                alert('Đã duyệt và lưu vào từ điển thành công!');
+                closeApproveModal();
                 closeDetailModal();
                 fetchSubmissions();
-             } catch (e) {
-                 alert('Lỗi: ' + e.message);
-             }
+            } catch (e) {
+                console.error(e);
+                alert(e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'XÁC NHẬN LƯU VÀO TỪ ĐIỂN';
+            }
         };
 
         window.updateStatus = async (id, newStatus) => {
@@ -235,7 +514,218 @@
             document.getElementById('tab-' + tab).classList.remove('hidden');
             document.getElementById('btn-' + tab).classList.add('sidebar-active');
             if (tab === 'submissions') fetchSubmissions();
+            if (tab === 'users') fetchUsers(1);
+        };
+
+        // ================= USER MANAGEMENT =================
+        let userPage = 1;
+        const USER_LIMIT = 25;
+        let currentUserRole = 'admin'; // Will be set during init
+
+        window.fetchUsers = async (page = 1) => {
+            userPage = page;
+            const tbody = document.getElementById('table-users');
+            const loader = document.getElementById('loader-users');
+            const search = document.getElementById('filter-user-search').value;
+            const roleFilter = document.getElementById('filter-user-role').value;
+            const statusFilter = document.getElementById('filter-user-status').value;
+
+            tbody.innerHTML = '';
+            loader.classList.remove('hidden');
+            document.getElementById('user-page-info').innerText = 'Đang tải...';
+
+            try {
+                // Gọi RPC chuẩn enterprise như user đã định nghĩa
+                const { data, error } = await db.rpc('admin_get_users', {
+                    p_page: userPage,
+                    p_limit: USER_LIMIT,
+                    p_search: search || null
+                });
+
+                if (error) {
+                    if (error.message.includes('Could not find the function')) {
+                        throw new Error('Chưa tạo RPC admin_get_users trên Supabase Database!');
+                    }
+                    throw error;
+                }
+
+                loader.classList.add('hidden');
+
+                // Client-side filtering cho role và status (trong tương lai nên đưa vào RPC)
+                let filteredData = data || [];
+                if (roleFilter) filteredData = filteredData.filter(u => u.role === roleFilter);
+                if (statusFilter) {
+                    const isLocked = statusFilter === 'locked';
+                    filteredData = filteredData.filter(u => u.is_locked === isLocked);
+                }
+
+                if (filteredData.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 font-bold">Không tìm thấy người dùng nào</td></tr>`;
+                    updateUserPagination(0);
+                    return;
+                }
+
+                // Lấy total_count nếu RPC có trả về, nếu không dùng length
+                const totalCount = data.length > 0 && data[0].total_count ? parseInt(data[0].total_count) : filteredData.length;
+
+                filteredData.forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition border-b border-slate-50 last:border-none';
+
+                    const roleColor = u.role === 'super_admin' ? 'bg-purple-100 text-purple-700' :
+                        u.role === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600';
+
+                    const statusHtml = u.is_locked
+                        ? '<span class="px-3 py-1 rounded-full bg-red-100 text-red-600 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 w-max mx-auto"><div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Bị khóa</span>'
+                        : '<span class="px-3 py-1 rounded-full bg-green-100 text-green-600 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 w-max mx-auto"><div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> Hoạt động</span>';
+
+                    // Super Admin không bị admin thường đụng vào
+                    const isProtected = u.role === 'super_admin' && currentUserRole !== 'super_admin';
+
+                    tr.innerHTML = `
+                        <td class="p-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-black text-slate-400">
+                                    ${(u.display_name || u.email || '?').charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-800 text-sm">${u.display_name || 'Chưa cập nhật'}</p>
+                                    <p class="text-xs text-slate-500 font-medium">${u.email || 'Ẩn email (Cần RPC)'}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4 text-center">
+                            <span class="px-3 py-1 rounded-lg ${roleColor} font-black text-[10px] uppercase tracking-widest">${u.role}</span>
+                        </td>
+                        <td class="p-4 text-center">${statusHtml}</td>
+                        <td class="p-4 text-xs text-slate-500 font-bold">${u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : 'Chưa có data'}</td>
+                        <td class="p-4 text-right">
+                            <button onclick="openUserActionModal('${u.id}', '${u.email}', '${u.role}', ${u.is_locked})" 
+                                class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 transition ${isProtected ? 'opacity-50 cursor-not-allowed' : ''}"
+                                ${isProtected ? 'disabled title="Không có quyền thao tác lên Super Admin"' : ''}>
+                                QUẢN LÝ
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                updateUserPagination(totalCount);
+            } catch (e) {
+                loader.classList.add('hidden');
+                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center bg-red-50 text-red-500 font-bold rounded-2xl">Lỗi: ${e.message}</td></tr>`;
+            }
+        };
+
+        function updateUserPagination(total) {
+            const btnPrev = document.getElementById('btn-user-prev');
+            const btnNext = document.getElementById('btn-user-next');
+            const info = document.getElementById('user-page-info');
+
+            const start = (userPage - 1) * USER_LIMIT + 1;
+            const end = Math.min(userPage * USER_LIMIT, total);
+
+            if (total === 0) {
+                info.innerText = 'Không có dữ liệu';
+                btnPrev.disabled = true;
+                btnNext.disabled = true;
+            } else {
+                info.innerText = `Hiển thị ${start}-${end} trên ${total}`;
+                btnPrev.disabled = userPage === 1;
+                btnNext.disabled = end >= total;
+            }
+        }
+
+        window.changeUserPage = (delta) => {
+            fetchUsers(userPage + delta);
+        };
+
+        window.openUserActionModal = (id, email, role, isLocked) => {
+            if (role === 'super_admin' && currentUserRole !== 'super_admin') {
+                return alert('Từ chối truy cập: Bạn không có quyền thao tác lên tài khoản Super Admin.');
+            }
+
+            document.getElementById('action-user-id').value = id;
+            document.getElementById('action-user-locked').value = isLocked;
+            document.getElementById('user-action-email').innerText = email !== 'undefined' && email ? email : 'ID: ' + id;
+
+            const btnBan = document.getElementById('btn-toggle-ban');
+            const inputReason = document.getElementById('ban-reason');
+
+            if (isLocked) {
+                btnBan.innerText = 'MỞ KHÓA TÀI KHOẢN (UNBAN)';
+                btnBan.className = 'w-full bg-green-600 text-white py-4 rounded-xl font-black shadow-lg shadow-green-200 hover:bg-green-700 transition';
+                inputReason.classList.add('hidden');
+            } else {
+                btnBan.innerText = 'KHÓA TÀI KHOẢN (BAN)';
+                btnBan.className = 'w-full bg-red-600 text-white py-4 rounded-xl font-black shadow-lg shadow-red-200 hover:bg-red-700 transition';
+                inputReason.classList.remove('hidden');
+                inputReason.value = '';
+            }
+
+            document.getElementById('user-action-modal').classList.remove('hidden');
+        };
+
+        window.closeUserActionModal = () => {
+            document.getElementById('user-action-modal').classList.add('hidden');
+        };
+
+        window.toggleBanUser = async () => {
+            const id = document.getElementById('action-user-id').value;
+            const isLockedStr = document.getElementById('action-user-locked').value;
+            const isCurrentlyLocked = isLockedStr === 'true';
+            const reason = document.getElementById('ban-reason').value.trim();
+
+            if (!isCurrentlyLocked && !reason) {
+                return alert('Vui lòng nhập lý do khóa tài khoản!');
+            }
+
+            if (!confirm(`Bạn chắc chắn muốn ${isCurrentlyLocked ? 'mở khóa' : 'khóa'} tài khoản này?`)) return;
+
+            try {
+                // Gọi RPC chuẩn như user yêu cầu
+                const { error } = await db.rpc('admin_ban_user', {
+                    p_user_id: id,
+                    p_reason: isCurrentlyLocked ? null : reason,
+                    p_is_locked: !isCurrentlyLocked
+                });
+
+                if (error) {
+                    if (error.message.includes('Could not find the function')) {
+                        throw new Error('Chưa tạo RPC admin_ban_user trên Supabase! RPC này cần thực hiện 3 bước: Cập nhật profiles, Cập nhật auth.users.banned_until, và Xóa auth.sessions.');
+                    }
+                    throw error;
+                }
+
+                alert(`Đã ${isCurrentlyLocked ? 'mở khóa' : 'khóa'} thành công!`);
+                closeUserActionModal();
+                fetchUsers(userPage);
+            } catch (e) {
+                console.error(e);
+                alert('Lỗi: ' + e.message);
+            }
+        };
+
+        window.resetUserPassword = async () => {
+            const email = document.getElementById('user-action-email').innerText;
+            if (email.startsWith('ID:')) return alert('Không có email của user này để gửi link reset.');
+
+            if (!confirm(`Gửi email đặt lại mật khẩu tới: ${email}?`)) return;
+
+            try {
+                const { error } = await db.auth.resetPasswordForEmail(email);
+                if (error) throw error;
+                alert('Đã gửi link đặt lại mật khẩu thành công! Yêu cầu user kiểm tra hòm thư.');
+            } catch (e) {
+                console.error(e);
+                alert('Lỗi: ' + e.message);
+            }
+        };
+
+        window.viewUserAuditLogs = () => {
+            alert('Tính năng xem Audit Logs đang được xây dựng (Sẽ nạp từ bảng public.audit_logs)');
         };
     </script>
 </body>
+
 </html>
