@@ -2,10 +2,9 @@
 
 Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
-
 ---
 
-## [1.1.0-demo] - 2026-04-13
+## [0.5.0] - 2026-04-13
 
 ### 🧠 Tự động hóa Huấn luyện AI (MLOps & Cloud Training)
 - 🤖 **GitHub Actions Training**: Thiết lập quy trình tự động huấn luyện lại model AI trên đám mây khi đạt ngưỡng dữ liệu mới (50 ảnh được duyệt).
@@ -37,7 +36,7 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
-## [1.0.9] - 2026-04-08
+## [0.4.0] - 2026-04-08
 
 ### 🛡️ Bảo mật & Chống Spam (Security & Anti-Spam)
 - 🔐 **Chính sách Bảo mật (SECURITY.md)**: Thiết lập chính sách bảo mật chính thức cho dự án, cam kết bảo vệ dữ liệu người dùng và quy trình báo cáo lỗ hổng.
@@ -59,7 +58,7 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
-## [1.0.8] - 2026-04-02
+## [0.3.0] - 2026-04-02
 
 ### ✨ Tính năng Hình ảnh & Hiệu ứng AI (Visual & AI Effects)
 - 🛸 **Hoạt ảnh Quét Laser**: Thêm tia laser quét ảnh từ trên xuống, tạo cảm giác công nghệ và "đánh lừa thị giác" giúp người dùng không có cảm giác phải chờ đợi AI phân tích.
@@ -80,7 +79,7 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
-## [1.0.7] - 2026-03-31
+## [0.2.0] - 2026-03-31
 
 ### 🚀 Nâng cấp Thương hiệu & Bảo mật
 - 🎨 **Biểu tượng ứng dụng mới**: Cập nhật Icon app chính thức theo phong cách hiện đại, tăng tính nhận diện thương hiệu.
@@ -103,7 +102,7 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
-## [1.0.6] - 2026-03-31
+## [0.1.2] - 2026-03-31
 
 ### 🚀 Nâng cấp & Sửa lỗi quan trọng
 - 🧭 **Tính năng La bàn (Compass)**: 
@@ -123,7 +122,7 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
-## [1.0.5] - 2026-03-30
+## [0.1.1] - 2026-03-30
 
 ### 🚀 Nâng cấp Premium & Tối ưu AI
 - 🎨 **UI/UX Premium**: Đại tu toàn bộ giao diện theo chuẩn thiết kế quốc tế (Premium Modern UI).
@@ -132,7 +131,7 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
-## [1.0.4] - 2026-03-29
+## [0.1.0] - 2026-03-29
 
 ### ✨ Tính năng mới khởi đầu
 - 🗺️ **Tính năng Bản đồ**: Thêm màn hình Bản đồ điểm bỏ rác công cộng sử dụng OpenStreetMap.
@@ -142,7 +141,7 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
-## [1.0.1] - 2025-05-09
+## [0.0.2] - 2025-05-09
 
 ### 🆕 Cập nhật
 - 🧠 **Thêm API Gemini 1.5 Flash**: Hỗ trợ nhận diện thông minh.
@@ -150,6 +149,6 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
-## [1.0.0] - Initial Release (2025-05-05)
+## [0.0.1] - Initial Release (2025-05-05)
 ### 🚀 Ứng dụng Phân loại Rác bằng AI
 - Tính năng chụp ảnh và phân loại rác cơ bản.

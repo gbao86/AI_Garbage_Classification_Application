@@ -1,18 +1,13 @@
 plugins {
     id("com.android.application")
-    id("com.google.gms.google-services")
-    id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
-}
-
-kotlin {
-    jvmToolchain(17)
+    id("kotlin-android")
 }
 
 android {
-    ndkVersion = "27.0.12077973"
     namespace = "com.example.phan_loai_rac_qua_hinh_anh"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -20,30 +15,34 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = "17"
     }
 
     defaultConfig {
         applicationId = "com.example.phan_loai_rac_qua_hinh_anh"
-        minSdk = 26
+        minSdk = flutter.minSdkVersion
         targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-
-        buildTypes {
-            getByName("release") {
-                isMinifyEnabled = false
-                isShrinkResources = false
-                signingConfig = signingConfigs.getByName("debug")
-            }
-        }
-    }
-    flutter {
-        source = "../.."
     }
 
-    dependencies {
-        implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
-        implementation("com.google.firebase:firebase-auth")
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("debug")
         }
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
+    buildToolsVersion = "35.0.0"
+}
+
+flutter {
+    source = "../.."
 }

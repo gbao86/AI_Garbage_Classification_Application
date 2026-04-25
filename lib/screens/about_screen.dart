@@ -41,7 +41,7 @@ class _AboutScreenState extends State<AboutScreen> {
       path: 'tiktokthu10@gmail.com',
       query: _encodeQueryParameters(<String, String>{
         'subject': 'Contact from EcoSort by Bao App User',
-        'body': 'Hi Trinh Gia Bao,\n\nI am using your EcoSort app and would like to...'
+        'body': 'Hi Trinh Gia Bao,\n\nI am using your EcoSort by Bao app and would like to...'
       }),
     );
 

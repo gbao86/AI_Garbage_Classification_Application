@@ -15,10 +15,8 @@ void main() async {
 
   for (var line in lines) {
     line = line.trim();
-    // Bỏ qua dòng trống hoặc bắt đầu bằng dấu #
     if (line.isEmpty || line.startsWith('#')) continue;
 
-    // Tách bỏ comment nằm cùng dòng (nếu có)
     final part = line.split('#')[0].trim();
     if (!part.contains('=')) continue;
 
@@ -27,13 +25,19 @@ void main() async {
 
     if (keyName == 'SUPABASE_URL') {
       url = value;
-    } else if (keyName == 'SUPABASE_ANON_KEY') {
+    } 
+    // Ưu tiên lấy Publishable Key nếu tìm thấy
+    else if (keyName == 'SUPABASE_PUBLISHABLE_KEY') {
+      key = value;
+    } 
+    // Chỉ lấy Anon Key nếu chưa tìm thấy Publishable Key trước đó
+    else if (keyName == 'SUPABASE_ANON_KEY' && key == null) {
       key = value;
     }
   }
 
   if (url == null || key == null) {
-    print('❌ Error: Thiếu SUPABASE_URL hoặc SUPABASE_ANON_KEY trong .env');
+    print('❌ Error: Thiếu SUPABASE_URL hoặc Key trong .env');
     return;
   }
 
@@ -48,7 +52,7 @@ export function getSupabaseConfig() {
 ''';
 
   await configFile.writeAsString(configContent);
-  print('✅ Đã đồng bộ .env sang web_admin/js/config.js');
-  print('📍 URL: $url');
-  print('📍 Key (10 ký tự): \${key.substring(0, 10)}...');
+  print('✅ Đã đồng bộ cấu hình sang web_admin/js/config.js');
+  // Đã sửa lỗi cú pháp bằng cách dùng dấu nháy kép bên ngoài
+  print("📍 Key đang dùng: ${key.startsWith('sb_') ? 'Publishable Key' : 'Anon JWT'}");
 }

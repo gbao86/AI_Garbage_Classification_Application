@@ -1,52 +1,56 @@
 # ♻️ EcoSort by Bao - Ứng Dụng Phân Loại Rác Thông Minh
+> Ứng dụng phân loại rác bằng AI sử dụng Flutter, TFLite và Gemini AI.
 
-[![Version](https://img.shields.io/badge/version-1.0.9-green.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.5.0-green.svg)](./CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Flutter-blue.svg)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](./LICENSE)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-red.svg)](./SECURITY.md)
 
 Ứng dụng sử dụng trí tuệ nhân tạo (AI) tiên tiến để nhận diện và phân loại rác thải qua hình ảnh, giúp người dùng xử lý rác đúng cách và bảo vệ môi trường.
 
----
+## 📌 Tổng quan
 
-## 📌 Giới thiệu
+**EcoSort by Bao** là ứng dụng hỗ trợ phân loại rác thải thông minh thông qua hình ảnh.
 
-**EcoSort by Bao** là giải pháp công nghệ nhằm hỗ trợ cộng đồng phân loại rác tại nguồn một cách dễ dàng và chính xác. Bằng cách kết hợp sức mạnh của mô hình **TFLite (Offline)**, **Google ML Kit** và **Gemini AI (Online)**, ứng dụng cung cấp khả năng nhận diện đa dạng các loại rác thải, bóc tách vật thể thông minh và đưa ra hướng dẫn xử lý chi tiết theo tiêu chuẩn môi trường.
+Hệ thống kết hợp:
+- ⚡ **TFLite (Offline)** – nhận diện nhanh ngay trên thiết bị
+- 🌐 **Gemini AI (Online)** – phân tích nâng cao khi cần
+- 🧠 **Google ML Kit** – bóc tách vật thể chính xác
+
+→ Giúp người dùng phân loại rác đúng cách trong điều kiện thực tế.
 
 ---
 
 ## 🎥 Video Demo
 
-> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v1.0.1**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v1.0.9**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
+> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v0.0.2**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v0.5.0**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
 
-👉 [Xem Video Demo trên YouTube (v1.0.1)](https://youtu.be/YuI4tK1fNLU?si=LTzk0kVj0328i7m5)
+👉 [Xem Video Demo trên YouTube (v0.0.2)](https://youtu.be/YuI4tK1fNLU?si=LTzk0kVj0328i7m5)
 
 ---
 
-## 🚀 Tính năng nổi bật (v1.0.9)
+## 🚀 Tính năng nổi bật
 
-- 📷 **Nhận diện thông minh**: Chụp ảnh hoặc chọn từ thư viện để AI phân tích loại rác.
-- 🛸 **Quét & Phân tách Vật thể**: Sử dụng hoạt ảnh tia laser và AI bóc tách phông nền, làm nổi bật rác thải bằng hiệu ứng gradient phát sáng chuyên nghiệp.
-- 🔐 **Bảo mật & Chống Spam**: Tích hợp mã băm **MD5 Hash** định danh ảnh, ngăn chặn spam báo cáo và tối ưu hóa tài nguyên lưu trữ.
-- 🎮 **Game Hệ thống 2.0**: Toàn bộ câu hỏi, ảnh và kiến thức được đồng bộ thời gian thực từ Supabase. Chế độ lọc dữ liệu sạch đảm bảo chất lượng câu hỏi.
-- 🗺️ **Bản đồ điểm bỏ rác**: Tìm kiếm các điểm thu gom rác công cộng gần bạn thông qua OpenStreetMap hoàn toàn miễn phí.
-- 📍 **Định vị GPS**: Tự động xác định vị trí thực tế của người dùng trên bản đồ.
-- 🧠 **Cơ chế xử lý kép**: Ưu tiên phân tích Offline bằng TFLite và tự động dùng Gemini Flash Online khi cần thiết.
-- 🏅 **Hệ thống Huy hiệu**: Theo dõi tiến trình và mở khóa các danh hiệu môi trường dựa trên điểm tích lũy (XP).
-- 🖥️ **Web Admin Dashboard**: Hệ thống quản trị mạnh mẽ giúp duyệt báo cáo cộng đồng và cập nhật database rác thải tức thì.
-- 🎨 **Giao diện Modern UI**: Thiết kế hiện đại, responsive và tối ưu hóa trải nghiệm trên nhiều loại màn hình.
+- 📷 Nhận diện rác bằng AI (camera & thư viện ảnh)
+- 🧠 Cơ chế AI kép (Offline → Online fallback)
+- 🛸 Bóc tách vật thể + hiệu ứng trực quan
+- 🗺️ Bản đồ điểm bỏ rác (OpenStreetMap)
+- 📍 Định vị GPS thời gian thực
+- 🎮 Hệ thống game (XP, huy hiệu, quiz)
+- 🔐 Chống spam bằng hash ảnh
+- 🖥️ Dashboard quản trị (Supabase)
+- 🎨 Giao diện hiện đại, responsive
 
 ---
 
 ## 🛠️ Công nghệ sử dụng
 
-- **Flutter & Dart**: Nền tảng phát triển ứng dụng di động.
-- **Supabase**: Backend-as-a-Service (Auth, Database, Storage, Realtime, Edge Functions).
-- **TensorFlow Lite**: Chạy mô hình AI nhận diện rác thải ngay trên thiết bị (Offline).
-- **Google ML Kit**: Bóc tách vật thể (Subject Segmentation).
-- **Google Gemini API**: Phân tích chuyên sâu hình ảnh bằng mô hình ngôn ngữ lớn (VLM).
-- **Crypto (MD5)**: Định danh và bảo mật dữ liệu hình ảnh.
-- **OpenStreetMap**: Hệ thống bản đồ mở.
+- **Flutter / Dart**
+- **Supabase** (Auth, Database, Storage, Realtime)
+- **TensorFlow Lite**
+- **Google ML Kit**
+- **Gemini API**
+- **OpenStreetMap**
 
 ---
 

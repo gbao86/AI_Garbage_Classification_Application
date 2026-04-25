@@ -13,7 +13,8 @@
     <application
         android:label="EcoSort by Bao"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:extractNativeLibs="true">
 
         <meta-data
           android:name="io.flutter.app.android.EnableImpeller"

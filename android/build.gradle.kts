@@ -13,6 +13,14 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 subprojects {
+    if (project.name != "app") {
+        project.afterEvaluate {
+            val androidExt = project.extensions.findByName("android")
+            if (androidExt != null && androidExt is com.android.build.gradle.LibraryExtension) {
+                androidExt.compileSdk = 36
+            }
+        }
+    }
     project.evaluationDependsOn(":app")
 }
 
