@@ -1,4 +1,5 @@
 import os
+import json
 import tensorflow as tf
 from supabase import create_client, Client
 import requests
@@ -176,6 +177,12 @@ def train_process():
             f.write(f"{label}\n")
 
     print("🎯 Hoàn tất! Đã tạo xong model_unquant.tflite và labels.txt thành công.")
+
+    # --- GHI METADATA ĐỂ upload_model.py ĐỌC ---
+    metadata = {"image_count": len(df)}
+    with open('training_metadata.json', 'w') as f:
+        json.dump(metadata, f)
+    print(f"💾 Đã lưu metadata: {metadata}")
 
 if __name__ == "__main__":
     train_process()
