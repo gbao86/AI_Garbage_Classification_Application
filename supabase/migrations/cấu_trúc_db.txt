@@ -1,0 +1,203 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.ai_model_classes (
+  id smallint NOT NULL DEFAULT nextval('ai_model_classes_id_seq'::regclass),
+  label text NOT NULL UNIQUE,
+  default_group_id smallint,
+  description text,
+  CONSTRAINT ai_model_classes_pkey PRIMARY KEY (id),
+  CONSTRAINT ai_model_classes_default_group_id_fkey FOREIGN KEY (default_group_id) REFERENCES public.waste_groups(id)
+);
+CREATE TABLE public.audit_logs (
+  id bigint NOT NULL DEFAULT nextval('audit_logs_id_seq'::regclass),
+  actor_id uuid,
+  action text NOT NULL,
+  entity_type text,
+  entity_id text,
+  payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+  ip inet,
+  user_agent text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT audit_logs_pkey PRIMARY KEY (id),
+  CONSTRAINT audit_logs_actor_id_fkey FOREIGN KEY (actor_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.badges (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  code text NOT NULL UNIQUE,
+  name_vi text NOT NULL,
+  description text,
+  threshold_xp integer,
+  icon_key text,
+  sort_order integer NOT NULL DEFAULT 0,
+  CONSTRAINT badges_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.collection_points (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  description text,
+  location USER-DEFINED NOT NULL,
+  address text,
+  point_type text,
+  external_ref text,
+  is_verified boolean NOT NULL DEFAULT false,
+  created_by uuid,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT collection_points_pkey PRIMARY KEY (id),
+  CONSTRAINT collection_points_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+);
+CREATE TABLE public.game_questions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  waste_dictionary_id uuid NOT NULL,
+  game_types ARRAY NOT NULL DEFAULT ARRAY['quiz'::text],
+  payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT game_questions_pkey PRIMARY KEY (id),
+  CONSTRAINT game_questions_waste_dictionary_id_fkey FOREIGN KEY (waste_dictionary_id) REFERENCES public.waste_dictionary(id)
+);
+CREATE TABLE public.game_sessions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  game_type text NOT NULL,
+  score integer NOT NULL DEFAULT 0 CHECK (score >= 0),
+  duration_ms integer,
+  detail jsonb NOT NULL DEFAULT '{}'::jsonb,
+  started_at timestamp with time zone,
+  finished_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT game_sessions_pkey PRIMARY KEY (id),
+  CONSTRAINT game_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.point_ledger (
+  id bigint NOT NULL DEFAULT nextval('point_ledger_id_seq'::regclass),
+  user_id uuid NOT NULL,
+  delta integer NOT NULL,
+  reason text NOT NULL,
+  ref_type text,
+  ref_id uuid,
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT point_ledger_pkey PRIMARY KEY (id),
+  CONSTRAINT point_ledger_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.privileged_action_approvals (
+  id bigint NOT NULL DEFAULT nextval('privileged_action_approvals_id_seq'::regclass),
+  request_id uuid NOT NULL,
+  approver_id uuid NOT NULL,
+  comment text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT privileged_action_approvals_pkey PRIMARY KEY (id),
+  CONSTRAINT privileged_action_approvals_request_id_fkey FOREIGN KEY (request_id) REFERENCES public.privileged_action_requests(id),
+  CONSTRAINT privileged_action_approvals_approver_id_fkey FOREIGN KEY (approver_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.privileged_action_requests (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  action_type USER-DEFINED NOT NULL,
+  state USER-DEFINED NOT NULL DEFAULT 'draft'::privileged_action_state,
+  payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+  requester_id uuid NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  executed_at timestamp with time zone,
+  execution_note text,
+  CONSTRAINT privileged_action_requests_pkey PRIMARY KEY (id),
+  CONSTRAINT privileged_action_requests_requester_id_fkey FOREIGN KEY (requester_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.profiles (
+  id uuid NOT NULL,
+  display_name text,
+  avatar_url text,
+  locale text DEFAULT 'vi'::text,
+  role USER-DEFINED NOT NULL DEFAULT 'user'::app_role,
+  xp_total bigint NOT NULL DEFAULT 0 CHECK (xp_total >= 0),
+  level integer NOT NULL DEFAULT 1 CHECK (level >= 1),
+  scan_count integer NOT NULL DEFAULT 0 CHECK (scan_count >= 0),
+  is_locked boolean NOT NULL DEFAULT false,
+  locked_reason text,
+  locked_at timestamp with time zone,
+  locked_by uuid,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id),
+  CONSTRAINT profiles_locked_by_fkey FOREIGN KEY (locked_by) REFERENCES auth.users(id)
+);
+CREATE TABLE public.system_settings (
+  key text NOT NULL,
+  value jsonb NOT NULL DEFAULT '{}'::jsonb,
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_by uuid,
+  CONSTRAINT system_settings_pkey PRIMARY KEY (key),
+  CONSTRAINT system_settings_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES auth.users(id)
+);
+CREATE TABLE public.user_badges (
+  user_id uuid NOT NULL,
+  badge_id uuid NOT NULL,
+  unlocked_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT user_badges_pkey PRIMARY KEY (user_id, badge_id),
+  CONSTRAINT user_badges_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
+  CONSTRAINT user_badges_badge_id_fkey FOREIGN KEY (badge_id) REFERENCES public.badges(id)
+);
+CREATE TABLE public.user_scan_events (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  waste_dictionary_id uuid,
+  ai_label text,
+  confidence numeric,
+  earned_xp integer NOT NULL DEFAULT 0,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT user_scan_events_pkey PRIMARY KEY (id),
+  CONSTRAINT user_scan_events_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
+  CONSTRAINT user_scan_events_waste_dictionary_id_fkey FOREIGN KEY (waste_dictionary_id) REFERENCES public.waste_dictionary(id)
+);
+CREATE TABLE public.waste_dictionary (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  slug text NOT NULL UNIQUE,
+  name_vi text NOT NULL,
+  description text,
+  fun_fact text,
+  image_url text,
+  waste_group_id smallint NOT NULL,
+  ai_model_class_id smallint,
+  is_active boolean NOT NULL DEFAULT true,
+  created_by uuid,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT waste_dictionary_pkey PRIMARY KEY (id),
+  CONSTRAINT waste_dictionary_waste_group_id_fkey FOREIGN KEY (waste_group_id) REFERENCES public.waste_groups(id),
+  CONSTRAINT waste_dictionary_ai_model_class_id_fkey FOREIGN KEY (ai_model_class_id) REFERENCES public.ai_model_classes(id),
+  CONSTRAINT waste_dictionary_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id)
+);
+CREATE TABLE public.waste_groups (
+  id smallint NOT NULL DEFAULT nextval('waste_groups_id_seq'::regclass),
+  code text NOT NULL UNIQUE,
+  name_vi text NOT NULL,
+  sort_order smallint NOT NULL DEFAULT 0,
+  CONSTRAINT waste_groups_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.waste_submissions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  submitter_id uuid NOT NULL,
+  status USER-DEFINED NOT NULL DEFAULT 'pending_review'::submission_status,
+  tflite_top_label text,
+  tflite_confidence numeric,
+  gemini_payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+  suggested_name_vi text,
+  suggested_group_id smallint,
+  suggested_fun_fact text,
+  suggested_image_url text,
+  scan_image_path text,
+  reviewer_id uuid,
+  reviewed_at timestamp with time zone,
+  rejection_reason text,
+  merged_dictionary_id uuid,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT waste_submissions_pkey PRIMARY KEY (id),
+  CONSTRAINT waste_submissions_submitter_id_fkey FOREIGN KEY (submitter_id) REFERENCES auth.users(id),
+  CONSTRAINT waste_submissions_suggested_group_id_fkey FOREIGN KEY (suggested_group_id) REFERENCES public.waste_groups(id),
+  CONSTRAINT waste_submissions_reviewer_id_fkey FOREIGN KEY (reviewer_id) REFERENCES auth.users(id),
+  CONSTRAINT waste_submissions_merged_dictionary_id_fkey FOREIGN KEY (merged_dictionary_id) REFERENCES public.waste_dictionary(id)
+);

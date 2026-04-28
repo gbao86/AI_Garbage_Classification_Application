@@ -3,28 +3,47 @@ name: Auto Train Waste Model
 on:
   repository_dispatch:
     types: [submission_approved]
-  workflow_dispatch: # Cho phép bấm nút chạy tay nếu muốn
+  workflow_dispatch: # Cho phép bấm nút chạy tay để test
+
+# Giới hạn thời gian toàn bộ job: 3 giờ (GitHub Actions free = 6h max)
+# Nếu vượt quá, job sẽ bị cancel thay vì treo vĩnh viễn
+defaults:
+  run:
+    shell: bash
 
 jobs:
   train:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
+      # Cache pip để tránh tải lại TensorFlow (~600MB) mỗi lần chạy
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-tf-${{ hashFiles('**/requirements-train.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-tf-
+
       - name: Install Dependencies
         run: |
-          pip install tensorflow pillow requests supabase
+          pip install --upgrade pip
+          pip install tensorflow==2.15.0 pillow requests supabase scikit-learn pandas numpy
 
       - name: Run Training Script
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          # Dùng SERVICE_ROLE_KEY để bypass RLS khi đọc waste_submissions
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python scripts/train_model.py
 
       - name: Upload Model to Supabase Storage

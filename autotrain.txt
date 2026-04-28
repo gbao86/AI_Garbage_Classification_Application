@@ -1,0 +1,79 @@
+Sử dụng GitHub Actions là một lựa chọn cực kỳ thông minh vì nó miễn phí (cho repo public hoặc có giới hạn giờ cho repo private) và tích hợp sẵn với luồng code của bạn.
+Dưới đây là kế hoạch chi tiết để "Automate" việc train model của bạn:
+1. Kiến trúc hệ thống
+1.
+Trigger: Bạn thiết lập một Supabase Webhook. Khi có dòng dữ liệu được chuyển sang approved, Webhook này sẽ gọi đến GitHub API (Repository Dispatch) để kích hoạt workflow.
+2.
+GitHub Worker:
+◦
+Cài đặt môi trường Python & TensorFlow.
+◦
+Chạy script tải toàn bộ ảnh approved từ Supabase Storage về máy ảo.
+◦
+Thực hiện Transfer Learning (Huấn luyện lại dựa trên model cũ) để tiết kiệm thời gian.
+◦
+Xuất file model_unquant.tflite mới.
+3.
+Deploy: Tự động đẩy file model mới lên Supabase Storage (vào một folder tên là models/latest/).
+2. Cấu hình GitHub Workflow
+Tôi sẽ tạo cho bạn file workflow này. Bạn hãy lưu vào đường dẫn: .github/workflows/auto_train.yml.
+auto_train.yml
++34
+Để hệ thống hoạt động, bạn cần 3 thứ:
+1.
+GitHub Workflow (.github/workflows/auto_train.yml): (Đã tạo ở trên) Đây là "người điều phối" chạy trên máy chủ của GitHub.
+2.
+Script Train (scripts/train_model.py): Script này sẽ tải ảnh từ Supabase và dùng TensorFlow để huấn luyện lại.
+3.
+Script Upload (scripts/upload_model.py): Đẩy file .tflite mới lên Supabase Storage sau khi train xong.
+Tôi sẽ tạo file scripts/train_model.py mẫu cho bạn. Script này sử dụng kỹ thuật Transfer Learning trên MobileNetV2 (rất nhẹ và nhanh, phù hợp với GitHub Actions).
+train_model.py
++73
+Tôi đã thiết lập cho bạn khung sườn (boilerplate) của hệ thống M LOps tự động sử dụng GitHub Actions.
+Các thành phần tôi vừa tạo:
+1.
+.github/workflows/auto_train.yml: Đây là "trái tim" của hệ thống trên GitHub. Nó sẽ tự động chạy mỗi khi nhận được tín hiệu từ Supabase, cài đặt môi trường Python và thực hiện huấn luyện.
+2.
+scripts/train_model.py: Script Python sử dụng TensorFlow để:
+◦
+Tải toàn bộ dữ liệu ảnh đã được bạn duyệt (approved) từ Supabase về GitHub.
+◦
+Sử dụng kỹ thuật Transfer Learning (MobileNetV2) để huấn luyện lại model dựa trên dữ liệu mới.
+◦
+Xuất ra file model_unquant.tflite mới nhất.
+Bước cuối cùng bạn cần làm để kích hoạt hệ thống:
+1.
+Cấu hình GitHub Secrets: Vào Repo của bạn trên GitHub > Settings > Secrets and variables > Actions. Thêm các biến sau lấy từ file .env của bạn:
+◦
+SUPABASE_URL
+◦
+SUPABASE_ANON_KEY
+◦
+SUPABASE_SERVICE_ROLE_KEY (Cái này lấy trong Supabase Dashboard > Settings > API).
+2.
+Tạo Webhook trên Supabase: Vào Supabase Dashboard > Database > Webhooks. Tạo một Webhook:
+◦
+Table: waste_submissions
+◦
+Events: UPDATE
+◦
+Condition: status bằng approved.
+◦
+Target: Gửi một POST request đến GitHub API: https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO/dispatches
+◦
+Headers:
+▪
+Authorization: Bearer YOUR_GITHUB_TOKEN
+▪
+Accept: application/vnd.github.v3+json
+◦
+Body: {"event_type": "submission_approved"}.
+Cơ chế vận hành:
+Mỗi khi bạn ngồi trên Web Admin và bấm Duyệt một báo cáo rác:
+1.
+Supabase thấy trạng thái đổi thành approved -> Gửi tín hiệu sang GitHub.
+2.
+GitHub Actions tự thức dậy -> Tải ảnh -> Train model -> Lưu model mới vào Storage.
+3.
+Lần tới khi người dùng mở App, App sẽ tự tải model thông minh hơn này về máy.
+Bây giờ bạn đã có một hệ thống AI tự học (Self-learning) hoàn toàn chuyên nghiệp mà không mất phí duy trì máy chủ!

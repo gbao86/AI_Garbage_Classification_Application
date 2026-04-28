@@ -11,8 +11,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import class_weight
 
 # --- 1. CẤU HÌNH & KẾT NỐI ---
+# Dùng SERVICE_ROLE_KEY để bypass RLS khi truy vấn database trên server
 URL: str = os.environ.get("SUPABASE_URL")
-KEY: str = os.environ.get("SUPABASE_KEY")
+KEY: str = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 supabase: Client = create_client(URL, KEY)
 
 IMG_SIZE = (224, 224)
@@ -34,10 +35,12 @@ def download_dataset():
         print(f"❌ Lỗi kết nối Supabase: {e}")
         return None
 
-    # --- NGƯỠNG TỐI THIỂU 50 ẢNH ĐỂ TRAIN ---
-    MIN_IMAGES = 50
+    # --- NGƯỠNG TỐI THIỂU ĐỂ TRAIN ---
+    # Đặt thấp (10) để test pipeline. Nâng lên 50+ khi có đủ dữ liệu thực tế.
+    MIN_IMAGES = 10
     if len(data) < MIN_IMAGES:
         print(f"⚠️ Dữ liệu hiện có {len(data)} ảnh, chưa đủ ngưỡng tối thiểu ({MIN_IMAGES}) để bắt đầu huấn luyện.")
+        print("   → Hãy duyệt thêm báo cáo trên Web Admin để tăng dữ liệu.")
         return None
 
     os.makedirs("dataset", exist_ok=True)
@@ -131,19 +134,33 @@ def train_process():
         tf.keras.layers.Dense(NUM_CLASSES, activation='softmax')
     ])
 
-    print("🔥 GĐ 1: Warm-up (20 Epochs)...")
+    # --- GĐ 1: WARM-UP (Giới hạn epoch thấp để phù hợp với GitHub Actions CPU) ---
+    # Tối đa 5 epoch, EarlyStopping sẽ dừng sớm nếu không cải thiện
+    print("🔥 GĐ 1: Warm-up (tối đa 5 Epochs)...")
     model.compile(optimizer=tf.keras.optimizers.Adam(1e-3), loss='categorical_crossentropy', metrics=['accuracy'])
-    model.fit(train_ds, steps_per_epoch=steps_per_epoch, validation_data=val_ds, epochs=20, class_weight=cw_dict, callbacks=[MemoryCleanupCallback()])
+    model.fit(
+        train_ds, steps_per_epoch=steps_per_epoch, validation_data=val_ds,
+        epochs=5, class_weight=cw_dict,
+        callbacks=[
+            tf.keras.callbacks.EarlyStopping(patience=2, restore_best_weights=True, monitor='val_loss'),
+            MemoryCleanupCallback()
+        ]
+    )
 
-    print("🎯 GĐ 2: Fine-tuning (50 Epochs)...")
+    # --- GĐ 2: FINE-TUNING (Giới hạn epoch để tránh timeout 6h của GitHub Actions) ---
+    print("🎯 GĐ 2: Fine-tuning (tối đa 15 Epochs)...")
     base_model.trainable = True
     for layer in base_model.layers[:100]: layer.trainable = False
 
     model.compile(optimizer=tf.keras.optimizers.Adam(1e-5), loss='categorical_crossentropy', metrics=['accuracy'])
-    model.fit(train_ds, steps_per_epoch=steps_per_epoch, validation_data=val_ds, epochs=50, class_weight=cw_dict, callbacks=[
-        tf.keras.callbacks.EarlyStopping(patience=5, restore_best_weights=True),
-        MemoryCleanupCallback()
-    ])
+    model.fit(
+        train_ds, steps_per_epoch=steps_per_epoch, validation_data=val_ds,
+        epochs=15, class_weight=cw_dict,
+        callbacks=[
+            tf.keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True, monitor='val_loss'),
+            MemoryCleanupCallback()
+        ]
+    )
 
     # --- XUẤT FILE TFLITE ---
     print("📦 Đang chuyển đổi sang TFLite...")
