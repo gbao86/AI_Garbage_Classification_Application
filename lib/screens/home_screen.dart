@@ -92,16 +92,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ? '\n\n**Lưu ý**: Độ tin cậy chưa cao. Bạn có thể thử chụp lại ảnh rõ hơn (đủ sáng, vật thể chiếm khung hình) hoặc dùng chế độ Online để được hướng dẫn chi tiết.'
         : '';
 
-    return '''**Loại rác**: $translatedLabel ($originalLabel)
-**Phân loại**: $classification
-**Độ tin cậy**: $confidenceText%$note
-
-**Hướng dẫn xử lý**:
-- **Cách vứt bỏ**: $disposal
-- **Nơi xử lý**: $where
-- **Tác hại nếu xử lý sai**: $harm
-
-**Mẹo sống xanh**: $tip''';
+    return '**Loại rác:** $translatedLabel ($originalLabel)  \n'
+        '**Phân loại:** $classification  \n'
+        '**Độ tin cậy:** $confidenceText%$note\n'
+        '\n'
+        '**Hướng dẫn xử lý:**\n'
+        '- **Cách vứt bỏ:** $disposal\n'
+        '- **Nơi xử lý:** $where\n'
+        '- **Tác hại nếu xử lý sai:** $harm\n'
+        '\n'
+        '**Mẹo sống xanh:** $tip';
   }
 
   @override
