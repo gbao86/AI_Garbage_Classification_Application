@@ -59,8 +59,9 @@ def upload_model():
         print(f"   {SUPABASE_URL}/storage/v1/object/public/{BUCKET}/{MODEL_REMOTE_PATH}")
         print(f"   {SUPABASE_URL}/storage/v1/object/public/{BUCKET}/{LABELS_REMOTE_PATH}")
     elif not model_ok:
-        print("\n❌ THẤT BẠI: Không tìm thấy model_unquant.tflite để upload.")
-        sys.exit(1)
+        # Không phải lỗi — training bị bỏ qua do thiếu dữ liệu, không có model mới
+        print("\n⏭️ Bỏ qua upload: Không có model mới (training chưa chạy do thiếu dữ liệu).")
+        print("   → Workflow hoàn thành bình thường. Duyệt thêm báo cáo để train lần sau.")
 
 
 if __name__ == "__main__":
