@@ -23,6 +23,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   bool _isLoading = true;
   bool _isSatellite = false;
   bool _showTraffic = false;
+  bool _isFetchingWaste = false;
+  DateTime? _lastFetchTime;
   List<Marker> _markers = [];
 
   final String _osmUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -36,7 +38,24 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _fetchWastePoints(double lat, double lon) async {
-    // 1. Mở rộng bán kính quét lên 0.05 độ (khoảng 5km) để dễ tìm thấy điểm hơn
+    // Debounce: chặn gọi API liên tục (cooldown 5 giây)
+    if (_isFetchingWaste) return;
+    final now = DateTime.now();
+    if (_lastFetchTime != null && now.difference(_lastFetchTime!) < const Duration(seconds: 5)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vui lòng chờ vài giây trước khi tải lại.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
+    setState(() => _isFetchingWaste = true);
+    _lastFetchTime = now;
+
+    // Mở rộng bán kính quét lên 0.05 độ (khoảng 5km)
     final String bbox = "(${lat - 0.05},${lon - 0.05},${lat + 0.05},${lon + 0.05})";
     final url = Uri.parse("https://overpass-api.de/api/interpreter?data=[out:json];node['amenity'~'waste_disposal|recycling|waste_basket']$bbox;out;");
 
@@ -95,6 +114,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       }
     } catch (e) {
       debugPrint("Lỗi tải data (Mất mạng hoặc API sập): $e");
+    } finally {
+      if (mounted) setState(() => _isFetchingWaste = false);
     }
   }
 
@@ -293,8 +314,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                   mini: true,
                   heroTag: "refresh",
                   backgroundColor: Colors.white,
-                  onPressed: () => _fetchWastePoints(_mapCenter.latitude, _mapCenter.longitude),
-                  child: const Icon(Icons.refresh_rounded, color: Colors.green),
+                  onPressed: _isFetchingWaste ? null : () => _fetchWastePoints(_mapCenter.latitude, _mapCenter.longitude),
+                  child: _isFetchingWaste
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.refresh_rounded, color: Colors.green),
                 ),
                 const SizedBox(height: 15),
                 FloatingActionButton(

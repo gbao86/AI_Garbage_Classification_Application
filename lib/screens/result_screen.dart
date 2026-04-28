@@ -12,6 +12,7 @@ class ResultScreen extends StatefulWidget {
   final String processingResult;
   final String? tfliteLabel;
   final double tfliteConfidence;
+  final String classificationType;
 
   const ResultScreen({
     super.key,
@@ -19,6 +20,7 @@ class ResultScreen extends StatefulWidget {
     required this.processingResult,
     this.tfliteLabel,
     this.tfliteConfidence = 0.0,
+    this.classificationType = '',
   });
 
   @override
@@ -169,18 +171,31 @@ class _ResultScreenState extends State<ResultScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    Color statusColor = Colors.green;
-    IconData statusIcon = Icons.recycling_rounded;
+    // Sử dụng classificationType từ field thay vì parse từ markdown
+    Color statusColor;
+    IconData statusIcon;
+    String statusText;
 
-    if (widget.processingResult.contains('nguy hại')) {
-      statusColor = Colors.redAccent;
-      statusIcon = Icons.warning_amber_rounded;
-    } else if (widget.processingResult.contains('không tái chế') || widget.processingResult.contains('trash')) {
-      statusColor = Colors.orangeAccent;
-      statusIcon = Icons.delete_outline_rounded;
-    } else if (widget.processingResult.contains('hữu cơ')) {
-      statusColor = Colors.brown;
-      statusIcon = Icons.eco_rounded;
+    switch (widget.classificationType) {
+      case 'nguy hại':
+        statusColor = Colors.redAccent;
+        statusIcon = Icons.warning_amber_rounded;
+        statusText = 'Rác Nguy hại';
+        break;
+      case 'hữu cơ':
+        statusColor = Colors.brown;
+        statusIcon = Icons.eco_rounded;
+        statusText = 'Rác Hữu cơ';
+        break;
+      case 'tái chế':
+        statusColor = Colors.green;
+        statusIcon = Icons.recycling_rounded;
+        statusText = 'Có thể Tái chế';
+        break;
+      default:
+        statusColor = Colors.orangeAccent;
+        statusIcon = Icons.delete_outline_rounded;
+        statusText = 'Rác không tái chế';
     }
 
     return Scaffold(
@@ -238,7 +253,7 @@ class _ResultScreenState extends State<ResultScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Column(
                 children: [
-                  _buildSummaryCard(statusColor, statusIcon),
+                  _buildSummaryCard(statusColor, statusIcon, statusText),
                   const SizedBox(height: 20),
                   Container(
                     width: double.infinity,
@@ -334,7 +349,7 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
-  Widget _buildSummaryCard(Color color, IconData icon) {
+  Widget _buildSummaryCard(Color color, IconData icon, String statusText) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: color.withValues(alpha: 0.3))),
@@ -347,19 +362,12 @@ class _ResultScreenState extends State<ResultScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Tình trạng phân loại', style: TextStyle(fontSize: 12, color: Colors.black54)),
-                Text(_extractClassificationType(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
+                Text(statusText, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
               ],
             ),
           ),
         ],
       ),
     );
-  }
-
-  String _extractClassificationType() {
-    if (widget.processingResult.contains('tái chế')) return 'Có thể Tái chế';
-    if (widget.processingResult.contains('nguy hại')) return 'Rác Nguy hại';
-    if (widget.processingResult.contains('hữu cơ')) return 'Rác Hữu cơ';
-    return 'Rác không tái chế';
   }
 }

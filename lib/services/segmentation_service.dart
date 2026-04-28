@@ -17,8 +17,6 @@ class SegmentationService {
     ),
   );
 
-  Future<void> init() async {}
-
   // CHỈ NHẬN KÍCH THƯỚC CHUẨN ĐÃ XOAY EXIF TỪ GIAO DIỆN
   Future<ui.Image?> getMask(File imageFile, int width, int height) async {
     try {

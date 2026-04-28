@@ -99,6 +99,33 @@ class _AuthScreenState extends State<AuthScreen>
     }
   }
 
+  Future<void> _forgotPassword() async {
+    final email = _email.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        _buildSnackBar('Vui lòng nhập email trước khi yêu cầu đặt lại mật khẩu.', isError: true),
+      );
+      return;
+    }
+    setState(() => _loading = true);
+    try {
+      await _auth.client.auth.resetPasswordForEmail(email);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          _buildSnackBar('Đã gửi link đặt lại mật khẩu về $email. Vui lòng kiểm tra hộp thư.', isError: false),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          _buildSnackBar('Lỗi: $e', isError: true),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   Future<void> _signInWithGoogle() async {
     if (_loading) return;
     if (Env.googleWebClientId.trim().isEmpty) {
@@ -212,7 +239,7 @@ class _AuthScreenState extends State<AuthScreen>
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: _green700.withOpacity(0.35),
+                color: _green700.withValues(alpha: 0.35),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -249,10 +276,10 @@ class _AuthScreenState extends State<AuthScreen>
       decoration: BoxDecoration(
         color: _surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _border.withOpacity(0.6)),
+        border: Border.all(color: _border.withValues(alpha: 0.6)),
         boxShadow: [
           BoxShadow(
-            color: _green900.withOpacity(0.06),
+            color: _green900.withValues(alpha: 0.06),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -293,6 +320,20 @@ class _AuthScreenState extends State<AuthScreen>
             const SizedBox(height: 14),
             _buildPasswordField(),
 
+            if (!_registerMode)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _loading ? null : _forgotPassword,
+                  style: TextButton.styleFrom(
+                    foregroundColor: _green500,
+                    padding: const EdgeInsets.only(top: 4),
+                    textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                  child: const Text('Quên mật khẩu?'),
+                ),
+              ),
+
             const SizedBox(height: 24),
 
             // ── Primary button ───────────────────────────────────────────
@@ -320,7 +361,7 @@ class _AuthScreenState extends State<AuthScreen>
       decoration: BoxDecoration(
         color: _green50,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _border.withOpacity(0.5)),
+        border: Border.all(color: _border.withValues(alpha: 0.5)),
       ),
       child: Row(
         children: [
@@ -412,7 +453,7 @@ class _AuthScreenState extends State<AuthScreen>
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _border.withOpacity(0.8)),
+        borderSide: BorderSide(color: _border.withValues(alpha: 0.8)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -480,19 +521,19 @@ class _AuthScreenState extends State<AuthScreen>
     return Row(
       children: [
         Expanded(
-            child: Divider(color: _border.withOpacity(0.7), thickness: 0.8)),
+            child: Divider(color: _border.withValues(alpha: 0.7), thickness: 0.8)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text(
             'hoặc tiếp tục với',
             style: TextStyle(
               fontSize: 12,
-              color: _textSecondary.withOpacity(0.8),
+              color: _textSecondary.withValues(alpha: 0.8),
             ),
           ),
         ),
         Expanded(
-            child: Divider(color: _border.withOpacity(0.7), thickness: 0.8)),
+            child: Divider(color: _border.withValues(alpha: 0.7), thickness: 0.8)),
       ],
     );
   }
@@ -505,7 +546,7 @@ class _AuthScreenState extends State<AuthScreen>
         onPressed: _loading ? null : _signInWithGoogle,
         style: OutlinedButton.styleFrom(
           foregroundColor: _textPrimary,
-          side: BorderSide(color: _border.withOpacity(0.9)),
+          side: BorderSide(color: _border.withValues(alpha: 0.9)),
           shape:
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           backgroundColor: Colors.white,
@@ -589,7 +630,7 @@ class _TabItem extends StatelessWidget {
             boxShadow: selected
                 ? [
               BoxShadow(
-                color: _green700.withOpacity(0.25),
+                color: _green700.withValues(alpha: 0.25),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               )

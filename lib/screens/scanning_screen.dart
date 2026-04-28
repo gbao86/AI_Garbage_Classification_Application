@@ -49,6 +49,7 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
   // Lưu thông tin TFLite để báo cáo
   String? _tfliteLabel;
   double _tfliteConfidence = 0.0;
+  String _classificationType = '';  // tái chế / hữu cơ / nguy hại / không tái chế
 
   bool _isScanCompleted = false; // Đánh dấu tia laser đã quét xong
   bool _isGeminiRunning = false;
@@ -113,6 +114,7 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
         _finalMarkdown = offlineResult.markdown;
         _tfliteLabel = offlineResult.originalLabel;
         _tfliteConfidence = offlineResult.confidence;
+        _classificationType = _getClassification(offlineResult.originalLabel);
       });
     }
 
@@ -197,6 +199,7 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
                 processingResult: _finalMarkdown!,
                 tfliteLabel: _tfliteLabel,
                 tfliteConfidence: _tfliteConfidence,
+                classificationType: _classificationType,
               ),
             ),
           );
@@ -247,7 +250,7 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
                     height: 4,
                     decoration: BoxDecoration(
                       boxShadow: [
-                        BoxShadow(color: Colors.blueAccent.withOpacity(0.9), blurRadius: 20, spreadRadius: 3),
+                        BoxShadow(color: Colors.blueAccent.withValues(alpha: 0.9), blurRadius: 20, spreadRadius: 3),
                         BoxShadow(color: Colors.white, blurRadius: 5, spreadRadius: 1),
                       ],
                       color: Colors.white,
@@ -270,7 +273,7 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
                     return FadeTransition(opacity: animation, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0.0, 0.2), end: Offset.zero).animate(animation), child: child));
                   },
                   child: _label != null
-                      ? Text(_label!, key: ValueKey<String>(_label!), style: TextStyle(color: const Color(0xFF6CFFA0), fontSize: 42, fontWeight: FontWeight.w700, letterSpacing: 1.2, shadows: [Shadow(color: Colors.black.withOpacity(0.9), blurRadius: 15, offset: const Offset(0, 4)), Shadow(color: const Color(0xFF6CFFA0).withOpacity(0.6), blurRadius: 12)],), textAlign: TextAlign.center)
+                      ? Text(_label!, key: ValueKey<String>(_label!), style: TextStyle(color: const Color(0xFF6CFFA0), fontSize: 42, fontWeight: FontWeight.w700, letterSpacing: 1.2, shadows: [Shadow(color: Colors.black.withValues(alpha: 0.9), blurRadius: 15, offset: const Offset(0, 4)), Shadow(color: const Color(0xFF6CFFA0).withValues(alpha: 0.6), blurRadius: 12)],), textAlign: TextAlign.center)
                       : const SizedBox.shrink(key: ValueKey('empty_label')),
                 ),
                 const SizedBox(height: 20),
@@ -282,9 +285,16 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
 
           Positioned(
             top: 50,
-            left: 20,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),
+            left: 12,
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.black.withValues(alpha: 0.3),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+              label: const Text('Hủy', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -318,7 +328,7 @@ class SmartScanPainter extends CustomPainter {
 
     if (!isScanCompleted) {
       double currentY = size.height * scanProgress;
-      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, currentY), Paint()..color = Colors.black.withOpacity(0.4));
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, currentY), Paint()..color = Colors.black.withValues(alpha: 0.4));
       return;
     }
 
@@ -328,7 +338,7 @@ class SmartScanPainter extends CustomPainter {
       canvas.saveLayer(rect, blurPaint);
       paintImage(canvas: canvas, rect: rect, image: sharpUiImage, fit: BoxFit.cover);
       canvas.restore();
-      canvas.drawRect(rect, Paint()..color = Colors.black.withOpacity(0.45));
+      canvas.drawRect(rect, Paint()..color = Colors.black.withValues(alpha: 0.45));
       canvas.saveLayer(rect, Paint()..blendMode = BlendMode.dstOut);
       paintImage(canvas: canvas, rect: rect, image: maskImage!, fit: BoxFit.cover);
       canvas.restore();
@@ -336,7 +346,7 @@ class SmartScanPainter extends CustomPainter {
 
       canvas.saveLayer(rect, Paint());
       paintImage(canvas: canvas, rect: rect, image: maskImage!, fit: BoxFit.cover);
-      final shimmerPaint = Paint()..blendMode = BlendMode.srcIn..shader = ui.Gradient.linear(Offset(size.width * (shimmerProgress * 2 - 1.0), 0), Offset(size.width * (shimmerProgress * 2), 0), [const Color(0x006CFFA0), const Color(0xFF6CFFA0).withOpacity(0.6), const Color(0x006CFFA0)], [0.0, 0.5, 1.0]);
+      final shimmerPaint = Paint()..blendMode = BlendMode.srcIn..shader = ui.Gradient.linear(Offset(size.width * (shimmerProgress * 2 - 1.0), 0), Offset(size.width * (shimmerProgress * 2), 0), [const Color(0x006CFFA0), const Color(0xFF6CFFA0).withValues(alpha: 0.6), const Color(0x006CFFA0)], [0.0, 0.5, 1.0]);
       canvas.drawRect(rect, shimmerPaint);
       canvas.restore();
     } else {
@@ -344,12 +354,17 @@ class SmartScanPainter extends CustomPainter {
       canvas.saveLayer(rect, blurPaint);
       paintImage(canvas: canvas, rect: rect, image: sharpUiImage, fit: BoxFit.cover);
       canvas.restore();
-      canvas.drawRect(rect, Paint()..color = Colors.black.withOpacity(0.3));
+      canvas.drawRect(rect, Paint()..color = Colors.black.withValues(alpha: 0.3));
     }
   }
 
   @override
-  bool shouldRepaint(covariant SmartScanPainter oldDelegate) => true;
+  bool shouldRepaint(covariant SmartScanPainter oldDelegate) {
+    return scanProgress != oldDelegate.scanProgress ||
+        shimmerProgress != oldDelegate.shimmerProgress ||
+        isScanCompleted != oldDelegate.isScanCompleted ||
+        maskImage != oldDelegate.maskImage;
+  }
 }
 
 class TypewriterText extends StatefulWidget {

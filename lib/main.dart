@@ -6,7 +6,7 @@ import 'package:phan_loai_rac_qua_hinh_anh/features/game/badge_inventory_screen.
 import 'package:phan_loai_rac_qua_hinh_anh/screens/home_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/screens/about_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/screens/map_screen.dart';
-import 'package:phan_loai_rac_qua_hinh_anh/app_theme.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/theme/app_theme.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/utils/env.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/widgets/auth_gate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -34,6 +34,8 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'EcoSort by Bao',
         theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system, // Tự động theo cài đặt hệ thống
         home: const AuthGate(),
         routes: {
           '/home': (context) => const HomeScreen(),

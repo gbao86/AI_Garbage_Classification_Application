@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'badge_inventory_screen.dart';
 import 'game_provider.dart';
@@ -106,6 +107,8 @@ class _GameScreenState extends State<GameScreen> {
           _isLoading = false;
         });
         _startTimer();
+        // Đánh dấu đã chơi game
+        SharedPreferences.getInstance().then((prefs) => prefs.setBool('has_played_game', true));
       }
     } catch (e) {
       debugPrint('Error loading game questions: $e');

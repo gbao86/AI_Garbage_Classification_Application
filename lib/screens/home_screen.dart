@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:image_picker/image_picker.dart';
@@ -14,8 +13,10 @@ import 'package:provider/provider.dart';
 import 'package:image/image.dart' as img;
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/game_provider.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/services/auth_service.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/services/model_update_service.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/game_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/badge_inventory_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -31,6 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Interpreter? _interpreter;
   List<String> _labels = [];
   int _currentIndex = 0;
+  bool _isModelUpdating = false;
+  bool _hasPlayedGame = false;
 
   final Map<String, String> _labelTranslations = {
     'battery': 'Pin / Ắc quy',
@@ -105,16 +108,71 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _initializeModelAndLabels();
+    _checkHasPlayedGame();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<GameProvider>().syncFromSupabase();
+      // Kiểm tra và tải model mới từ server (nền)
+      _checkForModelUpdate();
     });
+  }
+
+  Future<void> _checkHasPlayedGame() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() => _hasPlayedGame = prefs.getBool('has_played_game') ?? false);
+    }
+  }
+
+  Future<void> _checkForModelUpdate() async {
+    setState(() => _isModelUpdating = true);
+    try {
+      final updated = await ModelUpdateService.instance.checkAndUpdate();
+      if (updated && mounted) {
+        // Reload model với phiên bản mới
+        await _initializeModelAndLabels();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.auto_awesome, color: Colors.white, size: 18),
+                  SizedBox(width: 10),
+                  Expanded(child: Text('🧠 AI đã được cập nhật phiên bản mới!')),
+                ],
+              ),
+              backgroundColor: Colors.green.shade700,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          );
+        }
+      }
+    } finally {
+      if (mounted) setState(() => _isModelUpdating = false);
+    }
   }
 
   Future<void> _initializeModelAndLabels() async {
     try {
-      _interpreter = await Interpreter.fromAsset('assets/models/model_unquant.tflite');
-      final labelsData = await rootBundle.loadString('assets/models/labels.txt');
+      // Ƭu tiên model local (đã tải từ server), fallback về assets
+      final localModelPath = await ModelUpdateService.instance.localModelPath;
+      final localLabelsPath = await ModelUpdateService.instance.localLabelsPath;
+
+      if (localModelPath != null) {
+        debugPrint('📦 Đang dùng model từ server: $localModelPath');
+        _interpreter = Interpreter.fromFile(File(localModelPath));
+      } else {
+        _interpreter = await Interpreter.fromAsset('assets/models/model_unquant.tflite');
+      }
+
+      String labelsData;
+      if (localLabelsPath != null) {
+        labelsData = await File(localLabelsPath).readAsString();
+      } else {
+        labelsData = await rootBundle.loadString('assets/models/labels.txt');
+      }
+
       if (mounted) {
         setState(() {
           _labels = labelsData.split('\n').where((label) => label.isNotEmpty).toList();
@@ -309,7 +367,13 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           SafeArea(
-            child: CustomScrollView(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await context.read<GameProvider>().syncFromSupabase();
+                await _checkForModelUpdate();
+              },
+              color: theme.primaryColor,
+              child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
                 SliverToBoxAdapter(
@@ -370,7 +434,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   child: IconButton(
                                     icon: Icon(Icons.notifications_none_rounded, color: theme.primaryColor),
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: const Row(
+                                            children: [
+                                              Icon(Icons.construction_rounded, color: Colors.white, size: 18),
+                                              SizedBox(width: 10),
+                                              Expanded(child: Text('Tính năng thông báo đang được phát triển!')),
+                                            ],
+                                          ),
+                                          backgroundColor: Colors.orange.shade700,
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                          duration: const Duration(seconds: 2),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ],
@@ -390,6 +470,25 @@ class _HomeScreenState extends State<HomeScreen> {
                           _buildLoadingStatus(theme),
                         ],
 
+                        if (_isModelUpdating) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue.shade400)),
+                                const SizedBox(width: 10),
+                                Text('Đang kiểm tra cập nhật AI...', style: TextStyle(fontSize: 12, color: Colors.blue.shade600)),
+                              ],
+                            ),
+                          ),
+                        ],
+
                         const SizedBox(height: 40),
                         _buildMiniGameSection(theme),
 
@@ -400,6 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+          ),
           ),
           _buildCustomBottomNav(theme),
         ],
@@ -556,7 +656,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white.withValues(alpha: 0.25),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text('Mới', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          _hasPlayedGame ? '🎮 Tiếp tục' : 'Mới',
+                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
                       ),
                       const SizedBox(height: 16),
                       const Text(
@@ -701,11 +804,15 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildNavItem(0, Icons.home_rounded, 'Trang chủ', _currentIndex == 0, onTap: () => setState(() => _currentIndex = 0)),
             _buildNavItem(1, Icons.map_rounded, 'Bản đồ', _currentIndex == 1, onTap: () {
               setState(() => _currentIndex = 1);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const MapScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const MapScreen())).then((_) {
+                if (mounted) setState(() => _currentIndex = 0);
+              });
             }),
             _buildNavItem(2, Icons.info_rounded, 'Thông tin', _currentIndex == 2, onTap: () {
               setState(() => _currentIndex = 2);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutScreen())).then((_) {
+                if (mounted) setState(() => _currentIndex = 0);
+              });
             }),
           ],
         ),
