@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -240,25 +241,90 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Lottie.network(
+                'https://lottie.host/1bc0d768-27bd-4144-957d-5ba2b0a3d84c/sN7k7FPwgG.json',
+                width: 200,
+                height: 200,
+                errorBuilder: (_, __, ___) => const SizedBox(
+                  width: 60, height: 60,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Đang tải câu hỏi...',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Chuẩn bị thử thách cho bạn...',
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
     if (_errorMessage != null) {
       return Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(_errorMessage!, textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadGameData,
-                child: const Text("Tải lại"),
-              )
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Lottie.network(
+                  'https://lottie.host/02e56a23-0793-4214-8847-7aecde14b950/Yf3lmrUXqk.json',
+                  width: 160,
+                  height: 160,
+                  errorBuilder: (_, __, ___) => Icon(
+                    Icons.error_outline_rounded,
+                    size: 80,
+                    color: Colors.red.shade300,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Không thể tải dữ liệu',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  _errorMessage!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('Thử lại'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    onPressed: _loadGameData,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
