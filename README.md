@@ -115,6 +115,6 @@ Mọi đóng góp từ cộng đồng đều được trân trọng! Nếu bạn
 
 📥 **Trải nghiệm nhanh**: [Tải file APK cài đặt tại đây](https://drive.google.com/drive/folders/1swY2GXq4YbI0cJ71cbgdRxbpDXIc1g91?usp=sharing)
 
----
+--- 
 **Phát triển bởi Trịnh Gia Bao (gbao86)**
 📧 Liên hệ: tiktokthu10@gmail.com
