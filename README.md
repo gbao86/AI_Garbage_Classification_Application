@@ -113,7 +113,7 @@ Dự án áp dụng các tiêu chuẩn bảo mật nghiêm ngặt. Vui lòng xem
 ## 🤝 Đóng góp
 Mọi đóng góp từ cộng đồng đều được trân trọng! Nếu bạn có ý tưởng cải thiện ứng dụng, vui lòng tạo Pull Request hoặc Issue.
 
-📥 **Trải nghiệm nhanh**: [Tải file APK cài đặt tại đây](https://drive.google.com/file/d/17-gyxwDu6FJkL1elVjXdykcm4oO5e6v_/view?usp=sharing)
+📥 **Trải nghiệm nhanh**: [Tải file APK cài đặt tại đây](https://drive.google.com/drive/folders/1swY2GXq4YbI0cJ71cbgdRxbpDXIc1g91?usp=sharing)
 
 ---
 **Phát triển bởi Trịnh Gia Bao (gbao86)**
