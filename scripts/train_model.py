@@ -36,8 +36,7 @@ def download_dataset():
         return None
 
     # --- NGƯỠNG TỐI THIỂU ĐỂ TRAIN ---
-    # Đặt thấp (10) để test pipeline. Nâng lên 50+ khi có đủ dữ liệu thực tế.
-    MIN_IMAGES = 10
+    MIN_IMAGES = 50
     if len(data) < MIN_IMAGES:
         print(f"⚠️ Dữ liệu hiện có {len(data)} ảnh, chưa đủ ngưỡng tối thiểu ({MIN_IMAGES}) để bắt đầu huấn luyện.")
         print("   → Hãy duyệt thêm báo cáo trên Web Admin để tăng dữ liệu.")
