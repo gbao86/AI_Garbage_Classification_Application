@@ -66,3 +66,9 @@ web_admin/js/config.js
 
 # Supabase
 # supabase/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
