@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>EcoSort Admin - Đăng nhập Bảo mật</title>
+    <title>EcoSort by Bao Admin - Đăng nhập Bảo mật</title>
     <link rel="stylesheet" href="./src/tailwind.css">
 </head>
 
@@ -93,7 +93,7 @@
                 console.log('[DEBUG] Bắt đầu gọi loginWithEmail...');
                 await loginWithEmail(email, pass);
                 console.log('[DEBUG] loginWithEmail hoàn tất!');
-                
+
                 // Cưỡng chế chuyển trang nếu onAuthStateChange không hoạt động
                 window.location.replace('dashboard.html');
             } catch (e) {

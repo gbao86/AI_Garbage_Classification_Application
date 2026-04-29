@@ -1,0 +1,287 @@
+<!-- web_admin/dashboard.html -->
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSort by Bao Admin - Hệ thống Quản trị</title>
+    <style>
+        .hidden {
+            display: none !important;
+        }
+
+        .sidebar-active {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            border-left: 4px solid #16a34a;
+        }
+
+        @keyframes modal-in {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .animate-modal {
+            animation: modal-in 0.3s ease-out forwards;
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/dashboard-kprdKtoN.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/auth-pt9O5NEx.js">
+  <link rel="stylesheet" crossorigin href="/assets/auth-BdEj-39l.css">
+</head>
+
+<body class="bg-slate-50 font-sans">
+    <div id="auth-loader" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center">
+        <div class="w-10 h-10 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin mb-4"></div>
+        <p class="text-slate-500 font-bold text-sm tracking-widest uppercase">Đang xác thực hệ thống...</p>
+    </div>
+
+    <div class="flex min-h-screen">
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-white border-r border-slate-200 p-6 flex flex-col shadow-sm fixed h-full z-10">
+            <div class="flex items-center gap-3 mb-10 px-2">
+                <div class="bg-green-600 p-2 rounded-lg text-white font-black italic">E</div>
+                <h1 class="text-xl font-black text-slate-800 tracking-tight">EcoSort by Bao Admin Dashboard</h1>
+            </div>
+            <nav class="flex-1 space-y-1">
+                <button onclick="switchTab('submissions')" id="btn-submissions"
+                    class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition sidebar-active">Báo
+                    cáo rác</button>
+                <button onclick="switchTab('users')" id="btn-users"
+                    class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition hover:bg-slate-50">Người
+                    dùng</button>
+            </nav>
+            <div class="mt-auto pt-6 border-t border-slate-100">
+                <p id="admin-email" class="text-[10px] text-slate-400 font-bold mb-3 truncate uppercase"></p>
+                <button onclick="handleLogout()"
+                    class="w-full bg-slate-100 text-slate-600 py-3 rounded-xl font-bold text-xs hover:bg-red-50 hover:text-red-600 transition">Đăng
+                    xuất</button>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="flex-1 ml-64 p-10">
+            <section id="tab-submissions" class="tab-content">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-800">Duyệt rác</h2>
+                        <p class="text-slate-400 text-sm font-medium">Quản lý các báo cáo từ AI & Người dùng</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="filter-status" onchange="fetchSubmissions()"
+                            class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-green-500">
+                            <option value="pending_review">Chờ duyệt</option>
+                            <option value="approved">Đã duyệt</option>
+                            <option value="rejected">Đã từ chối</option>
+                        </select>
+                        <button onclick="fetchSubmissions()"
+                            class="bg-slate-800 text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-slate-900 transition">Làm
+                            mới</button>
+                    </div>
+                </div>
+
+                <div id="loader-submissions" class="text-center py-20 hidden">
+                    <div
+                        class="animate-spin inline-block w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full mb-4">
+                    </div>
+                    <p class="text-slate-400 font-bold">Đang lấy dữ liệu...</p>
+                </div>
+                <div id="grid-submissions" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
+            </section>
+
+            <!-- TAB USERS -->
+            <section id="tab-users" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-800">Quản lý Người dùng</h2>
+                        <p class="text-slate-400 text-sm font-medium">Hệ thống phân quyền & kiểm soát truy cập</p>
+                    </div>
+                </div>
+
+                <!-- Toolbar -->
+                <div
+                    class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap gap-4 justify-between items-center mb-6">
+                    <div class="flex gap-2 flex-1 min-w-[300px]">
+                        <input type="text" id="filter-user-search" placeholder="Tìm theo Email, Tên hiển thị..."
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 outline-none focus:border-green-500 transition">
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="filter-user-role"
+                            class="bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 outline-none focus:border-green-500">
+                            <option value="">Tất cả Vai trò</option>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                            <option value="super_admin">Super Admin</option>
+                        </select>
+                        <select id="filter-user-status"
+                            class="bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 outline-none focus:border-green-500">
+                            <option value="">Tất cả Trạng thái</option>
+                            <option value="active">Đang hoạt động</option>
+                            <option value="locked">Bị khóa (Banned)</option>
+                        </select>
+                        <button onclick="fetchUsers(1)"
+                            class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-900 transition flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            Lọc
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                                <tr
+                                    class="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400 border-b border-slate-100">
+                                    <th class="p-6 font-bold">Người dùng</th>
+                                    <th class="p-6 font-bold text-center">Vai trò</th>
+                                    <th class="p-6 font-bold text-center">Trạng thái</th>
+                                    <th class="p-6 font-bold">Đăng nhập lân cuối</th>
+                                    <th class="p-6 font-bold text-right">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-users" class="divide-y divide-slate-100">
+                                <!-- Dữ liệu sẽ được load qua JS -->
+                            </tbody>
+                        </table>
+                        <div id="loader-users" class="text-center py-20 hidden">
+                            <div
+                                class="animate-spin inline-block w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full mb-4">
+                            </div>
+                            <p class="text-slate-400 font-bold">Đang tải danh sách người dùng...</p>
+                        </div>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="p-6 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                        <span id="user-page-info"
+                            class="text-xs font-bold text-slate-400 uppercase tracking-widest">Đang tải...</span>
+                        <div class="flex gap-2">
+                            <button onclick="changeUserPage(-1)" id="btn-user-prev" disabled
+                                class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm">Trước</button>
+                            <button onclick="changeUserPage(1)" id="btn-user-next" disabled
+                                class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm">Sau</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- DETAIL MODAL -->
+    <div id="detail-modal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-50 hidden flex">
+        <div
+            class="bg-white rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-slate-800">Chi tiết báo cáo</h3>
+                <button onclick="closeDetailModal()"
+                    class="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition">Đóng</button>
+            </div>
+            <div id="detail-content" class="space-y-6">
+                <!-- Nội dung sẽ được nạp qua JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- APPROVE MODAL -->
+    <div id="approve-modal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-[60] hidden flex">
+        <div
+            class="bg-white rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-slate-800">Duyệt vào từ điển</h3>
+                <button onclick="closeApproveModal()"
+                    class="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition">Đóng</button>
+            </div>
+            <form id="approve-form" class="space-y-4" onsubmit="event.preventDefault(); window.submitApproveData();">
+                <input type="hidden" id="approve-id">
+                <input type="hidden" id="approve-image-url">
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tên loại
+                        rác (Tiếng Việt)</label>
+                    <input type="text" id="approve-name" required
+                        class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium text-slate-800">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Nhóm
+                        rác</label>
+                    <select id="approve-group" required
+                        class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium text-slate-800">
+                        <option value="">-- Chọn nhóm rác --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Fun Fact
+                        (Kiến thức bổ sung)</label>
+                    <textarea id="approve-funfact" rows="3"
+                        class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium text-slate-800 resize-none"></textarea>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" id="btn-submit-approve"
+                        class="w-full bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition">XÁC
+                        NHẬN LƯU VÀO TỪ ĐIỂN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- USER ACTION MODAL -->
+    <div id="user-action-modal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-[70] hidden flex">
+        <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl animate-modal overflow-hidden relative">
+            <button onclick="closeUserActionModal()"
+                class="absolute top-6 right-6 text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition">Đóng</button>
+            <h3 class="text-2xl font-black text-slate-800 mb-1">Quản lý User</h3>
+            <p id="user-action-email" class="text-slate-500 text-sm font-bold mb-6"></p>
+
+            <input type="hidden" id="action-user-id">
+            <input type="hidden" id="action-user-locked">
+
+            <div class="space-y-4">
+                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Tác vụ Bảo mật</h4>
+                    <button onclick="resetUserPassword()"
+                        class="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-500 hover:shadow-md transition text-slate-700 font-bold text-sm mb-3">
+                        <span>Gửi link Reset Password (Email)</span>
+                        <span class="text-blue-500">→</span>
+                    </button>
+                    <button onclick="viewUserAuditLogs()"
+                        class="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-slate-500 hover:shadow-md transition text-slate-700 font-bold text-sm">
+                        <span>Xem Lịch sử Hoạt động (Audit Logs)</span>
+                        <span class="text-slate-400">→</span>
+                    </button>
+                </div>
+
+                <div class="p-5 bg-red-50 rounded-2xl border border-red-100">
+                    <h4 class="text-[10px] font-black text-red-400 uppercase tracking-widest mb-3">Tác vụ Kiểm soát</h4>
+
+                    <div id="ban-section" class="mb-4">
+                        <input type="text" id="ban-reason" placeholder="Nhập lý do khóa (Bắt buộc nếu Ban)..."
+                            class="w-full p-4 bg-white border border-red-200 rounded-xl outline-none focus:border-red-500 mb-3 text-sm font-medium">
+                        <button onclick="toggleBanUser()" id="btn-toggle-ban"
+                            class="w-full bg-red-600 text-white py-4 rounded-xl font-black shadow-lg shadow-red-200 hover:bg-red-700 transition">KHÓA
+                            TÀI KHOẢN (BAN)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

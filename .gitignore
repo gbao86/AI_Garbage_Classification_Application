@@ -62,7 +62,7 @@ lib/utils/env.g.dart
 
 # Node (web_admin / JS tooling)
 web_admin/node_modules/
-web_admin/js/config.js
+
 
 # Supabase
 # supabase/
