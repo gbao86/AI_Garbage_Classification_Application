@@ -64,3 +64,9 @@ lib/utils/env.g.dart
 web_admin/node_modules/
 # Supabase
 # supabase/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
