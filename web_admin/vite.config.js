@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   build: {
+    target: 'es2022', 
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
@@ -10,4 +11,7 @@ export default defineConfig({
       },
     },
   },
+  esbuild: {
+    target: 'es2022'
+  }
 });
