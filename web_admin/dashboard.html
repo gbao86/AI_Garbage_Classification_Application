@@ -359,7 +359,11 @@
                 });
             } catch (e) {
                 loader.classList.add('hidden');
-                grid.innerHTML = `<div class="col-span-full p-10 bg-red-50 text-red-500 rounded-3xl text-sm font-bold">Lỗi: ${e.message}</div>`;
+                grid.innerHTML = '';
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'col-span-full p-10 bg-red-50 text-red-500 rounded-3xl text-sm font-bold';
+                errorDiv.textContent = `Lỗi: ${e && e.message ? e.message : 'Không xác định'}`;
+                grid.appendChild(errorDiv);
             }
         };
 
