@@ -7,6 +7,10 @@ on:
 
 # Giới hạn thời gian toàn bộ job: 3 giờ (GitHub Actions free = 6h max)
 # Nếu vượt quá, job sẽ bị cancel thay vì treo vĩnh viễn
+permissions:
+  contents: read
+  actions: read
+  
 defaults:
   run:
     shell: bash
