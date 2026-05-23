@@ -4,6 +4,21 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
+## [0.5.1] - 2026-05-23
+
+### 🎨 Đại tu Giao diện Mô tả Ký hiệu (Waste Symbols UI Upgrade)
+- 🧠 **Bộ phân tích mô tả động (Dynamic Parser)**: Triển khai bộ phân tích cú pháp runtime để tự động chuyển đổi văn bản mô tả phẳng thành các widget UI có cấu trúc cao cấp.
+- 📋 **Trình bày trực quan**:
+    - **Thông số kỹ thuật**: Hiển thị các thông tin như *Chịu nhiệt*, *Dùng cho*, *Tái chế*... thành các thẻ thuộc tính (Property Cards) có viền bo tròn và đổ bóng nhẹ.
+    - **Danh mục liệt kê**: Gom các dòng vật liệu ("Bao gồm") thành các thẻ danh sách (Checklist Cards) với chấm tròn chỉ hướng cùng tông màu.
+    - **Cảnh báo đỏ (Red Alerts)**: Tự động phát hiện các từ khóa cấm/nguy cơ (⚠️, KHÔNG, NGUY HẠI) và hiển thị trong hộp thông báo cảnh báo trực quan với biểu tượng cảnh báo chuyên dụng.
+
+### 🗑️ Tối ưu hóa Biểu tượng Thực tế (Realistic Trash Bin Icons)
+- 📐 **Thiết kế lại SVG Thùng rác**: Redesign vector `_svgTrashBin` thành dạng hình học cân đối, đối xứng hoàn hảo, giúp tăng độ thẩm mỹ và sắc nét cho ứng dụng.
+- 🇻🇳 **Đồng bộ hóa Thùng rác Việt Nam**: Loại bỏ hoàn toàn icon Android/Material (`Icons.delete_rounded`) mặc định và thay thế bằng vector thùng rác nắp lật ngoài đời thực cho tất cả các thùng phân loại rác Việt Nam (`SymbolStyle.colorBin`).
+
+---
+
 ## [0.5.0] - 2026-04-13
 
 ### 🧠 Tự động hóa Huấn luyện AI (MLOps & Cloud Training)

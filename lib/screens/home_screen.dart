@@ -6,6 +6,7 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/screens/scanning_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/screens/about_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/screens/map_screen.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/screens/waste_symbols_screen.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -490,6 +491,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
 
                         const SizedBox(height: 40),
+                        _buildKnowledgeSection(theme),
+
+                        const SizedBox(height: 40),
                         _buildMiniGameSection(theme),
 
                         const SizedBox(height: 120),
@@ -611,6 +615,62 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildKnowledgeSection(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Tra cứu', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 20),
+        InkWell(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const WasteSymbolsScreen()),
+          ),
+          borderRadius: BorderRadius.circular(28),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: Colors.black.withValues(alpha: 0.03)),
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 20, offset: const Offset(0, 8))],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.green, size: 32),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Ký hiệu rác thải',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tìm hiểu ý nghĩa các biểu tượng trên bao bì rác thải.',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey[400], size: 16),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
