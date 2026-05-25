@@ -4,6 +4,14 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
+## [0.5.3] - 2026-05-25
+
+### 🧠 Hủy kích hoạt tự động huấn luyện AI (Disable Auto-Train Engine)
+- ⚠️ **Hủy bỏ chức năng Auto-Train**: Gỡ bỏ hoàn toàn workflow tự động huấn luyện mô hình TensorFlow `.github/workflows/auto_train.yml` và các scripts đi kèm do sự thiếu ổn định về dữ liệu đầu vào (dataset) dẫn đến mô hình hoạt động sai lệch so với thiết kế.
+- 📱 **Chuyển về Model tĩnh trong Assets**: Gỡ bỏ service `ModelUpdateService` và logic cập nhật động từ server. Ứng dụng di động hiện tại sẽ tải và sử dụng mô hình gốc đóng gói sẵn ổn định trong assets (`assets/models/model_unquant.tflite`).
+
+---
+
 ## [0.5.2] - 2026-03-25
 
 ### 🧭 Tối ưu hóa Cấu trúc Điều hướng (Tab Navigation Optimization)
