@@ -175,31 +175,52 @@ class _ResultScreenState extends State<ResultScreen> {
     Color statusColor;
     IconData statusIcon;
     String statusText;
+    LinearGradient statusGradient;
 
     switch (widget.classificationType) {
       case 'nguy hại':
         statusColor = Colors.redAccent;
         statusIcon = Icons.warning_amber_rounded;
         statusText = 'Rác Nguy hại';
+        statusGradient = const LinearGradient(
+          colors: [Color(0xFFD32F2F), Color(0xFFEF5350)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
         break;
       case 'hữu cơ':
         statusColor = Colors.brown;
         statusIcon = Icons.eco_rounded;
         statusText = 'Rác Hữu cơ';
+        statusGradient = const LinearGradient(
+          colors: [Color(0xFF5D4037), Color(0xFF8D6E63)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
         break;
       case 'tái chế':
         statusColor = Colors.green;
         statusIcon = Icons.recycling_rounded;
         statusText = 'Có thể Tái chế';
+        statusGradient = const LinearGradient(
+          colors: [Color(0xFF2E7D32), Color(0xFF4CAF50)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
         break;
       default:
         statusColor = Colors.orangeAccent;
         statusIcon = Icons.delete_outline_rounded;
         statusText = 'Rác không tái chế';
+        statusGradient = const LinearGradient(
+          colors: [Color(0xFFE65100), Color(0xFFFF9800)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Kết quả phân tích'),
         centerTitle: true,
@@ -220,14 +241,21 @@ class _ResultScreenState extends State<ResultScreen> {
             Stack(
               children: [
                 Container(
-                  height: 280,
+                  height: 290,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: theme.primaryColor,
+                    gradient: statusGradient,
                     borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(30),
-                      bottomRight: Radius.circular(30),
+                      bottomLeft: Radius.circular(36),
+                      bottomRight: Radius.circular(36),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: statusColor.withValues(alpha: 0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
                 ),
                 Padding(
@@ -236,11 +264,21 @@ class _ResultScreenState extends State<ResultScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 15, offset: Offset(0, 8))],
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: statusColor.withValues(alpha: 0.25),
+                              blurRadius: 25,
+                              offset: const Offset(0, 12),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            width: 2.0,
+                          ),
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(22),
                           child: Image.file(widget.image, height: 220, width: double.infinity, fit: BoxFit.cover),
                         ),
                       ),
@@ -253,49 +291,88 @@ class _ResultScreenState extends State<ResultScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Column(
                 children: [
-                  _buildSummaryCard(statusColor, statusIcon, statusText),
+                  _animateWidget(_buildSummaryCard(theme, statusColor, statusIcon, statusText, statusGradient), 0),
+                  const SizedBox(height: 16),
+                  _animateWidget(_buildInfoChips(theme, statusColor), 1),
                   const SizedBox(height: 20),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))],
+                  _animateWidget(
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: theme.colorScheme.onSurface.withValues(alpha: 0.05)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.brightness == Brightness.dark
+                                ? Colors.black.withValues(alpha: 0.25)
+                                : Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          )
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 4,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: statusColor,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Icon(Icons.description_rounded, color: statusColor),
+                              const SizedBox(width: 8),
+                              const Text('Chi tiết hướng dẫn', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
+                            ],
+                          ),
+                          const Divider(height: 30),
+                          MarkdownBody(
+                            data: widget.processingResult,
+                            styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                              p: const TextStyle(fontSize: 16, height: 1.6),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.description_rounded, color: theme.primaryColor),
-                            const SizedBox(width: 10),
-                            const Text('Chi tiết hướng dẫn', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                          ],
-                        ),
-                        const Divider(height: 30),
-                        MarkdownBody(data: widget.processingResult, styleSheet: MarkdownStyleSheet(p: const TextStyle(fontSize: 16, height: 1.6))),
-                      ],
-                    ),
+                    2,
                   ),
                   const SizedBox(height: 30),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back_rounded),
-                      label: const Text('Phân loại ảnh khác'),
-                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), backgroundColor: theme.primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                  _animateWidget(
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.arrow_back_rounded),
+                            label: const Text('Phân loại ảnh khác'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: theme.primaryColor,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton.icon(
+                          onPressed: (_isReporting || _hasReported || _imageHash == null) ? null : () => _showReportDialog(),
+                          icon: Icon(_hasReported ? Icons.check_circle : Icons.report_gmailerrorred_rounded, 
+                                     color: _hasReported ? Colors.green : Colors.redAccent),
+                          label: Text(_hasReported ? 'Đã gửi báo cáo cho ảnh này' : 'Kết quả này chưa đúng? Báo cáo ngay', 
+                                     style: TextStyle(color: _hasReported ? Colors.green : Colors.redAccent, 
+                                     decoration: _hasReported ? null : TextDecoration.underline)),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton.icon(
-                    onPressed: (_isReporting || _hasReported || _imageHash == null) ? null : () => _showReportDialog(),
-                    icon: Icon(_hasReported ? Icons.check_circle : Icons.report_gmailerrorred_rounded, 
-                               color: _hasReported ? Colors.green : Colors.redAccent),
-                    label: Text(_hasReported ? 'Đã gửi báo cáo cho ảnh này' : 'Kết quả này chưa đúng? Báo cáo ngay', 
-                               style: TextStyle(color: _hasReported ? Colors.green : Colors.redAccent, 
-                               decoration: _hasReported ? null : TextDecoration.underline)),
+                    3,
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -308,6 +385,7 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   void _showReportDialog() {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -325,12 +403,15 @@ class _ResultScreenState extends State<ResultScreen> {
                 hintText: 'Ví dụ: Chai nhựa Aquafina',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 filled: true,
-                fillColor: Colors.grey[100],
+                fillColor: theme.brightness == Brightness.dark ? theme.colorScheme.surface : Colors.grey[100],
               ),
               autofocus: true,
             ),
             const SizedBox(height: 12),
-            const Text('Hệ thống sẽ lưu lại ảnh này để cải thiện trí tuệ nhân tạo.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            Text(
+              'Hệ thống sẽ lưu lại ảnh này để cải thiện trí tuệ nhân tạo.',
+              style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+            ),
           ],
         ),
         actions: [
@@ -349,20 +430,124 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
-  Widget _buildSummaryCard(Color color, IconData icon, String statusText) {
+  Widget _animateWidget(Widget child, int delayIndex) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 600 + delayIndex * 150),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, childWidget) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0.0, 30.0 * (1 - value)),
+            child: childWidget,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+
+  Widget _buildInfoChips(ThemeData theme, Color statusColor) {
+    final isGemini = widget.tfliteConfidence < 0.8;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: statusColor.withValues(alpha: 0.2)),
+            boxShadow: [
+              BoxShadow(
+                color: theme.brightness == Brightness.dark
+                    ? Colors.black.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(isGemini ? Icons.auto_awesome : Icons.memory_rounded, color: statusColor, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                isGemini 
+                    ? 'AI Gemini (Online)' 
+                    : 'AI Local (TFLite) · ${(widget.tfliteConfidence * 100).toStringAsFixed(0)}%',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSummaryCard(ThemeData theme, Color color, IconData icon, String statusText, LinearGradient gradient) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: color.withValues(alpha: 0.3))),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: color.withValues(alpha: 0.15)),
+        boxShadow: [
+          BoxShadow(
+            color: theme.brightness == Brightness.dark
+                ? Colors.black.withValues(alpha: 0.25)
+                : Colors.black.withValues(alpha: 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: Row(
         children: [
-          Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: color, shape: BoxShape.circle), child: Icon(icon, color: Colors.white, size: 30)),
-          const SizedBox(width: 15),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: gradient,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: Colors.white, size: 28),
+          ),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Tình trạng phân loại', style: TextStyle(fontSize: 12, color: Colors.black54)),
-                Text(statusText, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
+                Text(
+                  'Tình trạng phân loại',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  statusText,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: color,
+                    letterSpacing: -0.5,
+                  ),
+                ),
               ],
             ),
           ),

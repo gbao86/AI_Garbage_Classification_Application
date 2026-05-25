@@ -4,6 +4,26 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ---
 
+## [0.5.2] - 2026-03-25
+
+### 🧭 Tối ưu hóa Cấu trúc Điều hướng (Tab Navigation Optimization)
+- 📌 **Chuyển đổi Tab bằng `IndexedStack`**: Thay đổi cơ chế chuyển đổi màn hình chính từ đẩy trang mới (`Navigator.push`) sang `IndexedStack`. Việc này giúp giữ thanh Bottom Navigation Bar luôn cố định ở chân màn hình, chuyển tab mượt mà và bảo toàn trạng thái của từng tab (như GPS, bản đồ, trang chủ).
+- ⚙️ **Hỗ trợ nhúng Tab linh hoạt**: Thêm tham số `showBackButton` cho `MapScreen` và `AboutScreen`. Khi hiển thị dưới dạng tab con, nút Back trên app bar sẽ được ẩn đi để tăng tính đồng bộ và thẩm mỹ.
+- 📐 **Bảo toàn khoảng cách đệm (Padding)**: Điều chỉnh thông minh chiều cao đệm cuối trang của màn hình thông tin để tránh bị Bottom Nav che khuất chữ bản quyền.
+
+### 🎨 Khắc phục Triệt để Hiển thị Dark Mode (Full Dark Mode & Theme Sync)
+- 🌓 **Đồng bộ màu sắc toàn diện**: Loại bỏ hoàn toàn các màu nền và màu chữ hardcode (như `Colors.white`, `Colors.black54`) và thay thế bằng các màu động lấy trực tiếp từ `Theme.of(context)` (như `theme.colorScheme.surface`, `theme.colorScheme.onSurface`).
+- 🌙 **Hỗ trợ tối tối ưu**: Các Card dịch vụ quét, Card tra cứu ký hiệu, danh sách huy hiệu, các Contact Tile và hộp thoại Dialog đều tự động chuyển sang tông xám/đen cao cấp khi bật chế độ Tối của hệ điều hành, đảm bảo độ tương phản hoàn hảo và dễ đọc.
+- 📯 **Bottom Nav Động**: Tự động chuyển màu nền thanh điều hướng dưới từ màu đen cố định sang màu sáng đi kèm bóng đổ nhẹ khi ở chế độ Sáng (Light Mode).
+
+### 🏆 Đột phá Giao diện Kết quả AI (Premium Result Screen Redesign)
+- 🌈 **Gradient động theo loại rác**: Màu nền Header và các vòng tròn icon tự động biến đổi dải màu gradient theo loại rác phân tích được (Xanh cho *Tái chế*, Nâu cho *Hữu cơ*, Đỏ cho *Nguy hại*, Cam cho *Thông thường*).
+- 🔮 **Viền ảnh phát sáng (Glow Shadow)**: Áp dụng hiệu ứng viền bo góc bán trong suốt và bóng phát sáng theo tông màu phân loại của rác bao quanh ảnh chụp.
+- 🏷️ **Badge định danh AI Engine**: Hiển thị rõ Pill Badge phân biệt nguồn phân tích: **AI Gemini (Online)** hoặc **AI Local (TFLite) · XX%**.
+- 📈 **Hoạt ảnh xuất hiện tuần tự (Micro-animations)**: Tích hợp hiệu ứng trượt nhẹ từ dưới lên và mờ/tỏ dần (fade-in & slide-up) tuần tự cho từng thẻ thông tin kết quả.
+
+---
+
 ## [0.5.1] - 2026-05-23
 
 ### 🎨 Đại tu Giao diện Mô tả Ký hiệu (Waste Symbols UI Upgrade)

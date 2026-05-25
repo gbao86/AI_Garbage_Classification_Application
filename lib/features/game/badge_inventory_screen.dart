@@ -85,14 +85,17 @@ class BadgeInventoryScreen extends StatelessWidget {
     required int earnedCount,
     required int totalCount,
   }) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: theme.brightness == Brightness.dark
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.05),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -121,7 +124,7 @@ class BadgeInventoryScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Đã mở $earnedCount / $totalCount huy hiệu',
-                  style: const TextStyle(color: Colors.black54),
+                  style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                 ),
               ],
             ),
@@ -192,14 +195,17 @@ class BadgeInventoryScreen extends StatelessWidget {
     required int currentScore,
     required bool unlocked,
   }) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: unlocked ? Colors.green.withValues(alpha: 0.4) : Colors.black.withValues(alpha: 0.08),
+          color: unlocked
+              ? Colors.green.withValues(alpha: 0.4)
+              : theme.colorScheme.onSurface.withValues(alpha: 0.08),
         ),
       ),
       child: Row(
@@ -227,7 +233,7 @@ class BadgeInventoryScreen extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   'Mốc mở khóa: $targetScore điểm',
-                  style: const TextStyle(color: Colors.black54, fontSize: 12),
+                  style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 12),
                 ),
               ],
             ),

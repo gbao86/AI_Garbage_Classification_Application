@@ -56,6 +56,10 @@
                 <button onclick="switchTab('users')" id="btn-users"
                     class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition hover:bg-slate-50">Người
                     dùng</button>
+                <button onclick="switchTab('privileged_actions')" id="btn-privileged_actions"
+                    class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition hover:bg-slate-50">Hành động đặc quyền</button>
+                <button onclick="switchTab('settings')" id="btn-settings"
+                    class="w-full text-left px-4 py-3 rounded-xl text-slate-500 font-bold transition hover:bg-slate-50">Cài đặt hệ thống</button>
             </nav>
             <div class="mt-auto pt-6 border-t border-slate-100">
                 <p id="admin-email" class="text-[10px] text-slate-400 font-bold mb-3 truncate uppercase"></p>
@@ -173,6 +177,159 @@
                     </div>
                 </div>
             </section>
+
+            <!-- TAB PRIVILEGED ACTIONS -->
+            <section id="tab-privileged_actions" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-800">Hành động Đặc quyền</h2>
+                        <p class="text-slate-400 text-sm font-medium">Cơ chế phê duyệt hai bước cho các tác vụ nhạy cảm</p>
+                    </div>
+                    <button onclick="openCreatePAModal()"
+                        class="bg-green-600 text-white px-6 py-3.5 rounded-2xl font-black text-sm hover:bg-green-700 transition shadow-lg shadow-green-100 flex items-center gap-2">
+                        + Tạo yêu cầu mới
+                    </button>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center mb-6">
+                    <div class="flex gap-2">
+                        <select id="filter-pa-state" onchange="fetchPrivilegedActions(1)"
+                            class="bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 outline-none focus:border-green-500">
+                            <option value="">Tất cả Trạng thái</option>
+                            <option value="draft">Bản thảo</option>
+                            <option value="awaiting_second_approval">Chờ duyệt lần 2</option>
+                            <option value="approved">Đã duyệt (Chờ thực thi)</option>
+                            <option value="rejected">Đã từ chối</option>
+                            <option value="executed">Đã thực thi</option>
+                        </select>
+                    </div>
+                    <button onclick="fetchPrivilegedActions(1)"
+                        class="bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-900 transition">Làm mới</button>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                                <tr class="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-400 border-b border-slate-100">
+                                    <th class="p-6 font-bold">Hành động</th>
+                                    <th class="p-6 font-bold text-center">Người yêu cầu</th>
+                                    <th class="p-6 font-bold text-center">Trạng thái</th>
+                                    <th class="p-6 font-bold">Ngày tạo</th>
+                                    <th class="p-6 font-bold text-right">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-privileged-actions" class="divide-y divide-slate-100">
+                                <!-- Load JS -->
+                            </tbody>
+                        </table>
+                        <div id="loader-privileged-actions" class="text-center py-20 hidden">
+                            <div class="animate-spin inline-block w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full mb-4"></div>
+                            <p class="text-slate-400 font-bold">Đang tải danh sách yêu cầu...</p>
+                        </div>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="p-6 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                        <span id="pa-page-info" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Đang tải...</span>
+                        <div class="flex gap-2">
+                            <button onclick="changePAPage(-1)" id="btn-pa-prev" disabled
+                                class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm">Trước</button>
+                            <button onclick="changePAPage(1)" id="btn-pa-next" disabled
+                                class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm">Sau</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB SYSTEM SETTINGS -->
+            <section id="tab-settings" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-800">Cấu hình Hệ thống</h2>
+                        <p class="text-slate-400 text-sm font-medium">Quản lý trạng thái vận hành và các tham số tính năng</p>
+                    </div>
+                    <div id="settings-status-badge">
+                        <!-- Hiển thị phân quyền Admin vs Super Admin -->
+                    </div>
+                </div>
+
+                <div id="loader-settings" class="text-center py-20 hidden">
+                    <div class="animate-spin inline-block w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full mb-4"></div>
+                    <p class="text-slate-400 font-bold">Đang tải cấu hình...</p>
+                </div>
+
+                <div id="settings-form-container" class="space-y-8 hidden">
+                    <!-- Section 1: Maintenance & Kill Switch -->
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                        <h3 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                            <span class="p-2 rounded-xl bg-orange-100 text-orange-600">🛠️</span> Trạng thái vận hành (Maintenance & Kill Switch)
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <label class="flex items-start gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:bg-slate-100 transition">
+                                <input type="checkbox" id="setting-maint-enabled" class="w-5 h-5 mt-1 text-green-600 rounded focus:ring-green-500">
+                                <div>
+                                    <p class="font-bold text-slate-700 text-sm">Bật chế độ bảo trì (Maintenance Mode)</p>
+                                    <p class="text-xs text-slate-400 mt-1">Khi bật, người dùng thông thường sẽ không truy cập được app, chỉ Admin mới truy cập được.</p>
+                                </div>
+                            </label>
+                            <label class="flex items-start gap-4 p-5 bg-red-50/50 rounded-2xl border border-red-100 cursor-pointer hover:bg-red-50 transition">
+                                <input type="checkbox" id="setting-maint-killswitch" class="w-5 h-5 mt-1 text-red-600 rounded focus:ring-red-500">
+                                <div>
+                                    <p class="font-bold text-red-700 text-sm">Kích hoạt ngắt khẩn cấp (Kill Switch)</p>
+                                    <p class="text-xs text-red-400 mt-1 uppercase font-bold">Cực kỳ nhạy cảm! Vô hiệu hóa toàn bộ API ghi của ứng dụng đối với mọi người dùng.</p>
+                                </div>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Thông báo bảo trì hệ thống</label>
+                            <textarea id="setting-maint-message" rows="3" placeholder="Nhập thông báo hiển thị cho người dùng khi bảo trì..."
+                                class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium text-slate-800 resize-none"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Points configuration -->
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                        <h3 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                            <span class="p-2 rounded-xl bg-green-100 text-green-600">🏆</span> Cơ cấu điểm thưởng (Gamification Points)
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Điểm quét rác cơ bản</label>
+                                <input type="number" id="setting-points-base" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Điểm trả lời Quiz đúng</label>
+                                <input type="number" id="setting-points-correct" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Hệ số streak bonus (mỗi ngày)</label>
+                                <input type="number" id="setting-points-streak" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Gemini model configuration -->
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                        <h3 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                            <span class="p-2 rounded-xl bg-blue-100 text-blue-600">🧠</span> Cấu hình Trí tuệ nhân tạo (AI Gemini Model)
+                        </h3>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tên Model Gemini sử dụng</label>
+                            <input type="text" id="setting-gemini-model" placeholder="Ví dụ: gemini-1.5-flash hoặc gemini-pro"
+                                class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium">
+                        </div>
+                    </div>
+
+                    <!-- Save action -->
+                    <div class="flex justify-end pt-4" id="settings-save-container">
+                        <button onclick="saveSystemSettings()" id="btn-save-settings"
+                            class="bg-green-600 text-white px-10 py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition active:scale-95">
+                            LƯU CẤU HÌNH HỆ THỐNG
+                        </button>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -276,6 +433,77 @@
                             TÀI KHOẢN (BAN)</button>
                     </div>
                 </div>
+
+                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100" id="user-role-actions-section">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Vai trò & Quyền hạn (Cần Duyệt 2 Bước)</h4>
+                    <button onclick="requestRolePromotion()" id="btn-request-promote"
+                        class="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-green-500 hover:shadow-md transition text-slate-700 font-bold text-sm mb-3">
+                        <span>Đề xuất Nâng cấp lên Admin</span>
+                        <span class="text-green-500">↑</span>
+                    </button>
+                    <button onclick="requestRoleDemotion()" id="btn-request-demote"
+                        class="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-red-500 hover:shadow-md transition text-slate-700 font-bold text-sm">
+                        <span>Đề xuất Hạ cấp xuống User</span>
+                        <span class="text-red-500">↓</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE PRIVILEGED ACTION MODAL -->
+    <div id="create-pa-modal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-[75] hidden flex">
+        <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-slate-800">Tạo yêu cầu Đặc quyền</h3>
+                <button onclick="closeCreatePAModal()"
+                    class="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition">Đóng</button>
+            </div>
+            <form id="create-pa-form" class="space-y-4" onsubmit="event.preventDefault(); window.submitCreatePARequest();">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Loại hành động</label>
+                    <select id="create-pa-type" required onchange="handlePATypeChange()"
+                        class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium text-slate-800">
+                        <option value="">-- Chọn hành động --</option>
+                        <option value="promote_user_admin">Nâng cấp User lên Admin</option>
+                        <option value="demote_admin">Hạ cấp Admin xuống User</option>
+                        <option value="toggle_kill_switch">Bật/Tắt Kill Switch (Ngắt khẩn cấp)</option>
+                        <option value="delete_collection_point">Xóa điểm bỏ rác</option>
+                        <option value="other">Hành động khác</option>
+                    </select>
+                </div>
+
+                <!-- Dynamic inputs container -->
+                <div id="create-pa-payload-inputs" class="space-y-4">
+                    <!-- Load động tùy loại hành động chọn -->
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Lý do thực hiện / Ghi chú</label>
+                    <textarea id="create-pa-reason" rows="3" required placeholder="Nhập lý do chi tiết..."
+                        class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium text-slate-800 resize-none"></textarea>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" id="btn-submit-pa-request"
+                        class="w-full bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition">GỬI YÊU CẦU DUYỆT</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PRIVILEGED ACTION DETAIL MODAL -->
+    <div id="pa-detail-modal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-[75] hidden flex">
+        <div class="bg-white rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-slate-800">Chi tiết Yêu cầu đặc quyền</h3>
+                <button onclick="closePADetailModal()"
+                    class="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition">Đóng</button>
+            </div>
+            <div id="pa-detail-content" class="space-y-6">
+                <!-- Load JS -->
             </div>
         </div>
     </div>
@@ -517,8 +745,16 @@
             document.querySelectorAll('nav button').forEach(el => el.classList.remove('sidebar-active', 'hover:bg-slate-50'));
             document.getElementById('tab-' + tab).classList.remove('hidden');
             document.getElementById('btn-' + tab).classList.add('sidebar-active');
+            // Đảm bảo các button khác có hover
+            document.querySelectorAll('nav button').forEach(btn => {
+                if (!btn.classList.contains('sidebar-active')) {
+                    btn.classList.add('hover:bg-slate-50');
+                }
+            });
             if (tab === 'submissions') fetchSubmissions();
             if (tab === 'users') fetchUsers(1);
+            if (tab === 'privileged_actions') fetchPrivilegedActions(1);
+            if (tab === 'settings') fetchSystemSettings();
         };
 
         // ================= USER MANAGEMENT =================
@@ -652,6 +888,9 @@
             document.getElementById('action-user-id').value = id;
             document.getElementById('action-user-locked').value = isLocked;
             document.getElementById('user-action-email').innerText = email !== 'undefined' && email ? email : 'ID: ' + id;
+            
+            // Lưu vai trò của user mục tiêu vào dataset
+            document.getElementById('user-action-modal').dataset.targetRole = role;
 
             const btnBan = document.getElementById('btn-toggle-ban');
             const inputReason = document.getElementById('ban-reason');
@@ -666,6 +905,33 @@
                 inputReason.classList.remove('hidden');
                 inputReason.value = '';
             }
+
+            // Phân quyền hiển thị Nâng/Hạ cấp
+            const btnPromote = document.getElementById('btn-request-promote');
+            const btnDemote = document.getElementById('btn-request-demote');
+            const roleSection = document.getElementById('user-role-actions-section');
+
+            // Không cho phép tự nâng/hạ quyền chính mình
+            db.auth.getUser().then(({ data: { user } }) => {
+                const isSelf = user && user.id === id;
+                if (isSelf) {
+                    roleSection.classList.add('hidden');
+                } else {
+                    roleSection.classList.remove('hidden');
+                    if (role === 'user') {
+                        btnPromote.classList.remove('hidden');
+                        btnDemote.classList.add('hidden');
+                    } else if (role === 'admin') {
+                        btnPromote.classList.add('hidden');
+                        btnDemote.classList.remove('hidden');
+                    } else {
+                        // super_admin hoặc các role đặc biệt khác không tác động trực tiếp qua đây
+                        roleSection.classList.add('hidden');
+                    }
+                }
+            }).catch(e => {
+                console.error(e);
+            });
 
             document.getElementById('user-action-modal').classList.remove('hidden');
         };
@@ -723,6 +989,635 @@
             } catch (e) {
                 console.error(e);
                 alert('Lỗi: ' + e.message);
+            }
+        };
+
+        window.viewUserAuditLogs = () => {
+            alert('Tính năng xem Audit Logs đang được xây dựng (Sẽ nạp từ bảng public.audit_logs)');
+        };
+
+        // ================= PRIVILEGED ACTIONS & SYSTEM SETTINGS =================
+        let privilegedActions = [];
+        let paPage = 1;
+        const PA_LIMIT = 25;
+
+        // Map hiển thị tên hành động sang tiếng Việt
+        const ACTION_TYPE_MAP = {
+            'promote_user_admin': 'Nâng cấp User lên Admin',
+            'demote_admin': 'Hạ cấp Admin xuống User',
+            'toggle_kill_switch': 'Ngắt khẩn cấp (Kill Switch)',
+            'delete_collection_point': 'Xóa điểm bỏ rác',
+            'purge_user_data': 'Xóa dữ liệu người dùng',
+            'other': 'Hành động khác'
+        };
+
+        const STATE_BADGE_MAP = {
+            'draft': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-slate-100 text-slate-600">Bản thảo</span>',
+            'awaiting_second_approval': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-amber-100 text-amber-700 animate-pulse">Chờ duyệt lần 2</span>',
+            'approved': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-green-100 text-green-700">Đã duyệt (Chờ thực thi)</span>',
+            'rejected': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-red-100 text-red-700">Đã từ chối</span>',
+            'executed': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-blue-100 text-blue-700">Đã thực thi</span>',
+            'expired': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-gray-200 text-gray-500">Đã hết hạn</span>'
+        };
+
+        // 1. Quản lý yêu cầu từ màn hình User Detail
+        window.requestRolePromotion = async () => {
+            const targetUserId = document.getElementById('action-user-id').value;
+            const targetEmail = document.getElementById('user-action-email').innerText;
+            const reason = prompt('Nhập lý do đề xuất nâng quyền Admin (Bắt buộc):');
+            if (!reason) return;
+
+            try {
+                const { data: { session } } = await db.auth.getSession();
+                const currentUserId = session?.user?.id;
+
+                const { error } = await db.from('privileged_action_requests').insert({
+                    action_type: 'promote_user_admin',
+                    payload: { user_id: targetUserId, email: targetEmail },
+                    requester_id: currentUserId,
+                    execution_note: reason
+                });
+
+                if (error) throw error;
+                alert('Đã gửi đề xuất nâng cấp quyền Admin! Yêu cầu cần một Admin/Super Admin khác phê duyệt để có hiệu lực.');
+                closeUserActionModal();
+            } catch (e) {
+                alert('Lỗi: ' + e.message);
+            }
+        };
+
+        window.requestRoleDemotion = async () => {
+            const targetUserId = document.getElementById('action-user-id').value;
+            const targetEmail = document.getElementById('user-action-email').innerText;
+            const reason = prompt('Nhập lý do đề xuất hạ quyền Admin xuống User (Bắt buộc):');
+            if (!reason) return;
+
+            try {
+                const { data: { session } } = await db.auth.getSession();
+                const currentUserId = session?.user?.id;
+
+                const { error } = await db.from('privileged_action_requests').insert({
+                    action_type: 'demote_admin',
+                    payload: { user_id: targetUserId, email: targetEmail },
+                    requester_id: currentUserId,
+                    execution_note: reason
+                });
+
+                if (error) throw error;
+                alert('Đã gửi đề xuất hạ quyền Admin! Yêu cầu cần một Admin/Super Admin khác phê duyệt để có hiệu lực.');
+                closeUserActionModal();
+            } catch (e) {
+                alert('Lỗi: ' + e.message);
+            }
+        };
+
+        // 2. Fetch danh sách yêu cầu đặc quyền
+        window.fetchPrivilegedActions = async (page = 1) => {
+            paPage = page;
+            const tbody = document.getElementById('table-privileged-actions');
+            const loader = document.getElementById('loader-privileged-actions');
+            const stateFilter = document.getElementById('filter-pa-state').value;
+
+            tbody.innerHTML = '';
+            loader.classList.remove('hidden');
+            document.getElementById('pa-page-info').innerText = 'Đang tải...';
+
+            try {
+                // Lấy map profiles để hiển thị display_name người tạo
+                const { data: profiles } = await db.from('profiles').select('id, display_name');
+                const profilesMap = {};
+                if (profiles) {
+                    profiles.forEach(p => profilesMap[p.id] = p.display_name || p.id);
+                }
+
+                let query = db.from('privileged_action_requests')
+                    .select('*', { count: 'exact' });
+
+                if (stateFilter) {
+                    query = query.eq('state', stateFilter);
+                }
+
+                const fromIndex = (paPage - 1) * PA_LIMIT;
+                const toIndex = fromIndex + PA_LIMIT - 1;
+
+                const { data, count, error } = await query
+                    .order('created_at', { ascending: false })
+                    .range(fromIndex, toIndex);
+
+                if (error) throw error;
+
+                loader.classList.add('hidden');
+                privilegedActions = data || [];
+
+                if (privilegedActions.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-400 font-bold">Không có yêu cầu đặc quyền nào</td></tr>';
+                    updatePAPagination(0);
+                    return;
+                }
+
+                privilegedActions.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition border-b border-slate-50 last:border-none';
+
+                    const actionName = ACTION_TYPE_MAP[item.action_type] || item.action_type;
+                    const stateHtml = STATE_BADGE_MAP[item.state] || item.state;
+                    const requesterName = profilesMap[item.requester_id] || 'N/A';
+
+                    tr.innerHTML = `
+                        <td class="p-6">
+                            <p class="font-bold text-slate-800 text-sm">${actionName}</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">ID: ${item.id}</p>
+                        </td>
+                        <td class="p-6 text-center text-sm font-semibold text-slate-600">${requesterName}</td>
+                        <td class="p-6 text-center">${stateHtml}</td>
+                        <td class="p-6 text-xs text-slate-500 font-semibold">${new Date(item.created_at).toLocaleString()}</td>
+                        <td class="p-6 text-right">
+                            <button onclick="showPADetail('${item.id}')"
+                                class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-black hover:bg-slate-900 transition shadow-sm">
+                                CHI TIẾT
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                updatePAPagination(count || 0);
+            } catch (e) {
+                loader.classList.add('hidden');
+                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center bg-red-50 text-red-500 font-bold rounded-2xl">Lỗi: ${e.message}</td></tr>`;
+            }
+        };
+
+        function updatePAPagination(total) {
+            const btnPrev = document.getElementById('btn-pa-prev');
+            const btnNext = document.getElementById('btn-pa-next');
+            const info = document.getElementById('pa-page-info');
+
+            const start = (paPage - 1) * PA_LIMIT + 1;
+            const end = Math.min(paPage * PA_LIMIT, total);
+
+            if (total === 0) {
+                info.innerText = 'Không có dữ liệu';
+                btnPrev.disabled = true;
+                btnNext.disabled = true;
+            } else {
+                info.innerText = `Hiển thị ${start}-${end} trên ${total}`;
+                btnPrev.disabled = paPage === 1;
+                btnNext.disabled = end >= total;
+            }
+        }
+
+        window.changePAPage = (delta) => {
+            fetchPrivilegedActions(paPage + delta);
+        };
+
+        // 3. Xem chi tiết & Phê duyệt / Từ chối / Thực thi
+        window.showPADetail = async (id) => {
+            const item = privilegedActions.find(a => a.id === id);
+            if (!item) return;
+
+            const modal = document.getElementById('pa-detail-modal');
+            const content = document.getElementById('pa-detail-content');
+            content.innerHTML = '<p class="text-slate-400 font-bold text-center">Đang tải chi tiết phê duyệt...</p>';
+            modal.classList.remove('hidden');
+
+            try {
+                // Fetch approvals and profiles
+                const { data: approvals, error: appError } = await db.from('privileged_action_approvals')
+                    .select('*')
+                    .eq('request_id', id);
+                
+                if (appError) throw appError;
+
+                const { data: profiles } = await db.from('profiles').select('id, display_name');
+                const profilesMap = {};
+                if (profiles) {
+                    profiles.forEach(p => profilesMap[p.id] = p.display_name || p.id);
+                }
+
+                const { data: { session } } = await db.auth.getSession();
+                const currentUserId = session?.user?.id;
+
+                const actionName = ACTION_TYPE_MAP[item.action_type] || item.action_type;
+                const stateHtml = STATE_BADGE_MAP[item.state] || item.state;
+                const requesterName = profilesMap[item.requester_id] || item.requester_id;
+
+                // Kiểm tra xem user hiện tại đã duyệt chưa
+                const hasApproved = approvals && approvals.some(a => a.approver_id === currentUserId);
+                const isRequester = item.requester_id === currentUserId;
+
+                // Render approvals list
+                let approvalsHtml = '';
+                if (approvals && approvals.length > 0) {
+                    approvalsHtml = approvals.map(a => `
+                        <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <div>
+                                <p class="font-bold text-slate-800 text-sm">${profilesMap[a.approver_id] || a.approver_id}</p>
+                                <p class="text-xs text-slate-500 mt-0.5">${a.comment || 'Không có bình luận'}</p>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-bold">${new Date(a.created_at).toLocaleString()}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    approvalsHtml = '<p class="text-xs text-slate-400 italic">Chưa có lượt phê duyệt nào.</p>';
+                }
+
+                // Payload rendering
+                const payloadStr = JSON.stringify(item.payload, null, 2);
+
+                content.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div class="bg-slate-50 p-6 rounded-3xl">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loại hành động</span>
+                                <p class="text-lg font-black text-slate-800 mt-1">${actionName}</p>
+                            </div>
+                            <div class="bg-slate-50 p-6 rounded-3xl">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Người yêu cầu</span>
+                                <p class="font-bold text-slate-800 mt-1">${requesterName}</p>
+                            </div>
+                            <div class="bg-slate-50 p-6 rounded-3xl">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trạng thái</span>
+                                <div class="mt-2">${stateHtml}</div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-3xl flex flex-col">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Dữ liệu Payload (JSON)</span>
+                            <pre class="bg-slate-800 text-green-400 p-4 rounded-xl text-xs font-mono overflow-auto flex-1 max-h-[160px]">${payloadStr}</pre>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-3xl">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lý do tạo yêu cầu</span>
+                        <p class="text-slate-600 text-sm mt-2 leading-relaxed">${item.execution_note || 'N/A'}</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Danh sách phê duyệt (${approvals ? approvals.length : 0}/2)</span>
+                        <div class="space-y-2 max-h-[180px] overflow-y-auto">
+                            ${approvalsHtml}
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="pt-6 border-t border-slate-100 flex flex-wrap gap-4">
+                        ${(item.state === 'draft' || item.state === 'awaiting_second_approval') ? `
+                            ${isRequester ? `
+                                <div class="w-full p-4 bg-yellow-50 text-yellow-800 border border-yellow-100 rounded-xl text-xs font-semibold text-center">
+                                    ⚠️ Bạn là người tạo yêu cầu này. Hãy nhờ Admin khác phê duyệt để đảm bảo quy trình.
+                                </div>
+                            ` : `
+                                ${hasApproved ? `
+                                    <div class="w-full p-4 bg-green-50 text-green-800 border border-green-100 rounded-xl text-xs font-semibold text-center">
+                                        ✓ Bạn đã phê duyệt yêu cầu này rồi.
+                                    </div>
+                                ` : `
+                                    <button onclick="approvePARequest('${item.id}')" class="flex-[2] bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition">PHÊ DUYỆT</button>
+                                    <button onclick="rejectPARequest('${item.id}')" class="flex-1 bg-red-50 text-red-500 py-4 rounded-2xl font-bold hover:bg-red-100 transition">TỪ CHỐI</button>
+                                `}
+                            `}
+                        ` : ''}
+
+                        ${item.state === 'approved' ? `
+                            <button onclick="executePARequest('${item.id}')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-blue-100 hover:bg-blue-700 transition">THỰC THI HÀNG ĐỘNG</button>
+                        ` : ''}
+
+                        ${item.state === 'executed' ? `
+                            <div class="w-full p-5 bg-blue-50/50 text-blue-800 border border-blue-100 rounded-2xl text-xs">
+                                <p class="font-bold">✓ Đã thực thi thành công</p>
+                                <p class="mt-1 font-semibold text-blue-600">Ghi chú: ${item.execution_note || 'N/A'}</p>
+                                <p class="text-[10px] text-slate-400 mt-1 font-bold">Lúc: ${new Date(item.executed_at).toLocaleString()}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            } catch (e) {
+                content.innerHTML = `<div class="p-10 bg-red-50 text-red-500 rounded-3xl text-sm font-bold text-center">Lỗi tải chi tiết: ${e.message}</div>`;
+            }
+        };
+
+        window.closePADetailModal = () => {
+            document.getElementById('pa-detail-modal').classList.add('hidden');
+        };
+
+        window.approvePARequest = async (id) => {
+            const comment = prompt('Nhập ý kiến phê duyệt (Không bắt buộc):');
+            if (comment === null) return; // Cancel
+
+            try {
+                const { data, error } = await db.rpc('privileged_action_add_approval', {
+                    p_request_id: id,
+                    p_comment: comment || null
+                });
+
+                if (error) throw error;
+                alert('Đã phê duyệt thành công! Trạng thái hiện tại: ' + (ACTION_TYPE_MAP[data] || data));
+                closePADetailModal();
+                fetchPrivilegedActions(paPage);
+            } catch (e) {
+                alert('Lỗi phê duyệt: ' + e.message);
+            }
+        };
+
+        window.rejectPARequest = async (id) => {
+            const reason = prompt('Nhập lý do từ chối (Bắt buộc):');
+            if (!reason) return;
+
+            try {
+                const { data: { session } } = await db.auth.getSession();
+                const currentEmail = session?.user?.email || 'Admin';
+
+                const { error } = await db.from('privileged_action_requests').update({
+                    state: 'rejected',
+                    execution_note: `Bị từ chối bởi ${currentEmail}. Lý do: ${reason}`
+                }).eq('id', id);
+
+                if (error) throw error;
+                alert('Đã từ chối yêu cầu này!');
+                closePADetailModal();
+                fetchPrivilegedActions(paPage);
+            } catch (e) {
+                alert('Lỗi: ' + e.message);
+            }
+        };
+
+        window.executePARequest = async (id) => {
+            const item = privilegedActions.find(a => a.id === id);
+            if (!item) return;
+
+            if (!confirm('Bạn chắc chắn muốn thực thi hành động này trực tiếp lên hệ thống?')) return;
+
+            try {
+                const { data: { session } } = await db.auth.getSession();
+                const executorEmail = session?.user?.email || 'Admin';
+                const payload = item.payload;
+
+                // 1. Thực thi nghiệp vụ tùy theo loại hành động
+                if (item.action_type === 'promote_user_admin') {
+                    const { error } = await db.from('profiles').update({ role: 'admin' }).eq('id', payload.user_id);
+                    if (error) throw error;
+                } else if (item.action_type === 'demote_admin') {
+                    const { error } = await db.from('profiles').update({ role: 'user' }).eq('id', payload.user_id);
+                    if (error) throw error;
+                } else if (item.action_type === 'delete_collection_point') {
+                    const { error } = await db.from('collection_points').delete().eq('id', payload.point_id);
+                    if (error) throw error;
+                } else if (item.action_type === 'toggle_kill_switch') {
+                    // Lấy giá trị hiện tại
+                    const { data: currentMaint } = await db.from('system_settings').select('value').eq('key', 'maintenance').maybeSingle();
+                    const updatedVal = currentMaint?.value || { enabled: false, message: "" };
+                    updatedVal.kill_switch = payload.kill_switch;
+
+                    const { error } = await db.from('system_settings').update({ value: updatedVal }).eq('key', 'maintenance');
+                    if (error) throw error;
+                } else {
+                    throw new Error('Chưa hỗ trợ thực thi tự động cho loại hành động này.');
+                }
+
+                // 2. Cập nhật trạng thái yêu cầu sang 'executed'
+                const { error: updateError } = await db.from('privileged_action_requests').update({
+                    state: 'executed',
+                    executed_at: new Date().toISOString(),
+                    execution_note: `Thực thi thành công bởi ${executorEmail}`
+                }).eq('id', id);
+
+                if (updateError) throw updateError;
+
+                alert('Thực thi hành động thành công!');
+                closePADetailModal();
+                fetchPrivilegedActions(paPage);
+            } catch (e) {
+                alert('Lỗi thực thi: ' + e.message);
+            }
+        };
+
+        // 4. Tạo thủ công yêu cầu đặc quyền mới
+        window.openCreatePAModal = async () => {
+            const modal = document.getElementById('create-pa-modal');
+            document.getElementById('create-pa-type').value = '';
+            document.getElementById('create-pa-payload-inputs').innerHTML = '';
+            document.getElementById('create-pa-reason').value = '';
+            modal.classList.remove('hidden');
+        };
+
+        window.closeCreatePAModal = () => {
+            document.getElementById('create-pa-modal').classList.add('hidden');
+        };
+
+        window.handlePATypeChange = async () => {
+            const type = document.getElementById('create-pa-type').value;
+            const container = document.getElementById('create-pa-payload-inputs');
+            container.innerHTML = '<p class="text-xs text-slate-400 font-bold">Đang tải dữ liệu cấu hình...</p>';
+
+            try {
+                if (type === 'promote_user_admin') {
+                    const { data: users } = await db.from('profiles').select('id, display_name, role').eq('role', 'user');
+                    if (!users || users.length === 0) {
+                        container.innerHTML = '<p class="text-xs text-red-500 font-bold">Không tìm thấy user thường nào để nâng quyền.</p>';
+                        return;
+                    }
+                    let options = users.map(u => `<option value="${u.id}" data-name="${u.display_name}">${u.display_name || u.id} (User)</option>`).join('');
+                    container.innerHTML = `
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Chọn User nâng quyền</label>
+                            <select id="pa-input-user" required class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none text-slate-800">
+                                ${options}
+                            </select>
+                        </div>
+                    `;
+                } else if (type === 'demote_admin') {
+                    const { data: admins } = await db.from('profiles').select('id, display_name, role').eq('role', 'admin');
+                    if (!admins || admins.length === 0) {
+                        container.innerHTML = '<p class="text-xs text-red-500 font-bold">Không tìm thấy Admin nào khác để hạ quyền.</p>';
+                        return;
+                    }
+                    let options = admins.map(u => `<option value="${u.id}" data-name="${u.display_name}">${u.display_name || u.id} (Admin)</option>`).join('');
+                    container.innerHTML = `
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Chọn Admin hạ quyền</label>
+                            <select id="pa-input-user" required class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none text-slate-800">
+                                ${options}
+                            </select>
+                        </div>
+                    `;
+                } else if (type === 'toggle_kill_switch') {
+                    container.innerHTML = `
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Trạng thái Kill Switch mong muốn</label>
+                            <select id="pa-input-killswitch" required class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none text-slate-800">
+                                <option value="true">BẬT (Khóa toàn bộ API ghi)</option>
+                                <option value="false">TẮT (Hoạt động bình thường)</option>
+                            </select>
+                        </div>
+                    `;
+                } else if (type === 'delete_collection_point') {
+                    const { data: points } = await db.from('collection_points').select('id, name');
+                    if (!points || points.length === 0) {
+                        container.innerHTML = '<p class="text-xs text-red-500 font-bold">Không tìm thấy điểm bỏ rác nào.</p>';
+                        return;
+                    }
+                    let options = points.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+                    container.innerHTML = `
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Chọn Điểm bỏ rác muốn xóa</label>
+                            <select id="pa-input-point" required class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none text-slate-800">
+                                ${options}
+                            </select>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = '';
+                }
+            } catch (e) {
+                container.innerHTML = `<p class="text-xs text-red-500 font-bold">Lỗi tải dữ liệu: ${e.message}</p>`;
+            }
+        };
+
+        window.submitCreatePARequest = async () => {
+            const type = document.getElementById('create-pa-type').value;
+            const reason = document.getElementById('create-pa-reason').value.trim();
+            const btn = document.getElementById('btn-submit-pa-request');
+
+            if (!type || !reason) return alert('Vui lòng điền đầy đủ thông tin!');
+
+            let payload = {};
+            if (type === 'promote_user_admin' || type === 'demote_admin') {
+                const select = document.getElementById('pa-input-user');
+                const opt = select.options[select.selectedIndex];
+                payload = { user_id: select.value, name: opt.text };
+            } else if (type === 'toggle_kill_switch') {
+                const val = document.getElementById('pa-input-killswitch').value === 'true';
+                payload = { kill_switch: val };
+            } else if (type === 'delete_collection_point') {
+                const select = document.getElementById('pa-input-point');
+                const opt = select.options[select.selectedIndex];
+                payload = { point_id: select.value, name: opt.text };
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'ĐANG GỬI...';
+
+            try {
+                const { data: { session } } = await db.auth.getSession();
+                const currentUserId = session?.user?.id;
+
+                const { error } = await db.from('privileged_action_requests').insert({
+                    action_type: type,
+                    payload: payload,
+                    requester_id: currentUserId,
+                    execution_note: reason
+                });
+
+                if (error) throw error;
+
+                alert('Đã gửi yêu cầu phê duyệt thành công!');
+                closeCreatePAModal();
+                fetchPrivilegedActions(1);
+            } catch (e) {
+                alert('Lỗi gửi yêu cầu: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'GỬI YÊU CẦU DUYỆT';
+            }
+        };
+
+        // 5. Cấu hình hệ thống (System Settings)
+        window.fetchSystemSettings = async () => {
+            const container = document.getElementById('settings-form-container');
+            const loader = document.getElementById('loader-settings');
+            const statusBadge = document.getElementById('settings-status-badge');
+
+            container.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            try {
+                const { data, error } = await db.from('system_settings').select('*');
+                if (error) throw error;
+
+                loader.classList.add('hidden');
+                container.classList.remove('hidden');
+
+                // Map các config
+                const maintenance = data.find(s => s.key === 'maintenance')?.value || { enabled: false, kill_switch: false, message: "" };
+                const points = data.find(s => s.key === 'points')?.value || { scan_base: 10, game_correct: 5, streak_bonus_per: 1 };
+                const gemini = data.find(s => s.key === 'gemini')?.value || { model: "gemini-flash-latest" };
+
+                // Điền vào form
+                document.getElementById('setting-maint-enabled').checked = !!maintenance.enabled;
+                document.getElementById('setting-maint-killswitch').checked = !!maintenance.kill_switch;
+                document.getElementById('setting-maint-message').value = maintenance.message || '';
+
+                document.getElementById('setting-points-base').value = points.scan_base || 10;
+                document.getElementById('setting-points-correct').value = points.game_correct || 5;
+                document.getElementById('setting-points-streak').value = points.streak_bonus_per || 1;
+
+                document.getElementById('setting-gemini-model').value = gemini.model || 'gemini-flash-latest';
+
+                // Phân quyền cho từng Role
+                const inputs = [
+                    'setting-maint-enabled', 'setting-maint-killswitch', 'setting-maint-message',
+                    'setting-points-base', 'setting-points-correct', 'setting-points-streak',
+                    'setting-gemini-model'
+                ];
+
+                if (currentUserRole !== 'super_admin') {
+                    // Admin chỉ xem
+                    inputs.forEach(id => document.getElementById(id).disabled = true);
+                    document.getElementById('settings-save-container').classList.add('hidden');
+                    statusBadge.innerHTML = '<span class="px-4 py-2 rounded-xl bg-amber-100 text-amber-800 font-bold text-xs uppercase tracking-widest shadow-sm">Chế độ Chỉ Xem (Chỉ Super Admin được sửa)</span>';
+                } else {
+                    // Super admin sửa được
+                    inputs.forEach(id => document.getElementById(id).disabled = false);
+                    document.getElementById('settings-save-container').classList.remove('hidden');
+                    statusBadge.innerHTML = '<span class="px-4 py-2 rounded-xl bg-green-100 text-green-800 font-bold text-xs uppercase tracking-widest shadow-sm border border-green-200">Quyền chỉnh sửa Super Admin</span>';
+                }
+            } catch (e) {
+                loader.classList.add('hidden');
+                alert('Lỗi tải cấu hình: ' + e.message);
+            }
+        };
+
+        window.saveSystemSettings = async () => {
+            const btn = document.getElementById('btn-save-settings');
+            btn.disabled = true;
+            btn.innerText = 'ĐANG LƯU...';
+
+            try {
+                const { data: { session } } = await db.auth.getSession();
+                const userId = session?.user?.id;
+
+                const maintenanceVal = {
+                    enabled: document.getElementById('setting-maint-enabled').checked,
+                    kill_switch: document.getElementById('setting-maint-killswitch').checked,
+                    message: document.getElementById('setting-maint-message').value.trim()
+                };
+
+                const pointsVal = {
+                    scan_base: parseInt(document.getElementById('setting-points-base').value) || 10,
+                    game_correct: parseInt(document.getElementById('setting-points-correct').value) || 5,
+                    streak_bonus_per: parseInt(document.getElementById('setting-points-streak').value) || 1
+                };
+
+                const geminiVal = {
+                    model: document.getElementById('setting-gemini-model').value.trim() || 'gemini-flash-latest'
+                };
+
+                // Cập nhật Database
+                const { error: err1 } = await db.from('system_settings').update({ value: maintenanceVal, updated_by: userId }).eq('key', 'maintenance');
+                const { error: err2 } = await db.from('system_settings').update({ value: pointsVal, updated_by: userId }).eq('key', 'points');
+                const { error: err3 } = await db.from('system_settings').update({ value: geminiVal, updated_by: userId }).eq('key', 'gemini');
+
+                if (err1 || err2 || err3) {
+                    throw new Error('Lỗi cập nhật cấu hình: ' + (err1?.message || err2?.message || err3?.message));
+                }
+
+                alert('Đã cập nhật cấu hình hệ thống thành công!');
+                fetchSystemSettings();
+            } catch (e) {
+                alert('Lỗi lưu cấu hình: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'LƯU CẤU HÌNH HỆ THỐNG';
             }
         };
 

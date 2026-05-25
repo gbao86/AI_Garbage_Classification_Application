@@ -7,7 +7,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  final bool showBackButton;
+  const MapScreen({super.key, this.showBackButton = true});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -275,8 +276,19 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
               ),
               child: Row(
                 children: [
-                  IconButton(icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20), onPressed: () => Navigator.pop(context)),
-                  const Expanded(child: Text("EcoSort Maps", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Colors.green))),
+                  if (widget.showBackButton)
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  if (!widget.showBackButton)
+                    const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      "EcoSort Maps",
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Colors.green),
+                    ),
+                  ),
                   IconButton(
                     icon: Icon(_isSatellite ? Icons.map_rounded : Icons.satellite_alt_rounded, color: theme.primaryColor), 
                     onPressed: () => setState(() => _isSatellite = !_isSatellite)

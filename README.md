@@ -1,7 +1,7 @@
 # ♻️ EcoSort by Bao - Ứng Dụng Phân Loại Rác Thông Minh
 > Ứng dụng phân loại rác bằng AI sử dụng Flutter, TFLite và Gemini AI.
 
-[![Version](https://img.shields.io/badge/version-0.5.1-green.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.5.2-green.svg)](./CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Flutter-blue.svg)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](./LICENSE)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-red.svg)](./SECURITY.md)
@@ -23,7 +23,7 @@ Hệ thống kết hợp:
 
 ## 🎥 Video Demo
 
-> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v0.0.2**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v0.5.1**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
+> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v0.0.2**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v0.5.2**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
 
 👉 [Xem Video Demo trên YouTube (v0.0.2)](https://youtu.be/YuI4tK1fNLU?si=LTzk0kVj0328i7m5)
 
@@ -33,13 +33,14 @@ Hệ thống kết hợp:
 
 - 📷 Nhận diện rác bằng AI (camera & thư viện ảnh)
 - 🧠 Cơ chế AI kép (Offline → Online fallback)
-- 🛸 Bóc tách vật thể + hiệu ứng trực quan
-- 🗺️ Bản đồ điểm bỏ rác (OpenStreetMap)
-- 📍 Định vị GPS thời gian thực
-- 🎮 Hệ thống game (XP, huy hiệu, quiz)
-- 🔐 Chống spam bằng hash ảnh
+- 🛸 Bóc tách vật thể + hiệu ứng trực quan quét laser
+- 🏆 Giao diện kết quả AI premium với chuyển màu và hoạt ảnh mượt mà
+- 🌓 Đồng bộ màu sắc toàn diện (Full Light/Dark Mode)
+- 🗺️ Bản đồ điểm bỏ rác (OpenStreetMap) tích hợp định vị GPS
+- 🎮 Hệ thống game sinh thái (XP, huy hiệu, quiz)
+- 🔐 Chống spam bằng hash MD5 ảnh chụp
 - 🖥️ Dashboard quản trị (Supabase)
-- 🎨 Giao diện hiện đại, responsive
+- 🎨 Cấu trúc điều hướng Tab hiện đại (`IndexedStack`), mượt mà và responsive
 
 ---
 

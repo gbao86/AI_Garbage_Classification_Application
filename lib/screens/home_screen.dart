@@ -367,143 +367,165 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          SafeArea(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                await context.read<GameProvider>().syncFromSupabase();
-                await _checkForModelUpdate();
-              },
-              color: theme.primaryColor,
-              child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+          IndexedStack(
+            index: _currentIndex,
+            children: [
+              // Tab 0: Home view
+              SafeArea(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    await context.read<GameProvider>().syncFromSupabase();
+                    await _checkForModelUpdate();
+                  },
+                  color: theme.primaryColor,
+                  child: CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    'Hành động nhỏ, lợi ích lớn',
-                                    style: theme.textTheme.bodyLarge,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    'EcoSort by Bao',
-                                    style: theme.textTheme.headlineMedium?.copyWith(
-                                      color: theme.primaryColor,
-                                      fontWeight: FontWeight.bold,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Hành động nhỏ, lợi ích lớn',
+                                          style: theme.textTheme.bodyLarge,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Text(
+                                          'EcoSort by Bao',
+                                          style: theme.textTheme.headlineMedium?.copyWith(
+                                            color: theme.primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
                                     ),
-                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.surface,
+                                          borderRadius: BorderRadius.circular(16),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: theme.brightness == Brightness.dark
+                                                  ? Colors.black.withValues(alpha: 0.2)
+                                                  : Colors.black.withValues(alpha: 0.05),
+                                              blurRadius: 15,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: IconButton(
+                                          icon: Icon(Icons.person_outline_rounded, color: theme.primaryColor),
+                                          tooltip: 'Tài khoản',
+                                          onPressed: () => _openAccountSheet(context),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.surface,
+                                          borderRadius: BorderRadius.circular(16),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: theme.brightness == Brightness.dark
+                                                  ? Colors.black.withValues(alpha: 0.2)
+                                                  : Colors.black.withValues(alpha: 0.05),
+                                              blurRadius: 15,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: IconButton(
+                                          icon: Icon(Icons.notifications_none_rounded, color: theme.primaryColor),
+                                          onPressed: () {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: const Row(
+                                                  children: [
+                                                    Icon(Icons.construction_rounded, color: Colors.white, size: 18),
+                                                    SizedBox(width: 10),
+                                                    Expanded(child: Text('Tính năng thông báo đang được phát triển!')),
+                                                  ],
+                                                ),
+                                                backgroundColor: Colors.orange.shade700,
+                                                behavior: SnackBarBehavior.floating,
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                duration: const Duration(seconds: 2),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
+                              const SizedBox(height: 32),
+                              _buildHeroBanner(theme),
+                              const SizedBox(height: 40),
+
+                              Text('Dịch vụ', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 20),
+                              _buildActionGrid(theme),
+
+                              if (_processingMessage.isNotEmpty) ...[
+                                const SizedBox(height: 24),
+                                _buildLoadingStatus(theme),
+                              ],
+
+                              if (_isModelUpdating) ...[
+                                const SizedBox(height: 16),
                                 Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: Colors.blue.withValues(alpha: 0.05),
                                     borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 15, offset: const Offset(0, 4)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue.shade400)),
+                                      const SizedBox(width: 10),
+                                      Text('Đang kiểm tra cập nhật AI...', style: TextStyle(fontSize: 12, color: Colors.blue.shade600)),
                                     ],
-                                  ),
-                                  child: IconButton(
-                                    icon: Icon(Icons.person_outline_rounded, color: theme.primaryColor),
-                                    tooltip: 'Tài khoản',
-                                    onPressed: () => _openAccountSheet(context),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 15, offset: const Offset(0, 4)),
-                                    ],
-                                  ),
-                                  child: IconButton(
-                                    icon: Icon(Icons.notifications_none_rounded, color: theme.primaryColor),
-                                    onPressed: () {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: const Row(
-                                            children: [
-                                              Icon(Icons.construction_rounded, color: Colors.white, size: 18),
-                                              SizedBox(width: 10),
-                                              Expanded(child: Text('Tính năng thông báo đang được phát triển!')),
-                                            ],
-                                          ),
-                                          backgroundColor: Colors.orange.shade700,
-                                          behavior: SnackBarBehavior.floating,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                          duration: const Duration(seconds: 2),
-                                        ),
-                                      );
-                                    },
                                   ),
                                 ),
                               ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
-                        _buildHeroBanner(theme),
-                        const SizedBox(height: 40),
 
-                        Text('Dịch vụ', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 20),
-                        _buildActionGrid(theme),
+                              const SizedBox(height: 40),
+                              _buildKnowledgeSection(theme),
 
-                        if (_processingMessage.isNotEmpty) ...[
-                          const SizedBox(height: 24),
-                          _buildLoadingStatus(theme),
-                        ],
+                              const SizedBox(height: 40),
+                              _buildMiniGameSection(theme),
 
-                        if (_isModelUpdating) ...[
-                          const SizedBox(height: 16),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue.shade400)),
-                                const SizedBox(width: 10),
-                                Text('Đang kiểm tra cập nhật AI...', style: TextStyle(fontSize: 12, color: Colors.blue.shade600)),
-                              ],
-                            ),
+                              const SizedBox(height: 120),
+                            ],
                           ),
-                        ],
-
-                        const SizedBox(height: 40),
-                        _buildKnowledgeSection(theme),
-
-                        const SizedBox(height: 40),
-                        _buildMiniGameSection(theme),
-
-                        const SizedBox(height: 120),
-                      ],
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
+              ),
+              // Tab 1: Maps View
+              const MapScreen(showBackButton: false),
+              // Tab 2: About View
+              const AboutScreen(showBackButton: false),
+            ],
           ),
           _buildCustomBottomNav(theme),
         ],
@@ -589,16 +611,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildActionCard({required String title, required String subtitle, required IconData icon, required Color color, required VoidCallback onTap}) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(28),
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: Colors.black.withValues(alpha: 0.03)),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 20, offset: const Offset(0, 8))],
+          border: Border.all(color: theme.colorScheme.onSurface.withValues(alpha: 0.05)),
+          boxShadow: [
+            BoxShadow(
+              color: theme.brightness == Brightness.dark
+                  ? Colors.black.withValues(alpha: 0.2)
+                  : Colors.black.withValues(alpha: 0.04),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -611,7 +642,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
             const SizedBox(height: 4),
-            Text(subtitle, style: const TextStyle(color: Colors.black45, fontSize: 13)),
+            Text(subtitle, style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 13)),
           ],
         ),
       ),
@@ -633,17 +664,25 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: Colors.black.withValues(alpha: 0.03)),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 20, offset: const Offset(0, 8))],
+              border: Border.all(color: theme.colorScheme.onSurface.withValues(alpha: 0.05)),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.brightness == Brightness.dark
+                      ? Colors.black.withValues(alpha: 0.2)
+                      : Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.green, size: 32),
@@ -660,12 +699,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 4),
                       Text(
                         'Tìm hiểu ý nghĩa các biểu tượng trên bao bì rác thải.',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                        style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 13),
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey[400], size: 16),
+                Icon(Icons.arrow_forward_ios_rounded, color: theme.colorScheme.onSurface.withValues(alpha: 0.3), size: 16),
               ],
             ),
           ),
@@ -854,26 +893,24 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         height: 80,
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1C1E),
+          color: theme.brightness == Brightness.dark ? const Color(0xFF1A1C1E) : Colors.white,
           borderRadius: BorderRadius.circular(32),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 25, offset: const Offset(0, 10))],
+          boxShadow: [
+            BoxShadow(
+              color: theme.brightness == Brightness.dark
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.08),
+              blurRadius: 25,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _buildNavItem(0, Icons.home_rounded, 'Trang chủ', _currentIndex == 0, onTap: () => setState(() => _currentIndex = 0)),
-            _buildNavItem(1, Icons.map_rounded, 'Bản đồ', _currentIndex == 1, onTap: () {
-              setState(() => _currentIndex = 1);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const MapScreen())).then((_) {
-                if (mounted) setState(() => _currentIndex = 0);
-              });
-            }),
-            _buildNavItem(2, Icons.info_rounded, 'Thông tin', _currentIndex == 2, onTap: () {
-              setState(() => _currentIndex = 2);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutScreen())).then((_) {
-                if (mounted) setState(() => _currentIndex = 0);
-              });
-            }),
+            _buildNavItem(1, Icons.map_rounded, 'Bản đồ', _currentIndex == 1, onTap: () => setState(() => _currentIndex = 1)),
+            _buildNavItem(2, Icons.info_rounded, 'Thông tin', _currentIndex == 2, onTap: () => setState(() => _currentIndex = 2)),
           ],
         ),
       ),
@@ -881,14 +918,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNavItem(int index, IconData icon, String label, bool isSelected, {VoidCallback? onTap}) {
+    final theme = Theme.of(context);
+    final unselectedColor = theme.brightness == Brightness.dark ? Colors.white54 : Colors.black45;
+    final selectedColor = theme.brightness == Brightness.dark ? Colors.greenAccent : theme.primaryColor;
+    final labelColor = theme.brightness == Brightness.dark ? Colors.white : theme.primaryColor;
     return InkWell(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: isSelected ? Colors.greenAccent : Colors.white54, size: 26),
+          Icon(icon, color: isSelected ? selectedColor : unselectedColor, size: 26),
           const SizedBox(height: 6),
-          Text(label, style: TextStyle(color: isSelected ? Colors.white : Colors.white54, fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? labelColor : unselectedColor,
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
         ],
       ),
     );

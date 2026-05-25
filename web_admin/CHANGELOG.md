@@ -6,6 +6,27 @@ Tất cả các thay đổi đáng chú ý của module **Web Admin** sẽ đư�
 
 ---
 
+## [0.1.1] - 2026-05-25
+
+### 🛡️ Hành động đặc quyền & Duyệt 2 bước (Privileged Actions & Double-Approval)
+- **Hàng đợi yêu cầu đặc quyền:** Thêm Tab giao diện quản lý danh sách yêu cầu nhạy cảm (`privileged_action_requests`) kèm bộ lọc trạng thái và phân trang.
+- **Phê duyệt & Từ chối:** Hỗ trợ xem chi tiết yêu cầu, danh sách phê duyệt từ `privileged_action_approvals` và cho phép Admin phê duyệt (gọi RPC `privileged_action_add_approval`) hoặc Từ chối yêu cầu.
+- **Thực thi tự động:** Cho phép thực thi trực tiếp hành động trên UI (đổi role trong profiles, xoá điểm bỏ rác, bật/tắt Kill Switch) sau khi đạt đủ 2 chữ ký từ Admin khác nhau.
+- **Tạo yêu cầu thủ công:** Form tạo yêu cầu đặc quyền mới cho Admin.
+
+### ⚙️ Quản lý cấu hình hệ thống (System Settings)
+- **Giao diện cấu hình tập trung:** Thêm Tab quản lý cấu hình hệ thống nạp trực tiếp từ `system_settings` (Bảo trì, Ngắt khẩn cấp, Điểm thưởng trò chơi, AI Gemini Model).
+- **Phân quyền theo vai trò (RBAC):** Chỉ có `super_admin` được quyền chỉnh sửa và lưu cấu hình hệ thống; `admin` thường chỉ được quyền Xem (các trường nhập liệu bị khóa).
+
+### 👤 Tối ưu hóa Quản lý User
+- **Liên kết nâng/hạ cấp nhanh:** Bổ sung nút "Đề xuất nâng lên Admin" và "Đề xuất hạ xuống User" trong Modal Quản lý User để gửi yêu cầu đặc quyền duyệt 2 bước nhanh chóng.
+- **Sửa lỗi cú pháp Promise:** Khắc phục lỗi runtime gán Promise sai cách khi kiểm tra hành động tự nâng/hạ quyền chính mình trong hàm `openUserActionModal`.
+
+### 📦 Build & Đóng gói
+- Khởi chạy thành công bộ đóng gói sản phẩm tĩnh Vite đảm bảo ứng dụng không lỗi cú pháp.
+
+---
+
 ## [0.1.0] - 2026-04-25
 
 ### 🏗️ Cơ sở hạ tầng (Infrastructure)

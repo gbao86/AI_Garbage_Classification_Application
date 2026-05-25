@@ -2011,8 +2011,9 @@ class _WasteSymbolsScreenState extends State<WasteSymbolsScreen> {
   @override
   Widget build(BuildContext context) {
     final items = _buildItems();
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F0),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           'Ký hiệu rác thải & bao bì',
@@ -2020,19 +2021,19 @@ class _WasteSymbolsScreenState extends State<WasteSymbolsScreen> {
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: theme.appBarTheme.backgroundColor ?? theme.colorScheme.surface,
+        foregroundColor: theme.appBarTheme.foregroundColor ?? theme.colorScheme.onSurface,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child:
-              Container(height: 1, color: Colors.black.withValues(alpha: 0.06)),
+              Container(height: 1, color: theme.colorScheme.onSurface.withValues(alpha: 0.06)),
         ),
       ),
       body: Column(
         children: [
           // ── Filter chips ──
           Container(
-            color: Colors.white,
+            color: theme.colorScheme.surface,
             padding: const EdgeInsets.fromLTRB(0, 10, 0, 12),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -2082,6 +2083,7 @@ class _WasteSymbolsScreenState extends State<WasteSymbolsScreen> {
   }
 
   Widget _buildSectionHeader(_SectionHeader h) {
+    final theme = Theme.of(context);
     final isVN = h.flag == '🇻🇳';
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 24, 16, 8),
@@ -2107,15 +2109,15 @@ class _WasteSymbolsScreenState extends State<WasteSymbolsScreen> {
               children: [
                 Text(
                   h.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: Colors.black87),
+                      color: theme.colorScheme.onSurface),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   h.subtitle,
-                  style: TextStyle(fontSize: 11.5, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 11.5, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                 ),
               ],
             ),
@@ -2133,8 +2135,9 @@ class _WasteSymbolsScreenState extends State<WasteSymbolsScreen> {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color:
-                    isVN ? const Color(0xFFDA251D) : Colors.blueGrey[700],
+                color: isVN
+                    ? const Color(0xFFDA251D)
+                    : (theme.brightness == Brightness.dark ? Colors.blueGrey[200] : Colors.blueGrey[700]),
               ),
             ),
           ),
@@ -2144,6 +2147,7 @@ class _WasteSymbolsScreenState extends State<WasteSymbolsScreen> {
   }
 
   Widget _buildSymbolCard(_SymbolItem item) {
+    final theme = Theme.of(context);
     final s = item.symbol;
     final idx = item.globalIdx;
     final isExpanded = _expandedIndex == idx;
@@ -2154,17 +2158,19 @@ class _WasteSymbolsScreenState extends State<WasteSymbolsScreen> {
       duration: const Duration(milliseconds: 200),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isExpanded
               ? tagColor.withValues(alpha: 0.3)
-              : Colors.black.withValues(alpha: 0.06),
+              : theme.colorScheme.onSurface.withValues(alpha: 0.06),
           width: isExpanded ? 1.5 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isExpanded ? 0.06 : 0.03),
+            color: theme.brightness == Brightness.dark
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: isExpanded ? 0.06 : 0.03),
             blurRadius: isExpanded ? 12 : 6,
             offset: const Offset(0, 3),
           ),
@@ -2215,17 +2221,17 @@ class _WasteSymbolsScreenState extends State<WasteSymbolsScreen> {
                                 Flexible(
                                   child: Text(
                                     s.title,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 15,
-                                      color: Colors.black87,
+                                      color: theme.colorScheme.onSurface,
                                     ),
                                   ),
                                 ),
                                 if (s.badge != null) ...[
                                   const SizedBox(width: 6),
                                   Text(s.badge!,
-                                      style: const TextStyle(fontSize: 13)),
+                                      style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface)),
                                 ],
                               ],
                             ),
@@ -2233,7 +2239,7 @@ class _WasteSymbolsScreenState extends State<WasteSymbolsScreen> {
                             Text(
                               s.subtitle,
                               style: TextStyle(
-                                  color: Colors.grey[600], fontSize: 12.5),
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 12.5),
                             ),
                           ],
                         ),
@@ -2282,10 +2288,10 @@ class _WasteSymbolsScreenState extends State<WasteSymbolsScreen> {
                     margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFBFBFA),
+                      color: theme.brightness == Brightness.dark ? theme.scaffoldBackgroundColor : const Color(0xFFFBFBFA),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: Colors.black.withValues(alpha: 0.04),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.04),
                       ),
                     ),
                     child: _buildStructuredDescription(s.description, tagColor),
@@ -2325,10 +2331,14 @@ class _FilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: selected ? color.withValues(alpha: 0.12) : Colors.grey[100],
+          color: selected
+              ? color.withValues(alpha: 0.12)
+              : (Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.surface : Colors.grey[100]),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? color.withValues(alpha: 0.4) : Colors.grey[300]!,
+            color: selected
+                ? color.withValues(alpha: 0.4)
+                : (Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1) : Colors.grey[300]!),
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -2337,7 +2347,9 @@ class _FilterChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-            color: selected ? color : Colors.grey[600],
+            color: selected
+                ? color
+                : (Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6) : Colors.grey[600]),
           ),
         ),
       ),

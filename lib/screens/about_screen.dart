@@ -3,7 +3,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatefulWidget {
-  const AboutScreen({super.key});
+  final bool showBackButton;
+  const AboutScreen({super.key, this.showBackButton = true});
 
   @override
   State<AboutScreen> createState() => _AboutScreenState();
@@ -87,10 +88,11 @@ class _AboutScreenState extends State<AboutScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F3),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
+            automaticallyImplyLeading: widget.showBackButton,
             expandedHeight: 280.0,
             pinned: true,
             stretch: true,
@@ -187,14 +189,14 @@ class _AboutScreenState extends State<AboutScreen> {
                       children: [
                         Text(
                           '© $_currentYear EcoSort by Bao',
-                          style: const TextStyle(color: Colors.black38, fontSize: 13, fontWeight: FontWeight.w500),
+                          style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.4), fontSize: 13, fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(height: 4),
-                        const Text('Made with ❤️ for the Planet', style: TextStyle(color: Colors.black26, fontSize: 11)),
+                        Text('Made with ❤️ for the Planet', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.3), fontSize: 11)),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  SizedBox(height: widget.showBackButton ? 40 : 120),
                 ],
               ),
             ),
@@ -208,9 +210,17 @@ class _AboutScreenState extends State<AboutScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: theme.brightness == Brightness.dark
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,7 +233,7 @@ class _AboutScreenState extends State<AboutScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Text(content, style: const TextStyle(color: Colors.black54, fontSize: 15, height: 1.5)),
+          Text(content, style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7), fontSize: 15, height: 1.5)),
         ],
       ),
     );
@@ -244,8 +254,9 @@ class _AboutScreenState extends State<AboutScreen> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+            border: Border.all(color: theme.colorScheme.onSurface.withValues(alpha: 0.08)),
           ),
           child: Row(
             children: [
@@ -259,7 +270,7 @@ class _AboutScreenState extends State<AboutScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(label, style: const TextStyle(color: Colors.black38, fontSize: 11, fontWeight: FontWeight.bold)),
+                    Text(label, style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.4), fontSize: 11, fontWeight: FontWeight.bold)),
                     Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                   ],
                 ),
