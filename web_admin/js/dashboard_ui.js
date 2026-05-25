@@ -55,6 +55,17 @@ function escapeHTML(str) {
         .replace(/'/g, '&#039;');
 }
 
+function generateSecureRandomString(length = 4) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const array = new Uint8Array(length);
+    (window.crypto || crypto).getRandomValues(array);
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars[array[i] % chars.length];
+    }
+    return result;
+}
+
 // -------------------------------------------------------------
 // TAB 1: SUBMISSIONS MANAGEMENT
 // -------------------------------------------------------------
@@ -71,7 +82,7 @@ window.fetchSubmissions = async () => {
         loader.classList.add('hidden');
 
         if (allSubmissions.length === 0) {
-            grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-300 font-bold">Không có báo cáo nào ở trạng thái ${status}</div>`;
+            grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-300 font-bold">Không có báo cáo nào ở trạng thái ${escapeHTML(status)}</div>`;
             return;
         }
 
@@ -80,16 +91,16 @@ window.fetchSubmissions = async () => {
             card.className = 'bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300';
             card.innerHTML = `
                 <div class="h-44 bg-slate-50 relative group">
-                    ${item.scan_image_path ? `<img src="${item.scan_image_path}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-slate-300 text-[10px] font-bold">NO IMAGE</div>'}
+                    ${item.scan_image_path ? `<img src="${escapeHTML(item.scan_image_path)}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-slate-300 text-[10px] font-bold">NO IMAGE</div>'}
                 </div>
                 <div class="p-8">
-                    <h3 class="font-black text-slate-800 text-lg truncate">${item.suggested_name_vi || 'Yêu cầu mới'}</h3>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 mb-6 italic">${item.tflite_top_label || 'AI chưa phân loại'}</p>
+                    <h3 class="font-black text-slate-800 text-lg truncate">${escapeHTML(item.suggested_name_vi || 'Yêu cầu mới')}</h3>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 mb-6 italic">${escapeHTML(item.tflite_top_label || 'AI chưa phân loại')}</p>
 
                     <div class="flex gap-2">
-                        <button onclick="showDetail('${item.id}')" class="flex-1 bg-slate-800 text-white py-3 rounded-2xl text-xs font-black hover:bg-slate-900 transition">CHI TIẾT</button>
+                        <button onclick="showDetail('${escapeHTML(item.id)}')" class="flex-1 bg-slate-800 text-white py-3 rounded-2xl text-xs font-black hover:bg-slate-900 transition">CHI TIẾT</button>
                         ${status === 'pending_review' ? `
-                            <button onclick="updateStatus('${item.id}', 'rejected')" class="bg-red-50 text-red-500 px-4 rounded-2xl font-bold text-xs hover:bg-red-100 transition">HỦY</button>
+                            <button onclick="updateStatus('${escapeHTML(item.id)}', 'rejected')" class="bg-red-50 text-red-500 px-4 rounded-2xl font-bold text-xs hover:bg-red-100 transition">HỦY</button>
                         ` : ''}
                     </div>
                 </div>
@@ -114,35 +125,35 @@ window.showDetail = (id) => {
     content.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-slate-50 rounded-[2rem] overflow-hidden border border-slate-100">
-                ${item.scan_image_path ? `<img src="${item.scan_image_path}" class="w-full h-full object-contain">` : '<p class="p-20 text-center text-slate-300 font-bold">KHÔNG CÓ ẢNH</p>'}
+                ${item.scan_image_path ? `<img src="${escapeHTML(item.scan_image_path)}" class="w-full h-full object-contain">` : '<p class="p-20 text-center text-slate-300 font-bold">KHÔNG CÓ ẢNH</p>'}
             </div>
             <div class="space-y-4">
                 <div class="bg-slate-50 p-6 rounded-3xl">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tên đề xuất</span>
-                    <p class="text-xl font-black text-slate-800">${item.suggested_name_vi || 'N/A'}</p>
+                    <p class="text-xl font-black text-slate-800">${escapeHTML(item.suggested_name_vi || 'N/A')}</p>
                 </div>
                 <div class="bg-slate-50 p-6 rounded-3xl">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nhãn AI (TFLite)</span>
-                    <p class="font-bold text-slate-800">${item.tflite_top_label || 'N/A'} (${(item.tflite_confidence * 100).toFixed(1)}%)</p>
+                    <p class="font-bold text-slate-800">${escapeHTML(item.tflite_top_label || 'N/A')} (${(item.tflite_confidence * 100).toFixed(1)}%)</p>
                 </div>
                  <div class="bg-slate-50 p-6 rounded-3xl">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trạng thái</span>
-                    <p class="font-bold text-green-600 uppercase">${item.status}</p>
+                    <p class="font-bold text-green-600 uppercase">${escapeHTML(item.status)}</p>
                 </div>
             </div>
         </div>
         <div class="bg-slate-50 p-6 rounded-3xl">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phân tích Gemini</span>
-            <p class="text-slate-600 text-sm mt-2 leading-relaxed">${item.gemini_payload?.result_text || 'Chưa có phân tích'}</p>
+            <p class="text-slate-600 text-sm mt-2 leading-relaxed">${escapeHTML(item.gemini_payload?.result_text || 'Chưa có phân tích')}</p>
         </div>
         <div class="bg-slate-50 p-6 rounded-3xl">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kiến thức bổ sung (Fun Fact)</span>
-            <p class="text-slate-600 text-sm mt-2">${item.suggested_fun_fact || 'N/A'}</p>
+            <p class="text-slate-600 text-sm mt-2">${escapeHTML(item.suggested_fun_fact || 'N/A')}</p>
         </div>
         ${item.status === 'pending_review' ? `
             <div class="pt-6 border-t border-slate-100 flex gap-4">
-                <button onclick="approveWithData('${item.id}')" class="flex-[2] bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition">DUYỆT VÀO HỆ THỐNG</button>
-                <button onclick="updateStatus('${item.id}', 'rejected')" class="flex-1 bg-red-50 text-red-500 py-4 rounded-2xl font-bold hover:bg-red-100 transition">TỪ CHỐI</button>
+                <button onclick="approveWithData('${escapeHTML(item.id)}')" class="flex-[2] bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition">DUYỆT VÀO HỆ THỐNG</button>
+                <button onclick="updateStatus('${escapeHTML(item.id)}', 'rejected')" class="flex-1 bg-red-50 text-red-500 py-4 rounded-2xl font-bold hover:bg-red-100 transition">TỪ CHỐI</button>
             </div>
         ` : ''}
     `;
@@ -201,8 +212,8 @@ window.submitApproveData = async () => {
     if (!nameVi || !groupId) return alert('Vui lòng nhập tên và chọn nhóm rác!');
 
     let slug = slugify(nameVi);
-    // Append random string to prevent duplication
-    slug += '-' + Math.random().toString(36).substring(2, 6);
+    // Append secure random string to prevent duplication
+    slug += '-' + generateSecureRandomString(4);
 
     btn.disabled = true;
     btn.innerText = 'ĐANG LƯU...';
