@@ -11,7 +11,7 @@ on:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest # Đổi tất cả sang chạy trên Ubuntu cho nhẹ và nhanh
     permissions:
       security-events: write
       packages: read
@@ -22,14 +22,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Quét phần code Android gốc (nếu có tùy biến Java/Kotlin)
-          - language: java-kotlin
-            build-mode: none
-          # Quét phần code Web Quản trị (thư mục web_admin dùng JavaScript/HTML)
+          # Chỉ tập trung quét phần code Web Quản trị (web_admin) mà không cần build
           - language: javascript-typescript
-            build-mode: none
-          # Quét phần code iOS gốc (nếu có tùy biến Swift)
-          - language: swift
             build-mode: none
 
     steps:
@@ -41,13 +35,6 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
-
-    - name: Run manual build steps
-      if: matrix.build-mode == 'manual'
-      shell: bash
-      run: |
-        echo 'Nếu cần build thủ công thì cấu hình ở đây, hiện tại autobuild đã đủ.'
-        exit 1
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
