@@ -2,6 +2,8 @@
 
 > Hệ thống quản trị nội bộ cho ứng dụng phân loại rác **EcoSort by Bao**.
 > Giao diện dành riêng cho Admin và Super Admin — không dành cho người dùng thông thường.
+> 
+> 🌐 **Địa chỉ Cloudflare Pages chính thức:** [ecosort-by-bao-admin.pages.dev](https://ecosort-by-bao-admin.pages.dev/)
 
 ---
 
@@ -128,26 +130,65 @@ Web Admin áp dụng mô hình **RBAC (Role-Based Access Control)** hai tầng:
 
 ---
 
-## Tính năng
+## Tính năng chi tiết
 
-### 🗂️ Tab Duyệt Rác (Waste Submissions)
-- Xem danh sách báo cáo phân loại rác từ người dùng App theo trạng thái (Chờ duyệt / Đã duyệt / Từ chối).
-- Xem chi tiết: Ảnh quét, nhãn AI (TFLite + Gemini), tên đề xuất, fun fact.
-- **Duyệt vào Từ điển:** Form nhập tên chuẩn, chọn nhóm rác, thêm fun fact → tự động slug hóa và lưu vào `waste_dictionary`.
-- Từ chối báo cáo không hợp lệ.
+### 🗂️ 1. Tab Duyệt Rác (Waste Submissions)
+* Xem danh sách báo cáo phân loại rác từ người dùng App theo trạng thái (Chờ duyệt / Đã duyệt / Từ chối).
+* Xem chi tiết: Ảnh quét, nhãn AI (TFLite + Gemini), tên đề xuất, fun fact.
+* **Duyệt vào Từ điển:** Form nhập tên chuẩn, chọn nhóm rác, thêm fun fact → tự động slug hóa và lưu vào `waste_dictionary`.
+* Từ chối báo cáo không hợp lệ.
 
-### 👥 Tab Quản lý Người dùng (User Management)
-- Bảng dữ liệu phân trang (25 dòng/trang) với đầy đủ thông tin: Avatar, Tên, Email, Role, Trạng thái, Last Login.
-- **Tìm kiếm & Lọc:** Theo email/tên, theo role, theo trạng thái hoạt động.
-- **Ban / Unban:** Khóa tài khoản kèm lý do bắt buộc (Backend kill session ngay lập tức).
-- **Reset Password:** Gửi link đặt lại mật khẩu qua email.
-- **Audit Logs:** Xem lịch sử hành động từ bảng `public.audit_logs` *(đang phát triển)*.
+### 👥 2. Tab Quản lý Người dùng (User Management)
+* Bảng dữ liệu phân trang (25 dòng/trang) với đầy đủ thông tin: Avatar, Tên, Email, Role, Trạng thái, Last Login.
+* **Tìm kiếm & Lọc:** Theo email/tên, theo role, theo trạng thái hoạt động.
+* **Ban / Unban:** Khóa tài khoản kèm lý do bắt buộc (Backend kill session ngay lập tức).
+* **Reset Password:** Gửi link đặt lại mật khẩu qua email.
+* **Quản lý quyền hạn nhanh:** Đề xuất nâng cấp lên Admin hoặc hạ cấp xuống User trực tiếp trong modal quản lý bằng cách tạo tự động một yêu cầu đặc quyền duyệt 2 bước.
+
+### 🛡️ 3. Tab Hành động đặc quyền (Privileged Actions - Double-Approval)
+* Bảng quản trị danh sách yêu cầu thay đổi nhạy cảm của hệ thống (`privileged_action_requests`).
+* **Cơ chế Duyệt 2 bước:**
+  * Bất kỳ Admin nào cũng có thể tạo yêu cầu phê duyệt (Nâng quyền Admin, Hạ quyền Admin, Xoá điểm bỏ rác, Bật/Tắt Kill Switch).
+  * Yêu cầu cần có **2 lượt phê duyệt** khác nhau từ 2 Admin/Super Admin (không bao gồm người tạo yêu cầu) thông qua hàm SQL `privileged_action_add_approval` để được duyệt (`approved`).
+  * Một khi yêu cầu được duyệt, nút **Thực thi** xuất hiện trên giao diện để cập nhật thay đổi trực tiếp lên Database.
+* **Tạo yêu cầu thủ công:** Form tạo yêu cầu đặc quyền linh hoạt ngay trên màn hình.
+
+### ⚙️ 4. Tab Cấu hình hệ thống (System Settings)
+* Đồng bộ trực tiếp cấu hình hệ thống từ bảng `system_settings`:
+  * **Bảo trì & Ngắt khẩn cấp (Maintenance & Kill Switch):** Bật/Tắt bảo trì ứng dụng, Bật/Tắt ngắt khẩn cấp khóa API ghi, thay đổi thông điệp hiển thị cho người dùng.
+  * **Điểm số thưởng (Gamification):** Điểm quét rác cơ bản, điểm Quiz, hệ số streak bonus.
+  * **Trí tuệ nhân tạo (Gemini AI):** Tên model Gemini sử dụng của App.
+* **Phân quyền chỉnh sửa (RBAC):** Chỉ có `super_admin` mới hiển thị nút **Lưu cấu hình hệ thống** và có quyền tương tác sửa đổi. `admin` thường chỉ được hiển thị ở chế độ **Chỉ Xem (Read-only)**.
+
+---
+
+## 🛠️ Đồng bộ biến môi trường (Secrets Sync)
+
+Dự án Web Admin được cấu hình lấy trực tiếp thông tin Supabase thông qua tệp cấu hình `js/config.js`. Để đồng bộ thông tin khóa từ tệp `.env` của thư mục chính, hãy chạy lệnh sau:
+```bash
+# Thực hiện tại thư mục gốc của project (phan_loai_rac_qua_hinh_anh)
+dart scripts/sync_env.dart
+```
+Lệnh này sẽ tự động sinh tệp `web_admin/js/config.js` chứa Supabase URL và Publishable Key mới nhất.
+
+---
+
+## ☁️ Hướng dẫn Deploy lên Cloudflare Pages
+
+1. **Chuẩn bị:** Đảm bảo tệp `web_admin/js/config.js` đã được chạy đồng bộ khóa mới nhất và được commit/push lên Git.
+2. **Cấu hình trên Cloudflare Pages Dashboard:**
+   * **Root Directory (Thư mục gốc):** `web_admin`
+   * **Framework Preset:** `Vite` (hoặc `None`)
+   * **Build Command (Lệnh build):** `npm run build`
+   * **Build Output Directory (Thư mục đầu ra):** `dist`
+3. **Cấu hình Redirect URL trong Supabase Auth:**
+   * Thêm URL Pages của bạn vào phần **Redirect URLs** của Supabase Auth (ví dụ: `https://ecosort-by-bao-admin.pages.dev/**` để tránh lỗi đăng nhập qua Magic Link).
 
 ---
 
 ## Database & API (Supabase RPC)
 
-Web Admin sử dụng hai PostgreSQL Function với `SECURITY DEFINER` để truy cập an toàn vào `auth.users`:
+Web Admin sử dụng các PostgreSQL Function với `SECURITY DEFINER` để truy cập an toàn vào `auth.users`:
 
 ### `public.admin_get_users(p_page, p_limit, p_search)`
 Lấy danh sách người dùng kèm email và `total_count` để phân trang.
@@ -161,6 +202,9 @@ Khóa/Mở khóa tài khoản thực hiện đúng 3 bước:
 4. Ghi `public.audit_logs`.
 > Chặn Admin ban Super Admin ở tầng Backend.
 
+### `public.privileged_action_add_approval(p_request_id, p_comment)`
+Đăng ký chữ ký phê duyệt cho yêu cầu đặc quyền. Tự động chuyển đổi trạng thái khi đạt đủ số lượt duyệt tối thiểu.
+
 Xem SQL đầy đủ trong [CHANGELOG.md](./CHANGELOG.md#️-sql--database-hướng-dẫn-thiết-lập).
 
 ---
@@ -172,5 +216,5 @@ Xem [CHANGELOG.md](./CHANGELOG.md) để biết lịch sử thay đổi chi ti�
 ---
 
 <p align="center">
-  Được xây dựng với ❤️ bởi <strong>Bao</strong> · <em>EcoSort by Bao Admin v0.1.0</em>
+  Được xây dựng với ❤️ bởi <strong>Bao</strong> · <em>EcoSort by Bao Admin v0.1.1</em>
 </p>
