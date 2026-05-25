@@ -25,7 +25,7 @@ Hệ thống kết hợp:
 
 | Trang chủ (Home Screen) | Bản đồ điểm bỏ rác (Map Screen) | Thông tin ứng dụng (About Screen) |
 |:---:|:---:|:---:|
-| ![Home Screen](assets/images/home_screen.jpg) | ![Map Screen](assets/images/map_screen.jpg) | ![About Screen](assets/images/about_screen.jpg) |
+| ![Home Screen](assets/images/home_preview.jpg) | ![Map Screen](assets/images/map_preview.jpg) | ![About Screen](assets/images/about_screen.jpg) |
 
 ---
 
