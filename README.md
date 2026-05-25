@@ -59,7 +59,7 @@ Hệ thống kết hợp:
 
 ### 1. Cơ chế AI Kép (Hybrid Workflow)
 * **Mô hình TFLite (Offline - Ưu tiên):** Khi nhận diện ảnh, mô hình TensorFlow Lite tích hợp sẵn (`model_unquant.tflite`) sẽ chạy trực tiếp trên thiết bị (Edge AI). Quá trình xử lý ảnh đầu vào kích thước `224x224` pixel diễn ra cục bộ, không cần mạng internet, tốc độ phản hồi cực nhanh và tiết kiệm tài nguyên.
-* **Gemini API Fallback (Online - Phân tích sâu):** Nếu độ tự tin của mô hình TFLite dưới **80% (confidence < 0.8)**, ứng dụng tự động gửi ảnh lên API **Gemini 1.5 Flash** (`gemini-flash-latest`) trực tuyến để phân tích chuyên sâu, nhận diện chính xác các vật thể phức tạp và trả về cẩm nang phân loại/tái chế chi tiết.
+* **Gemini API Fallback (Online - Phân tích sâu):** Nếu độ tự tin của mô hình TFLite dưới **80% (confidence < 0.8)**, ứng dụng tự động gửi ảnh lên API **Gemini Flash** (`gemini-flash-latest`) trực tuyến để phân tích chuyên sâu, nhận diện chính xác các vật thể phức tạp và trả về cẩm nang phân loại/tái chế chi tiết.
 
 ### 2. Bộ Dữ Liệu Huấn Luyện (Kaggle Garbage Dataset)
 Mô hình Offline được huấn luyện dựa trên bộ dữ liệu **Garbage Dataset** chất lượng cao từ Kaggle với **13,348 hình ảnh** được phân loại cụ thể thành **10 nhóm**:
