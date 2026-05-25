@@ -522,6 +522,16 @@
             return String(str).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
         }
 
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // AUTH & INIT
         (async function init() {
             try {
@@ -853,7 +863,7 @@
                 updateUserPagination(totalCount);
             } catch (e) {
                 loader.classList.add('hidden');
-                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center bg-red-50 text-red-500 font-bold rounded-2xl">Lỗi: ${e.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center bg-red-50 text-red-500 font-bold rounded-2xl">Lỗi: ${escapeHTML(e.message)}</td></tr>`;
             }
         };
 
@@ -1144,7 +1154,7 @@
                 updatePAPagination(count || 0);
             } catch (e) {
                 loader.classList.add('hidden');
-                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center bg-red-50 text-red-500 font-bold rounded-2xl">Lỗi: ${e.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center bg-red-50 text-red-500 font-bold rounded-2xl">Lỗi: ${escapeHTML(e.message)}</td></tr>`;
             }
         };
 
@@ -1292,7 +1302,7 @@
                     </div>
                 `;
             } catch (e) {
-                content.innerHTML = `<div class="p-10 bg-red-50 text-red-500 rounded-3xl text-sm font-bold text-center">Lỗi tải chi tiết: ${e.message}</div>`;
+                content.innerHTML = `<div class="p-10 bg-red-50 text-red-500 rounded-3xl text-sm font-bold text-center">Lỗi tải chi tiết: ${escapeHTML(e.message)}</div>`;
             }
         };
 
@@ -1469,7 +1479,7 @@
                     container.innerHTML = '';
                 }
             } catch (e) {
-                container.innerHTML = `<p class="text-xs text-red-500 font-bold">Lỗi tải dữ liệu: ${e.message}</p>`;
+                container.innerHTML = `<p class="text-xs text-red-500 font-bold">Lỗi tải dữ liệu: ${escapeHTML(e.message)}</p>`;
             }
         };
 
