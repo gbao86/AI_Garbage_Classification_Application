@@ -14,7 +14,6 @@ import 'package:provider/provider.dart';
 import 'package:image/image.dart' as img;
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/game_provider.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/services/auth_service.dart';
-import 'package:phan_loai_rac_qua_hinh_anh/services/model_update_service.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/game_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/badge_inventory_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,7 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Interpreter? _interpreter;
   List<String> _labels = [];
   int _currentIndex = 0;
-  bool _isModelUpdating = false;
   bool _hasPlayedGame = false;
 
   final Map<String, String> _labelTranslations = {
@@ -113,8 +111,6 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<GameProvider>().syncFromSupabase();
-      // Kiểm tra và tải model mới từ server (nền)
-      _checkForModelUpdate();
     });
   }
 
@@ -125,54 +121,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _checkForModelUpdate() async {
-    setState(() => _isModelUpdating = true);
-    try {
-      final updated = await ModelUpdateService.instance.checkAndUpdate();
-      if (updated && mounted) {
-        // Reload model với phiên bản mới
-        await _initializeModelAndLabels();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Row(
-                children: [
-                  Icon(Icons.auto_awesome, color: Colors.white, size: 18),
-                  SizedBox(width: 10),
-                  Expanded(child: Text('🧠 AI đã được cập nhật phiên bản mới!')),
-                ],
-              ),
-              backgroundColor: Colors.green.shade700,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          );
-        }
-      }
-    } finally {
-      if (mounted) setState(() => _isModelUpdating = false);
-    }
-  }
-
   Future<void> _initializeModelAndLabels() async {
     try {
-      // Ƭu tiên model local (đã tải từ server), fallback về assets
-      final localModelPath = await ModelUpdateService.instance.localModelPath;
-      final localLabelsPath = await ModelUpdateService.instance.localLabelsPath;
-
-      if (localModelPath != null) {
-        debugPrint('📦 Đang dùng model từ server: $localModelPath');
-        _interpreter = Interpreter.fromFile(File(localModelPath));
-      } else {
-        _interpreter = await Interpreter.fromAsset('assets/models/model_unquant.tflite');
-      }
-
-      String labelsData;
-      if (localLabelsPath != null) {
-        labelsData = await File(localLabelsPath).readAsString();
-      } else {
-        labelsData = await rootBundle.loadString('assets/models/labels.txt');
-      }
+      _interpreter = await Interpreter.fromAsset('assets/models/model_unquant.tflite');
+      final labelsData = await rootBundle.loadString('assets/models/labels.txt');
 
       if (mounted) {
         setState(() {
@@ -375,7 +327,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: RefreshIndicator(
                   onRefresh: () async {
                     await context.read<GameProvider>().syncFromSupabase();
-                    await _checkForModelUpdate();
                   },
                   color: theme.primaryColor,
                   child: CustomScrollView(
@@ -487,24 +438,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _buildLoadingStatus(theme),
                               ],
 
-                              if (_isModelUpdating) ...[
-                                const SizedBox(height: 16),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.withValues(alpha: 0.05),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue.shade400)),
-                                      const SizedBox(width: 10),
-                                      Text('Đang kiểm tra cập nhật AI...', style: TextStyle(fontSize: 12, color: Colors.blue.shade600)),
-                                    ],
-                                  ),
-                                ),
-                              ],
+
 
                               const SizedBox(height: 40),
                               _buildKnowledgeSection(theme),
