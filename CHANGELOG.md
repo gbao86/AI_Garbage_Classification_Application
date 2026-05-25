@@ -10,6 +10,12 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 - ⚠️ **Hủy bỏ chức năng Auto-Train**: Gỡ bỏ hoàn toàn workflow tự động huấn luyện mô hình TensorFlow `.github/workflows/auto_train.yml` và các scripts đi kèm do sự thiếu ổn định về dữ liệu đầu vào (dataset) dẫn đến mô hình hoạt động sai lệch so với thiết kế.
 - 📱 **Chuyển về Model tĩnh trong Assets**: Gỡ bỏ service `ModelUpdateService` và logic cập nhật động từ server. Ứng dụng di động hiện tại sẽ tải và sử dụng mô hình gốc đóng gói sẵn ổn định trong assets (`assets/models/model_unquant.tflite`).
 
+### 🛡️ Cải tiến xử lý ngoại lệ AI & Tách cấu trúc Web Admin (AI Fallback & Web Admin Modularization)
+- 📡 **Cơ chế Fallback thông minh cho Gemini**: Cập nhật `GeminiService` đẩy ngoại lệ thay vì trả về chuỗi thông tin lỗi thô. Khi ứng dụng gặp sự cố mạng hoặc lỗi API, màn hình `ScanningScreen` tự động bắt lỗi và sử dụng kết quả từ mô hình TFLite Offline làm phương án dự phòng, đi kèm thông báo trực quan cho người dùng.
+- 🧩 **Giải phóng tài nguyên ML Kit**: Đảm bảo giải phóng hoàn toàn tài nguyên của `SubjectSegmenter` trong hàm `dispose` của `ScanningScreen` nhằm tối ưu hóa RAM và hạn chế rò rỉ bộ nhớ (Memory Leak).
+- ⚙️ **Mã hóa HTML bảo mật (XSS Prevention)**: Khắc phục lỗi CodeQL `js/xss-through-exception` trên trang quản trị Web Admin bằng việc tích hợp bộ lọc mã hóa HTML ký tự đặc biệt khi hiển thị thông tin ngoại lệ lỗi lên DOM.
+- 📦 **Tách cấu trúc Module Web Admin**: Tái cấu trúc file `dashboard.html` từ ~1640 dòng thành các module Javascript riêng biệt (`js/dashboard_api.js` và `js/dashboard_ui.js`) theo chuẩn ES Modules, giúp tăng khả năng bảo trì và nâng cấp dự án.
+
 ---
 
 ## [0.5.2] - 2026-03-25

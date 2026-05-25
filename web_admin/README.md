@@ -50,7 +50,9 @@ web_admin/
 ├── dashboard.html      # Trang Dashboard chính
 ├── js/
 │   ├── auth.js         # Logic xác thực Supabase (login, checkAdminPermissions)
-│   └── config.js       # Cấu hình Supabase URL & Key (tự sinh, không sửa tay)
+│   ├── config.js       # Cấu hình Supabase URL & Key (tự sinh, không sửa tay)
+│   ├── dashboard_api.js # Logic kết nối API & Gọi Supabase DB/RPC
+│   └── dashboard_ui.js # Logic dựng giao diện, xử lý sự kiện & tab/modal
 ├── src/
 │   └── tailwind.css    # Điểm vào CSS (Tailwind directives)
 ├── dist/               # Kết quả build production (gitignored)

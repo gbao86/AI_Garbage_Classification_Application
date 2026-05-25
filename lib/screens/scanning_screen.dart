@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -120,15 +119,26 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
 
     if (offlineResult.confidence < 0.8) {
       setState(() => _isGeminiRunning = true);
-      final geminiResult = await _geminiService.processImageAndGetGuidance(widget.image);
-      if (mounted) {
-        setState(() {
-          _label = "Đã phân tích bằng AI";
-          _finalMarkdown = geminiResult;
-          _isGeminiRunning = false;
-        });
-        _checkAndNavigate();
+      try {
+        final geminiResult = await _geminiService.processImageAndGetGuidance(widget.image);
+        if (mounted) {
+          setState(() {
+            _label = "Đã phân tích bằng AI";
+            _finalMarkdown = geminiResult;
+            _isGeminiRunning = false;
+          });
+        }
+      } catch (e) {
+        debugPrint('Lỗi Gemini, chuyển hướng fallback sang Offline: $e');
+        if (mounted) {
+          setState(() {
+            _label = "${offlineResult.label} (Offline)";
+            _finalMarkdown = "${offlineResult.markdown}\n\n*(Lưu ý: Không thể kết nối với Gemini AI do lỗi mạng, đang sử dụng kết quả Offline)*";
+            _isGeminiRunning = false;
+          });
+        }
       }
+      _checkAndNavigate();
     } else {
       _checkAndNavigate();
     }

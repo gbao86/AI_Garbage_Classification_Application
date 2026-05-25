@@ -25,6 +25,12 @@ Tất cả các thay đổi đáng chú ý của module **Web Admin** sẽ đư�
 ### 📦 Build & Đóng gói
 - Khởi chạy thành công bộ đóng gói sản phẩm tĩnh Vite đảm bảo ứng dụng không lỗi cú pháp.
 
+### 🔒 Bảo mật XSS & Tái cấu trúc ES Modules
+- **Ngăn chặn XSS qua Exception (XSS Prevention)**: Khắc phục cảnh báo CodeQL `js/xss-through-exception` bằng cách mã hóa HTML các thông điệp ngoại lệ (`e.message`) khi ghi đè vào thuộc tính `innerHTML` của các phần tử DOM.
+- **Tách cấu trúc Module Javascript (ES Modules)**: Tái cấu trúc tệp `dashboard.html` bằng cách di chuyển toàn bộ logic JavaScript sang hai tệp module chuyên biệt:
+  - `js/dashboard_api.js`: Quản lý tất cả các yêu cầu kết nối cơ sở dữ liệu Supabase và lời gọi hàm RPC.
+  - `js/dashboard_ui.js`: Quản lý các biến trạng thái giao diện (View State), render phần tử DOM, xử lý sự kiện hiển thị modal/tab và xuất ra cửa sổ `window` toàn cục để duy trì sự tương thích với mã HTML cũ.
+
 ---
 
 ## [0.1.0] - 2026-04-25

@@ -51,7 +51,7 @@ Dựa trên ảnh được cung cấp, hãy thực hiện các bước sau:
       return response.text?.trim() ?? 'Không nhận được kết quả từ Gemini.';
     } catch (e) {
       debugPrint('Lỗi khi xử lý ảnh với Gemini: $e');
-      return 'Lỗi phân tích Gemini AI: $e';
+      rethrow;
     }
   }
 }
