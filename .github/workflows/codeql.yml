@@ -24,13 +24,13 @@ jobs:
         include:
           # Quét phần code Android gốc (nếu có tùy biến Java/Kotlin)
           - language: java-kotlin
-            build-mode: autobuild
+            build-mode: none
           # Quét phần code Web Quản trị (thư mục web_admin dùng JavaScript/HTML)
           - language: javascript-typescript
             build-mode: none
           # Quét phần code iOS gốc (nếu có tùy biến Swift)
           - language: swift
-            build-mode: autobuild
+            build-mode: none
 
     steps:
     - name: Checkout repository
