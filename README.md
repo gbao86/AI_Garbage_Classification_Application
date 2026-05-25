@@ -21,7 +21,7 @@ Hệ thống kết hợp:
 
 ---
 
-## 📸 Giao diện ứng dụng
+## 📸 Giao diện ứng dụng 
 
 | Trang chủ (Home Screen) | Bản đồ điểm bỏ rác (Map Screen) | Thông tin ứng dụng (About Screen) |
 |:---:|:---:|:---:|
