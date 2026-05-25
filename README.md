@@ -45,6 +45,41 @@ Hệ thống kết hợp:
 
 ---
 
+## 🧠 Mô hình AI Phân Loại Rác (TF Lite & Gemini API)
+
+Ứng dụng sử dụng cơ chế **AI kép (Hybrid AI Pipeline)** nhằm cân bằng giữa tốc độ phản hồi offline và độ chính xác tối đa:
+
+### 1. Cơ chế AI Kép (Hybrid Workflow)
+* **Mô hình TFLite (Offline - Ưu tiên):** Khi nhận diện ảnh, mô hình TensorFlow Lite tích hợp sẵn (`model_unquant.tflite`) sẽ chạy trực tiếp trên thiết bị (Edge AI). Quá trình xử lý ảnh đầu vào kích thước `224x224` pixel diễn ra cục bộ, không cần mạng internet, tốc độ phản hồi cực nhanh và tiết kiệm tài nguyên.
+* **Gemini API Fallback (Online - Phân tích sâu):** Nếu độ tự tin của mô hình TFLite dưới **80% (confidence < 0.8)**, ứng dụng tự động gửi ảnh lên API **Gemini 1.5 Flash** (`gemini-flash-latest`) trực tuyến để phân tích chuyên sâu, nhận diện chính xác các vật thể phức tạp và trả về cẩm nang phân loại/tái chế chi tiết.
+
+### 2. Bộ Dữ Liệu Huấn Luyện (Kaggle Garbage Dataset)
+Mô hình Offline được huấn luyện dựa trên bộ dữ liệu **Garbage Dataset** chất lượng cao từ Kaggle với **13,348 hình ảnh** được phân loại cụ thể thành **10 nhóm**:
+* 🔋 **Battery (Pin):** 756 ảnh
+* 🥬 **Biological (Rác hữu cơ / sinh học):** 699 ảnh
+* 📦 **Cardboard (Bìa carton):** 1,411 ảnh
+* 👕 **Clothes (Quần áo):** 1,892 ảnh
+* 🥛 **Glass (Thủy tinh):** 1,736 ảnh
+* 🔩 **Metal (Kim loại):** 930 ảnh
+* 📝 **Paper (Giấy):** 1,336 ảnh
+* 🥤 **Plastic (Nhựa):** 1,597 ảnh
+* 👟 **Shoes (Giày dép):** 1,449 ảnh
+* 🗑️ **Trash (Rác thải khác):** 453 ảnh
+
+### 3. Đánh Giá Hiệu Năng Mô Hình (Evaluation Metrics)
+
+* **Độ chính xác và độ mất mát (Loss & Accuracy):**
+  ![Loss & Accuracy](assets/images/loss_accuracy.png)
+
+* **Ma trận nhầm lẫn (Confusion Matrix):**
+  ![Confusion Matrix](assets/images/Confusion_Matrix.png)
+
+* **Báo cáo Phân loại (Classification Report):**
+  Thống kê Precision, Recall và F1-Score cho 10 lớp rác thải.
+  ![Classification Report](assets/images/report.png)
+
+---
+
 ## 🛠️ Công nghệ sử dụng
 
 - **Flutter / Dart**
