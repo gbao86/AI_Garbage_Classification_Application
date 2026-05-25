@@ -21,6 +21,14 @@ Hệ thống kết hợp:
 
 ---
 
+## 📸 Giao diện ứng dụng
+
+| Trang chủ (Home Screen) | Bản đồ điểm bỏ rác (Map Screen) | Thông tin ứng dụng (About Screen) |
+|:---:|:---:|:---:|
+| ![Home Screen](assets/images/home_screen.jpg) | ![Map Screen](assets/images/map_screen.jpg) | ![About Screen](assets/images/about_screen.jpg) |
+
+---
+
 ## 🎥 Video Demo
 
 > ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v0.0.2**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v0.5.3**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
