@@ -55,6 +55,8 @@ Hệ thống kết hợp:
 
 ## 🧠 Mô hình AI Phân Loại Rác (TF Lite & Gemini API)
 
+> 📓 **Notebook**: Toàn bộ quá trình chuẩn bị dữ liệu, xây dựng và huấn luyện mô hình được thực hiện trên Kaggle. Chi tiết xem tại [Kaggle Notebook - Phân loại rác](https://www.kaggle.com/code/jisy736386/phan-loai-rac).
+
 Ứng dụng sử dụng cơ chế **AI kép (Hybrid AI Pipeline)** nhằm cân bằng giữa tốc độ phản hồi offline và độ chính xác tối đa:
 
 ### 1. Cơ chế AI Kép (Hybrid Workflow)
@@ -78,14 +80,14 @@ Mô hình Offline được huấn luyện dựa trên bộ dữ liệu **Garbage
 ### 3. Đánh Giá Hiệu Năng Mô Hình (Evaluation Metrics)
 
 * **Độ chính xác và độ mất mát (Loss & Accuracy):**
-  ![Loss & Accuracy](assets/images/loss_accuracy.png)
+  [![Loss & Accuracy](assets/images/loss_accuracy.png)](https://www.kaggle.com/code/jisy736386/phan-loai-rac)
 
 * **Ma trận nhầm lẫn (Confusion Matrix):**
-  ![Confusion Matrix](assets/images/Confusion_Matrix.png)
+  [![Confusion Matrix](assets/images/Confusion_Matrix.png)](https://www.kaggle.com/code/jisy736386/phan-loai-rac)
 
 * **Báo cáo Phân loại (Classification Report):**
   Thống kê Precision, Recall và F1-Score cho 10 lớp rác thải.
-  ![Classification Report](assets/images/report.png)
+  [![Classification Report](assets/images/report.png)](https://www.kaggle.com/code/jisy736386/phan-loai-rac)
 
 ---
 
