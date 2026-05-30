@@ -33,6 +33,8 @@ class _ResultScreenState extends State<ResultScreen> {
   String? _imageHash;
   final TextEditingController _suggestedNameController = TextEditingController();
 
+  bool _hasSavedScan = false;
+
   @override
   void initState() {
     super.initState();
@@ -47,10 +49,209 @@ class _ResultScreenState extends State<ResultScreen> {
 
   Future<void> _calculateImageHash() async {
     final bytes = await widget.image.readAsBytes();
-    setState(() {
-      _imageHash = md5.convert(bytes).toString();
-    });
-    _checkExistingReport();
+    if (mounted) {
+      setState(() {
+        _imageHash = md5.convert(bytes).toString();
+      });
+      _checkExistingReport();
+      _saveScanEvent(); // Tự động lưu lịch sử quét rác và cộng điểm
+    }
+  }
+
+  Future<void> _saveScanEvent() async {
+    if (_hasSavedScan) return;
+    
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return; // Chỉ lưu nếu đã đăng nhập
+
+    try {
+      final supabase = Supabase.instance.client;
+      
+      // 1. Nén ảnh quét
+      File compressedFile = await _compressForReport(widget.image);
+      
+      // 2. Upload ảnh lên bucket 'waste-reports' dưới thư mục scans/
+      final fileName = '${_imageHash ?? DateTime.now().millisecondsSinceEpoch}.jpg';
+      final imagePath = 'scans/${user.id}/$fileName';
+      
+      await supabase.storage.from('waste-reports').upload(
+        imagePath,
+        compressedFile,
+        fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+      );
+
+      final String publicUrl = supabase.storage.from('waste-reports').getPublicUrl(imagePath);
+
+      // 3. Tra cứu waste_dictionary_id từ slug/tfliteLabel nếu có
+      String? wasteDictId;
+      if (widget.tfliteLabel != null) {
+        try {
+          final dict = await supabase
+              .from('waste_dictionary')
+              .select('id')
+              .eq('slug', widget.tfliteLabel!)
+              .maybeSingle();
+          if (dict != null) {
+            wasteDictId = dict['id'] as String?;
+          }
+        } catch (_) {}
+      }
+
+      // 4. Lấy hệ số CO2 từ waste_groups tương ứng
+      double co2Coefficient = 0.5; // mặc định
+      if (widget.classificationType.isNotEmpty) {
+        try {
+          final group = await supabase
+              .from('waste_groups')
+              .select('co2_coefficient')
+              .eq('code', widget.classificationType)
+              .maybeSingle();
+          if (group != null) {
+            co2Coefficient = (group['co2_coefficient'] as num).toDouble();
+          }
+        } catch (_) {}
+      }
+
+      final int weightGrams = 100; // Mặc định 100g cho một vật thể quét
+      final double co2Saved = weightGrams * co2Coefficient;
+      final int earnedXp = 10;
+
+      // 5. Thêm bản ghi vào user_scan_events
+      await supabase.from('user_scan_events').insert({
+        'user_id': user.id,
+        'waste_dictionary_id': wasteDictId,
+        'ai_label': widget.tfliteLabel ?? 'unknown',
+        'confidence': widget.tfliteConfidence,
+        'earned_xp': earnedXp,
+        'image_url': publicUrl,
+        'weight_grams': weightGrams,
+        'co2_saved_grams': co2Saved,
+      });
+
+      // 6. Cộng điểm kinh nghiệm
+      await supabase.rpc('rpc_award_points', params: {
+        'p_delta': earnedXp,
+        'p_reason': 'waste_scan',
+        'p_ref_type': 'scan',
+        'p_metadata': {'co2_saved_grams': co2Saved},
+      });
+
+      // 7. Cập nhật tiến trình nhiệm vụ hàng ngày và Streak hoạt động
+      await _updateQuestProgress('scan_count', 1);
+      await _updateDailyStreak();
+
+      _hasSavedScan = true;
+      debugPrint('Saved scan event successfully.');
+    } catch (e) {
+      debugPrint('Error saving scan event: $e');
+    }
+  }
+
+  Future<void> _updateQuestProgress(String questType, int increment) async {
+    try {
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+      if (user == null) return;
+
+      // Lấy danh sách nhiệm vụ active cùng loại
+      final activeQuests = await supabase
+          .from('quests')
+          .select()
+          .eq('quest_type', questType)
+          .eq('is_active', true);
+
+      for (var quest in activeQuests) {
+        final questId = quest['id'];
+        final targetCount = quest['target_count'] as int;
+        final rewardXp = quest['reward_xp'] as int;
+
+        final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+        
+        final userQuestRecord = await supabase
+            .from('user_quests')
+            .select()
+            .eq('user_id', user.id)
+            .eq('quest_id', questId)
+            .eq('date', todayStr)
+            .maybeSingle();
+
+        int newProgress = increment;
+        bool alreadyRewarded = false;
+
+        if (userQuestRecord != null) {
+          newProgress = (userQuestRecord['progress_count'] as int) + increment;
+          alreadyRewarded = userQuestRecord['is_rewarded'] as bool;
+        }
+
+        final bool isCompleted = newProgress >= targetCount;
+
+        await supabase.from('user_quests').upsert({
+          'user_id': user.id,
+          'quest_id': questId,
+          'date': todayStr,
+          'progress_count': newProgress,
+          'is_completed': isCompleted,
+          'is_rewarded': alreadyRewarded || isCompleted,
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+
+        if (isCompleted && !alreadyRewarded) {
+          await supabase.rpc('rpc_award_points', params: {
+            'p_delta': rewardXp,
+            'p_reason': 'quest_completed',
+            'p_ref_type': 'quest',
+            'p_metadata': {'quest_title': quest['title_vi']},
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error updating quest progress: $e');
+    }
+  }
+
+  Future<void> _updateDailyStreak() async {
+    try {
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+      if (user == null) return;
+
+      final profile = await supabase
+          .from('profiles')
+          .select('current_streak, longest_streak, last_active_date')
+          .eq('id', user.id)
+          .single();
+
+      final lastActiveStr = profile['last_active_date'] as String?;
+      final int currentStreak = (profile['current_streak'] as num?)?.toInt() ?? 0;
+      final int longestStreak = (profile['longest_streak'] as num?)?.toInt() ?? 0;
+
+      final today = DateTime.now();
+      final todayStr = today.toIso8601String().substring(0, 10);
+
+      if (lastActiveStr == todayStr) return;
+
+      int newStreak = 1;
+      if (lastActiveStr != null) {
+        final lastActiveDate = DateTime.parse(lastActiveStr);
+        final difference = today.difference(lastActiveDate).inDays;
+
+        if (difference == 1) {
+          newStreak = currentStreak + 1;
+        } else if (difference > 1) {
+          newStreak = 1;
+        }
+      }
+
+      final int newLongestStreak = newStreak > longestStreak ? newStreak : longestStreak;
+
+      await supabase.from('profiles').update({
+        'current_streak': newStreak,
+        'longest_streak': newLongestStreak,
+        'last_active_date': todayStr,
+      }).eq('id', user.id);
+    } catch (e) {
+      debugPrint('Error updating daily streak: $e');
+    }
   }
 
   Future<void> _checkExistingReport() async {

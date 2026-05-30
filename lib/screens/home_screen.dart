@@ -17,6 +17,7 @@ import 'package:phan_loai_rac_qua_hinh_anh/services/auth_service.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/game_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/features/game/badge_inventory_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/screens/history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -350,13 +351,45 @@ class _HomeScreenState extends State<HomeScreen> {
                                           style: theme.textTheme.bodyLarge,
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                        Text(
-                                          'EcoSort by Bao',
-                                          style: theme.textTheme.headlineMedium?.copyWith(
-                                            color: theme.primaryColor,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
+                                        Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                'EcoSort by Bao',
+                                                style: theme.textTheme.headlineMedium?.copyWith(
+                                                  color: theme.primaryColor,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            if (context.watch<GameProvider>().streak > 0)
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  gradient: const LinearGradient(colors: [Colors.orange, Colors.redAccent]),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.redAccent.withValues(alpha: 0.3),
+                                                      blurRadius: 6,
+                                                      offset: const Offset(0, 2),
+                                                    )
+                                                  ]
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    const Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 14),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      '${context.watch<GameProvider>().streak} ngày',
+                                                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                          ],
                                         ),
                                       ],
                                     ),
@@ -432,13 +465,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               Text('Dịch vụ', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                               const SizedBox(height: 20),
                               _buildActionGrid(theme),
+                              _buildHistoryActionCard(theme),
 
                               if (_processingMessage.isNotEmpty) ...[
                                 const SizedBox(height: 24),
                                 _buildLoadingStatus(theme),
                               ],
 
-
+                              _buildDailyQuestsSection(theme),
 
                               const SizedBox(height: 40),
                               _buildKnowledgeSection(theme),
@@ -873,6 +907,183 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildHistoryActionCard(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0),
+      child: InkWell(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const HistoryScreen()),
+        ),
+        borderRadius: BorderRadius.circular(28),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: theme.colorScheme.onSurface.withValues(alpha: 0.05)),
+            boxShadow: [
+              BoxShadow(
+                color: theme.brightness == Brightness.dark
+                    ? Colors.black.withValues(alpha: 0.2)
+                    : Colors.black.withValues(alpha: 0.04),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(Icons.history_rounded, color: Colors.green, size: 32),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Nhật ký Xanh & Tác động',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Xem lịch sử quét rác và biểu đồ lượng CO₂ đã giảm thiểu.',
+                      style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios_rounded, color: theme.colorScheme.onSurface.withValues(alpha: 0.3), size: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDailyQuestsSection(ThemeData theme) {
+    final game = context.watch<GameProvider>();
+    final quests = game.dailyQuests;
+    final isDark = theme.brightness == Brightness.dark;
+
+    if (quests.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 40),
+        Text('Nhiệm vụ Hôm nay', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 20),
+        ListView.builder(
+          shrinkWrap: true,
+          padding: EdgeInsets.zero,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: quests.length,
+          itemBuilder: (context, index) {
+            final q = quests[index];
+            final bool isCompleted = q['is_completed'] as bool;
+            final int progress = q['progress_count'] as int;
+            final int target = q['target_count'] as int;
+            final double percent = (progress / target).clamp(0.0, 1.0);
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              elevation: 0,
+              color: isDark ? const Color(0xFF2A2D31) : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(color: isDark ? Colors.grey[850]! : Colors.grey[100]!),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? Colors.green.withValues(alpha: 0.15)
+                            : Colors.orange.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                        color: isCompleted ? Colors.green : Colors.orange,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            q['title_vi'],
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              decoration: isCompleted ? TextDecoration.lineThrough : null,
+                              color: isCompleted ? Colors.grey : (isDark ? Colors.white : Colors.black87),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            q['description'] ?? '',
+                            style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                          ),
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: percent,
+                              backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                              color: isCompleted ? Colors.green : theme.primaryColor,
+                              minHeight: 6,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '$progress/$target',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: isCompleted ? Colors.green : Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.flash_on_rounded, color: Colors.amber, size: 14),
+                            Text(
+                              '+${q['reward_xp']} XP',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.amber),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 

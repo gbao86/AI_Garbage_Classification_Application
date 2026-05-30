@@ -2,6 +2,19 @@
 
 Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
+## [0.5.4] - 2026-05-30
+
+### 🗺️ Cách tân Bản đồ & Tìm kiếm địa điểm (CartoDB Map Layers & Address Search)
+- 🎨 **Lớp bản đồ CartoDB cao cấp**: Tích hợp các lớp bản đồ vector sạch sẽ và hiện đại thay thế cho bản đồ mặc định đơn điệu: *CartoDB Voyager* (mặc định sáng), *CartoDB Positron* (tối giản), và *CartoDB Dark Matter* (**tự động đồng bộ với Dark Mode** của hệ thống).
+- 🧭 **Bảng chọn lớp phủ BottomSheet**: Thiết kế bảng điều khiển BottomSheet mượt mà để chọn kiểu bản đồ và bật/tắt lớp phủ Giao thông & Đường đi xe đạp/đi bộ.
+- 🔍 **Tìm địa điểm miễn phí (Nominatim API)**: Tích hợp thanh tìm kiếm địa chỉ ở đầu bản đồ sử dụng OpenStreetMap Nominatim API, cho phép tìm kiếm bất kỳ địa điểm nào và tự động quét các trạm rác xung quanh điểm đó.
+- 📍 **Phân loại Marker trực quan**: Color-code các Marker hiển thị trên bản đồ dựa trên thuộc tính thực tế của thùng rác (Màu Xanh lá cho điểm tái chế, màu Xanh dương cho trạm thu gom lớn, màu Cam cho thùng rác nhỏ).
+
+### 🏆 Nhật ký Xanh, Tác động môi trường (CO₂) & Nhiệm vụ / Streak
+- 📊 **Nhật ký Xanh (Scan History & Carbon Stats)**: Bổ sung màn hình lịch sử quét rác và phân tích tác động môi trường. Quy đổi lượng CO₂ giảm thiểu thành các chỉ số thú vị như số lượng cây xanh hấp thụ hay số giờ tiết kiệm điện bóng đèn LED.
+- 📅 **Nhiệm vụ Ngày & Streak (Daily Quests & Streak)**: Tích hợp hệ thống trò chơi hóa (gamification) gồm bảng nhiệm vụ hằng ngày ("Chiến binh phân loại", "Nhà thám hiểm Xanh", v.v.) và bộ đếm Streak 🔥 hoạt động liên tục lưu trữ thời gian thực trên Supabase.
+- 🤝 **Đóng góp điểm rác mới (Crowdsourcing)**: Cho phép người dùng chụp ảnh thực tế tại vị trí GPS hiện tại (hệ thống sẽ tự động yêu cầu xác định vị trí GPS thực tế mới nhất của thiết bị khi chọn) hoặc **Ghim vị trí tùy chọn bất kỳ** trên bản đồ thông qua chế độ chọn vị trí trực quan (với ghim đỏ ở chính giữa màn hình giúp kéo thả bản đồ và tự động dịch địa chỉ ngược qua Nominatim), giúp đóng góp điểm rác ngay cả khi người dùng đang không có mặt trực tiếp tại đó. Thưởng nóng +20 XP sau khi Admin duyệt.
+
 ---
 
 ## [0.5.3] - 2026-05-25

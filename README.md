@@ -1,7 +1,7 @@
 # ♻️ EcoSort by Bao - Ứng Dụng Phân Loại Rác Thông Minh
 > Ứng dụng phân loại rác bằng AI sử dụng Flutter, TFLite và Gemini AI.
 
-[![Version](https://img.shields.io/badge/version-0.5.3-green.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.5.4-green.svg)](./CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Flutter-blue.svg)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](./LICENSE)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-red.svg)](./SECURITY.md)
@@ -23,15 +23,19 @@ Hệ thống kết hợp:
 
 ## 📸 Giao diện chính của ứng dụng 
 
-| Trang chủ (Home Screen) | Bản đồ điểm bỏ rác (Map Screen) | Thông tin ứng dụng (About Screen) |
-|:---:|:---:|:---:|
-| ![Home Screen](assets/images/home_preview.jpg) | ![Map Screen](assets/images/map_preview.jpg) | ![About Screen](assets/images/about_screen.jpg) |
+| Trang chủ (Home Screen) | Bản đồ mới v0.5.4 (New Map Screen) |
+|:---:|:---:|
+| ![Home Screen](assets/images/home_preview.jpg) | ![Map Screen v0.5.4](assets/images/map_review_v0.5.4.jpg) |
+
+| Nhật ký & Tác động v0.5.4 (History & Impact) | Thông tin ứng dụng (About Screen) |
+|:---:|:---:|
+| ![Scan History v0.5.4](assets/images/new_ver0.5.4.jpg) | ![About Screen](assets/images/about_screen.jpg) |
 
 ---
 
 ## 🎥 Video Demo
 
-> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v0.0.2**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v0.5.3**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
+> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v0.0.2**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v0.5.4**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
 
 👉 [Xem Video Demo trên YouTube (v0.0.2)](https://youtu.be/YuI4tK1fNLU?si=LTzk0kVj0328i7m5)
 
@@ -45,7 +49,10 @@ Hệ thống kết hợp:
 - 🛸 Bóc tách vật thể + hiệu ứng trực quan quét laser
 - 🏆 Giao diện kết quả AI premium với chuyển màu và hoạt ảnh mượt mà
 - 🌓 Đồng bộ màu sắc toàn diện (Full Light/Dark Mode)
-- 🗺️ Bản đồ điểm bỏ rác (OpenStreetMap) tích hợp định vị GPS
+- 🗺️ Bản đồ điểm bỏ rác hiện đại (CartoDB voyager/positron/dark) tích hợp định vị GPS tươi, tìm địa chỉ và lọc lớp phủ giao thông/đường đi xe đạp.
+- 🤝 Đóng góp điểm bỏ rác mới (Crowdsourcing) thông qua định vị GPS thực tế hiện tại hoặc ghim vị trí tùy chọn trực quan trên bản đồ (di chuyển bản đồ dưới tâm ghim cố định), tự động dịch ngược địa chỉ, kèm ảnh chụp thực tế và phần thưởng XP.
+- 📊 Nhật ký Xanh & Biểu đồ tác động môi trường (tính toán lượng CO₂ giảm thiểu tích lũy).
+- 📅 Hệ thống Nhiệm vụ Hàng ngày & Chuỗi hoạt động Streak hằng ngày 🔥 để giữ chân người dùng.
 - 🎮 Hệ thống game sinh thái (XP, huy hiệu, quiz)
 - 🔐 Chống spam bằng hash MD5 ảnh chụp
 - 🖥️ Dashboard quản trị (Supabase)
