@@ -25,11 +25,11 @@ Hệ thống kết hợp:
 
 | Trang chủ (Home Screen) | Bản đồ mới v0.5.4 (New Map Screen) |
 |:---:|:---:|
-| ![Home Screen](assets/images/home_preview.jpg) | ![Map Screen v0.5.4](assets/images/map_review_v0.5.4.jpg) |
+| ![Home Screen v0.5.4](assets/images/home_preview_ver0.5.4.jpg) | ![Map Screen v0.5.4](assets/images/map_review_v0.5.4.jpg) |
 
-| Nhật ký & Tác động v0.5.4 (History & Impact) | Thông tin ứng dụng (About Screen) |
+| Nhật ký & Tác động v0.5.4 (History & Impact) | Thông tin ứng dụng v0.5.4 (About Screen) |
 |:---:|:---:|
-| ![Scan History v0.5.4](assets/images/new_ver0.5.4.jpg) | ![About Screen](assets/images/about_screen.jpg) |
+| ![Scan History v0.5.4](assets/images/new_ver0.5.4.jpg) | ![About Screen v0.5.4](assets/images/about_screen_v0.5.4.jpg) |
 
 ---
 
