@@ -124,7 +124,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initializeModelAndLabels() async {
     try {
-      _interpreter = await Interpreter.fromAsset('assets/models/model_unquant.tflite');
+      final options = InterpreterOptions();
+      try {
+        if (Platform.isAndroid) {
+          options.addDelegate(GpuDelegateV2());
+        }
+      } catch (e) {
+        debugPrint('Không thể tải GPU Delegate: $e');
+      }
+
+      _interpreter = await Interpreter.fromAsset('assets/models/model_unquant.tflite', options: options);
       final labelsData = await rootBundle.loadString('assets/models/labels.txt');
 
       if (mounted) {

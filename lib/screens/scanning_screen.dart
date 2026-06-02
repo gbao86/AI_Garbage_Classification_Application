@@ -144,88 +144,48 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
     }
   }
 
-  static Future<Map<String, dynamic>> _inferenceIsolate(Map<String, dynamic> params) async {
-    try {
-      final String imagePath = params['imagePath'];
-      final List<String> labels = List<String>.from(params['labels']);
-      final Map<String, String> labelTranslations = Map<String, String>.from(params['labelTranslations']);
-
-      final file = File(imagePath);
-      final bytes = await file.readAsBytes();
-
-      final image = img.decodeImage(bytes);
-      if (image == null) return {'error': 'Lỗi giải mã ảnh'};
-      final resized = img.copyResize(image, width: 224, height: 224);
-      final inputData = List.generate(224, (y) =>
-          List.generate(224, (x) {
-            final pixel = resized.getPixel(x, y);
-            return [pixel.r.toDouble(), pixel.g.toDouble(), pixel.b.toDouble()];
-          })
-      );
-
-      final options = InterpreterOptions();
-      try {
-        if (Platform.isAndroid) {
-          options.addDelegate(GpuDelegateV2());
-        }
-      } catch (e) {
-        debugPrint('Không thể tải GPU Delegate, tự động fallback sang CPU: $e');
-      }
-
-      Interpreter? interpreter;
-      try {
-        interpreter = await Interpreter.fromAsset('assets/models/model_unquant.tflite', options: options);
-        final input = [[inputData]];
-        final output = List.generate(1, (_) => List.filled(labels.length, 0.0));
-        interpreter.run(input, output);
-
-        final maxScore = output[0].reduce((a, b) => a > b ? a : b);
-        final maxScoreIndex = output[0].indexOf(maxScore);
-
-        String originalLabel = labels[maxScoreIndex].trim().replaceFirst(RegExp(r'^\d+\s+'), '');
-        final translatedLabel = labelTranslations[originalLabel] ?? originalLabel;
-
-        return {
-          'label': translatedLabel,
-          'originalLabel': originalLabel,
-          'confidence': maxScore,
-        };
-      } finally {
-        interpreter?.close();
-      }
-    } catch (e) {
-      return {'error': 'Lỗi trong Background Isolate: $e'};
-    }
+  static List<List<List<double>>> _preprocessForClassifier(Uint8List bytes) {
+    final image = img.decodeImage(bytes);
+    if (image == null) return [];
+    final resized = img.copyResize(image, width: 224, height: 224);
+    return List.generate(224, (y) =>
+        List.generate(224, (x) {
+          final pixel = resized.getPixel(x, y);
+          return [pixel.r.toDouble(), pixel.g.toDouble(), pixel.b.toDouble()];
+        })
+    );
   }
 
   Future<({String label, String originalLabel, String markdown, double confidence})> _classifyLocal() async {
-    if (widget.labels.isEmpty) {
+    if (widget.classifierInterpreter == null || widget.labels.isEmpty) {
       return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Mô hình chưa sẵn sàng', confidence: 0.0);
     }
     try {
-      final res = await compute(_inferenceIsolate, {
-        'imagePath': widget.image.path,
-        'labels': widget.labels,
-        'labelTranslations': widget.labelTranslations,
-      });
-
-      if (res.containsKey('error')) {
-        return (label: 'Lỗi', originalLabel: 'N/A', markdown: res['error'].toString(), confidence: 0.0);
+      final imageBytes = await widget.image.readAsBytes();
+      final inputData = await compute(_preprocessForClassifier, imageBytes);
+      if (inputData.isEmpty) {
+        return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Lỗi xử lý ảnh', confidence: 0.0);
       }
 
-      final String label = res['label'];
-      final String originalLabel = res['originalLabel'];
-      final double confidence = res['confidence'];
+      final input = [inputData];
+      final output = List.generate(1, (_) => List.filled(widget.labels.length, 0.0));
+      widget.classifierInterpreter!.run(input, output);
+
+      final maxScore = output[0].reduce((a, b) => a > b ? a : b);
+      final maxScoreIndex = output[0].indexOf(maxScore);
+
+      String originalLabel = widget.labels[maxScoreIndex].trim().replaceFirst(RegExp(r'^\d+\s+'), '');
+      final translatedLabel = widget.labelTranslations[originalLabel] ?? originalLabel;
 
       final markdown = widget.buildLocalGuidanceMarkdown(
-        translatedLabel: label,
+        translatedLabel: translatedLabel,
         originalLabel: originalLabel,
         classification: _getClassification(originalLabel),
-        confidencePct: confidence * 100,
-        lowConfidence: confidence < 0.8,
+        confidencePct: maxScore * 100,
+        lowConfidence: maxScore < 0.8,
       );
 
-      return (label: label, originalLabel: originalLabel, markdown: markdown, confidence: confidence);
+      return (label: translatedLabel, originalLabel: originalLabel, markdown: markdown, confidence: maxScore);
     } catch (e) {
       return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Lỗi: $e', confidence: 0.0);
     }
