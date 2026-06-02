@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,6 +50,9 @@ class GameProvider with ChangeNotifier {
       await _loadData();
       return;
     }
+
+    // 0. Xử lý đồng bộ các giao dịch offline trước để tránh bị ghi đè mất điểm
+    await _processOfflineOutbox(uid);
     
     // 1. Đồng bộ XP và Streak
     try {
@@ -138,6 +142,76 @@ class GameProvider with ChangeNotifier {
     }
   }
 
+  Future<void> _processOfflineOutbox(String uid) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final List<String> outbox = prefs.getStringList('pending_scores_$uid') ?? [];
+      if (outbox.isEmpty) return;
+
+      final List<String> remaining = List.from(outbox);
+      bool hasNetworkError = false;
+
+      for (final transactionStr in outbox) {
+        if (hasNetworkError) break;
+        try {
+          final tx = jsonDecode(transactionStr) as Map<String, dynamic>;
+          final points = tx['points'] as int;
+          final reason = tx['reason'] as String;
+          final refType = tx['ref_type'] as String?;
+          final refId = tx['ref_id'] as String?;
+          final metadata = tx['metadata'] as Map<String, dynamic>? ?? {};
+
+          await Supabase.instance.client.rpc(
+            'rpc_award_points',
+            params: {
+              'p_delta': points,
+              'p_reason': reason,
+              'p_ref_type': refType,
+              'p_ref_id': refId,
+              'p_metadata': metadata,
+            },
+          );
+          remaining.remove(transactionStr);
+        } catch (e) {
+          debugPrint('Lỗi đẩy transaction offline lên Supabase: $e');
+          final eStr = e.toString();
+          if (eStr.contains('SocketException') || eStr.contains('Failed host lookup') || eStr.contains('ClientException') || eStr.contains('Network')) {
+            hasNetworkError = true;
+          } else {
+            remaining.remove(transactionStr); // Bỏ qua nếu lỗi cú pháp hoặc tham số để tránh nghẽn hàng đợi
+          }
+        }
+      }
+
+      await prefs.setStringList('pending_scores_$uid', remaining);
+    } catch (e) {
+      debugPrint('Lỗi xử lý outbox offline: $e');
+    }
+  }
+
+  Future<void> _saveToOfflineOutbox(int points, String reason, String? refType, String? refId) async {
+    try {
+      final uid = Supabase.instance.client.auth.currentUser?.id;
+      if (uid == null) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      final List<String> outbox = prefs.getStringList('pending_scores_$uid') ?? [];
+
+      final tx = {
+        'points': points,
+        'reason': reason,
+        'ref_type': refType,
+        'ref_id': refId,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+
+      outbox.add(jsonEncode(tx));
+      await prefs.setStringList('pending_scores_$uid', outbox);
+    } catch (e) {
+      debugPrint('Lỗi lưu transaction offline: $e');
+    }
+  }
+
   Future<void> addScore(int points) async {
     if (points <= 0) return;
     final uid = Supabase.instance.client.auth.currentUser?.id;
@@ -153,7 +227,7 @@ class GameProvider with ChangeNotifier {
           },
         );
         if (res != null) {
-          _score = int.tryParse(res.toString()) ?? _score;
+          _score = int.tryParse(res.toString()) ?? (_score + points);
         } else {
           _score += points;
         }
@@ -164,7 +238,8 @@ class GameProvider with ChangeNotifier {
         notifyListeners();
         return;
       } catch (e) {
-        debugPrint('rpc_award_points fallback local: $e');
+        debugPrint('rpc_award_points lỗi, lưu offline outbox: $e');
+        await _saveToOfflineOutbox(points, 'game_session', 'game', null);
       }
     }
     _score += points;
@@ -207,7 +282,7 @@ class GameProvider with ChangeNotifier {
           },
         );
         if (res != null) {
-          _score = int.tryParse(res.toString()) ?? _score;
+          _score = int.tryParse(res.toString()) ?? (_score - cost);
         } else {
           _score -= cost;
         }
@@ -218,7 +293,8 @@ class GameProvider with ChangeNotifier {
         notifyListeners();
         return true;
       } catch (e) {
-        debugPrint('redeemBadge rpc fallback: $e');
+        debugPrint('redeemBadge rpc lỗi, lưu offline outbox: $e');
+        await _saveToOfflineOutbox(-cost, 'badge_redeem', 'badge', null);
       }
     }
 

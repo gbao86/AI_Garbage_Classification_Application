@@ -4,8 +4,10 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
 ## [0.5.5] - 2026-06-02
 
-### 🛠️ Đồng bộ dữ liệu CSDL & Sửa lỗi hiển thị UI phân loại (Database Sync & Classification UI Fix)
-- 💾 **Sửa lỗi thiếu cột CSDL Supabase**: Thêm file migration `20260602173000_add_missing_scan_columns.sql` để bổ sung các cột còn thiếu trong database gồm `image_url`, `weight_grams`, `co2_saved_grams` (cho bảng `user_scan_events`) và `image_url` (cho bảng `collection_points`). Khắc phục triệt để lỗi crash API khi lưu lịch sử quét rác và khi gửi địa điểm đóng góp mới.
+### ⚙️ Tối ưu hóa kỹ thuật Chuyên sâu (Advanced Engineering Optimization)
+- 💾 **Sửa lỗi thiếu cột CSDL & Tối ưu RLS**: Cập nhật file migration `20260602173000_add_missing_scan_columns.sql` bổ sung các cột còn thiếu và tích hợp cơ chế **Custom JWT Claims** giúp hàm `is_admin()` kiểm tra quyền trực tiếp từ RAM, triệt tiêu đệ quy RLS và tăng tốc truy vấn DB lên gấp nhiều lần.
+- ⚡ **Background Isolate & GPU Delegates cho AI**: Tách tiến trình suy luận TFLite sang một **Background Isolate** riêng thông qua `compute()` kết hợp với GPU/Metal Delegates, giải phóng Main Thread giúp duy trì hoạt ảnh quét laser ở tốc độ 60/120 FPS ổn định mà không giật lag.
+- 📳 **Offline Outbox Pattern**: Thiết kế hàng đợi outbox offline cho `GameProvider` lưu trữ trong `SharedPreferences`, bảo toàn điểm số người dùng kiếm được khi mất mạng và đồng bộ tuần tự lên Supabase khi kết nối khôi phục.
 - 🔄 **Đồng bộ hóa mã phân loại rác**: Cập nhật hàm `_getClassification` trong `scanning_screen.dart` và switch-case phân loại trong `result_screen.dart` sang các mã tiếng Anh chuẩn database (`hazardous`, `organic`, `recyclable`, `trash`). Khắc phục lỗi lệch ngôn ngữ khiến hệ số giảm thiểu CO₂ luôn bị lùi về giá trị mặc định.
 - 🎨 **Sửa lỗi hiển thị màu sắc Lịch sử**: Sửa logic gán `groupColor` dựa theo code nhóm rác thực tế từ CSDL trong `history_screen.dart`, giúp các thẻ lịch sử hiển thị đúng màu đặc trưng của từng nhóm rác (Xanh dương cho Tái chế, Đỏ cho Nguy hại, Xanh lá cho Hữu cơ) thay vì tất cả hiển thị màu xám.
 
