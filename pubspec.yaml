@@ -26,6 +26,7 @@ dependencies:
   flutter_markdown: ^0.7.7
   lottie: ^3.3.2
   flutter_image_compress: ^2.3.0
+  connectivity_plus: ^6.1.1
   package_info_plus: ^8.0.0
   geolocator: ^13.0.2
   flutter_map: ^6.1.0

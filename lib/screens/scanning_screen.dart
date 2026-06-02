@@ -9,6 +9,7 @@ import 'package:phan_loai_rac_qua_hinh_anh/services/gemini_service.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ScanningScreen extends StatefulWidget {
   final File image;
@@ -135,9 +136,30 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
 
     if (offlineResult.confidence < 0.8) {
       debugPrint('[FLOW] Confidence ${offlineResult.confidence} < 0.8 → GỌI GEMINI API');
+      
+      // Kiểm tra kết nối mạng trước khi gọi Gemini
+      final connectivityResult = await (Connectivity().checkConnectivity());
+      final hasNetwork = connectivityResult.any((element) => element != ConnectivityResult.none);
+
+      if (!hasNetwork) {
+        debugPrint('[FLOW] Không có mạng, bỏ qua Gemini, dùng Offline ngay.');
+        if (mounted) {
+          setState(() {
+            _label = "${offlineResult.label} (Offline)";
+            _finalMarkdown = "${offlineResult.markdown}\n\n*(Lưu ý: Không có kết nối mạng, đang sử dụng kết quả Offline)*";
+            _isGeminiRunning = false;
+            _analysisSource = 'tflite_fallback';
+          });
+        }
+        _checkAndNavigate();
+        return;
+      }
+
       setState(() => _isGeminiRunning = true);
       try {
-        final geminiResult = await _geminiService.processImageAndGetGuidance(widget.image);
+        // Thêm timeout 15s để tránh treo app khi mạng lag
+        final geminiResult = await _geminiService.processImageAndGetGuidance(widget.image)
+            .timeout(const Duration(seconds: 15));
         debugPrint('[FLOW] Gemini trả về thành công (${geminiResult.length} ký tự)');
         if (mounted) {
           setState(() {
