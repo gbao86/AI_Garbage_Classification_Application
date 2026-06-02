@@ -122,8 +122,11 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
 
     if (mounted) {
       setState(() {
-        _label = offlineResult.label;
-        _finalMarkdown = offlineResult.markdown;
+        // Tối ưu hóa UX: Chỉ hiển thị kết quả TFLite ngay nếu độ tự tin cao (>= 80%).
+        // Nếu độ tự tin thấp, giữ _label = null để người dùng không nhìn thấy kết quả đoán sai lệch 
+        // trong khi hệ thống đang chạy Gemini API ở phía sau.
+        _label = offlineResult.confidence >= 0.8 ? offlineResult.label : null;
+        _finalMarkdown = offlineResult.confidence >= 0.8 ? offlineResult.markdown : null;
         _tfliteLabel = offlineResult.originalLabel;
         _tfliteConfidence = offlineResult.confidence;
         _classificationType = _getClassification(offlineResult.originalLabel);
@@ -356,7 +359,9 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
                       : const SizedBox.shrink(key: ValueKey('empty_label')),
                 ),
                 const SizedBox(height: 20),
-                if (_isGeminiRunning || _label == null || (!_isScanCompleted))
+                if (_isGeminiRunning)
+                  const TypewriterText(text: "Đang tối ưu phân tích bằng Cloud AI...")
+                else if (_label == null || (!_isScanCompleted))
                   const TypewriterText(text: "Đang phân tích cấu trúc..."),
               ],
             ),
