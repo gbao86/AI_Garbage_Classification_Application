@@ -34,10 +34,17 @@ class _ResultScreenState extends State<ResultScreen> {
   final TextEditingController _suggestedNameController = TextEditingController();
 
   bool _hasSavedScan = false;
+  late String _currentResultText;
+  late String _currentClassificationType;
+  bool _isReanalyzing = false;
+  bool _isReanalyzed = false;
+  String? _insertedScanEventId;
 
   @override
   void initState() {
     super.initState();
+    _currentResultText = widget.processingResult;
+    _currentClassificationType = widget.classificationType;
     _calculateImageHash();
   }
 
@@ -99,12 +106,12 @@ class _ResultScreenState extends State<ResultScreen> {
 
       // 4. Lấy hệ số CO2 từ waste_groups tương ứng
       double co2Coefficient = 0.5; // mặc định
-      if (widget.classificationType.isNotEmpty) {
+      if (_currentClassificationType.isNotEmpty) {
         try {
           final group = await supabase
               .from('waste_groups')
               .select('co2_coefficient')
-              .eq('code', widget.classificationType)
+              .eq('code', _currentClassificationType)
               .maybeSingle();
           if (group != null) {
             co2Coefficient = (group['co2_coefficient'] as num).toDouble();
@@ -116,8 +123,8 @@ class _ResultScreenState extends State<ResultScreen> {
       final double co2Saved = weightGrams * co2Coefficient;
       final int earnedXp = 10;
 
-      // 5. Thêm bản ghi vào user_scan_events
-      await supabase.from('user_scan_events').insert({
+      // 5. Thêm bản ghi vào user_scan_events và lấy ID về
+      final res = await supabase.from('user_scan_events').insert({
         'user_id': user.id,
         'waste_dictionary_id': wasteDictId,
         'ai_label': widget.tfliteLabel ?? 'unknown',
@@ -126,7 +133,11 @@ class _ResultScreenState extends State<ResultScreen> {
         'image_url': publicUrl,
         'weight_grams': weightGrams,
         'co2_saved_grams': co2Saved,
-      });
+      }).select('id').maybeSingle();
+
+      if (res != null) {
+        _insertedScanEventId = res['id'] as String?;
+      }
 
       // 6. Cộng điểm kinh nghiệm
       await supabase.rpc('rpc_award_points', params: {
@@ -144,6 +155,89 @@ class _ResultScreenState extends State<ResultScreen> {
       debugPrint('Saved scan event successfully.');
     } catch (e) {
       debugPrint('Error saving scan event: $e');
+    }
+  }
+
+  Future<void> _updateScanEventAfterReanalysis(String newClassType) async {
+    if (_insertedScanEventId == null) return;
+    try {
+      final supabase = Supabase.instance.client;
+      
+      double co2Coefficient = 0.5;
+      try {
+        final group = await supabase
+            .from('waste_groups')
+            .select('co2_coefficient')
+            .eq('code', newClassType)
+            .maybeSingle();
+        if (group != null) {
+          co2Coefficient = (group['co2_coefficient'] as num).toDouble();
+        }
+      } catch (_) {}
+
+      final double newCo2Saved = 100 * co2Coefficient; // 100g rác
+
+      await supabase.from('user_scan_events').update({
+        'ai_label': 'gemini_reanalyzed',
+        'co2_saved_grams': newCo2Saved,
+      }).eq('id', _insertedScanEventId!);
+
+      debugPrint('Updated scan event after reanalysis successfully.');
+    } catch (e) {
+      debugPrint('Error updating scan event after reanalysis: $e');
+    }
+  }
+
+  Future<void> _reanalyzeWithGemini() async {
+    if (_isReanalyzing) return;
+    setState(() {
+      _isReanalyzing = true;
+    });
+
+    try {
+      final geminiService = GeminiService();
+      final String geminiResult = await geminiService.processImageAndGetGuidance(widget.image);
+      
+      String newClassType = _currentClassificationType;
+      if (geminiResult.contains('Tái chế') || geminiResult.contains('tái chế') || geminiResult.contains('recyclable')) {
+        newClassType = 'recyclable';
+      } else if (geminiResult.contains('Hữu cơ') || geminiResult.contains('hữu cơ') || geminiResult.contains('organic')) {
+        newClassType = 'organic';
+      } else if (geminiResult.contains('Nguy hại') || geminiResult.contains('nguy hại') || geminiResult.contains('hazardous')) {
+        newClassType = 'hazardous';
+      } else if (geminiResult.contains('Không tái chế') || geminiResult.contains('trash')) {
+        newClassType = 'trash';
+      }
+
+      setState(() {
+        _currentResultText = geminiResult;
+        _currentClassificationType = newClassType;
+        _isReanalyzed = true;
+      });
+
+      await _updateScanEventAfterReanalysis(newClassType);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text('Đã phân tích nâng cao thành công bằng Gemini AI!'),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error reanalyzing with Gemini: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi khi gọi Gemini AI: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isReanalyzing = false;
+        });
+      }
     }
   }
 
@@ -378,7 +472,7 @@ class _ResultScreenState extends State<ResultScreen> {
     String statusText;
     LinearGradient statusGradient;
 
-    switch (widget.classificationType) {
+    switch (_currentClassificationType) {
       case 'hazardous':
         statusColor = Colors.redAccent;
         statusIcon = Icons.warning_amber_rounded;
@@ -536,11 +630,32 @@ class _ResultScreenState extends State<ResultScreen> {
                           ),
                           const Divider(height: 30),
                           MarkdownBody(
-                            data: widget.processingResult,
+                            data: _currentResultText,
                             styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
                               p: const TextStyle(fontSize: 16, height: 1.6),
                             ),
                           ),
+                          if (widget.tfliteLabel != null && !_isReanalyzed) ...[
+                            const Divider(height: 30),
+                            Center(
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: statusColor,
+                                  side: BorderSide(color: statusColor.withValues(alpha: 0.5)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                ),
+                                icon: _isReanalyzing 
+                                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: statusColor))
+                                    : const Icon(Icons.auto_awesome_rounded, size: 18),
+                                label: Text(
+                                  _isReanalyzing ? 'Đang phân tích...' : 'Chưa chuẩn? Phân tích sâu bằng Gemini AI',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                                onPressed: _isReanalyzing ? null : _reanalyzeWithGemini,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
