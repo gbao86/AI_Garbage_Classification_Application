@@ -8,7 +8,6 @@ import 'package:phan_loai_rac_qua_hinh_anh/screens/result_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/services/gemini_service.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ScanningScreen extends StatefulWidget {
@@ -190,18 +189,16 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
   static List<List<List<double>>> _preprocessForClassifier(Uint8List bytes) {
     final image = img.decodeImage(bytes);
     if (image == null) return [];
-    // Vì ảnh đưa vào đã được nén về 224x224 bằng native code nên copyResize ở đây cực nhanh
-    final resized = (image.width == 224 && image.height == 224)
-        ? image
-        : img.copyResize(image, width: 224, height: 224);
+    final resized = img.copyResize(image, width: 224, height: 224);
     return List.generate(224, (y) =>
         List.generate(224, (x) {
           final pixel = resized.getPixel(x, y);
-          // Chuẩn hóa pixel về dải [-1, 1] cho mô hình float32 (Teachable Machine unquantized)
+          // Khôi phục công thức gốc: Trả về giá trị RGB dạng nguyên bản [0, 255]
+          // vì mô hình TFLite trong assets được tối ưu hóa để nhận diện dải giá trị này.
           return [
-            (pixel.r.toDouble() / 127.5) - 1.0,
-            (pixel.g.toDouble() / 127.5) - 1.0,
-            (pixel.b.toDouble() / 127.5) - 1.0,
+            pixel.r.toDouble(),
+            pixel.g.toDouble(),
+            pixel.b.toDouble(),
           ];
         })
     );
@@ -214,24 +211,11 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
       return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Mô hình chưa sẵn sàng', confidence: 0.0);
     }
     try {
-      debugPrint('[TFLITE] Đang nén ảnh về 224x224 bằng native code...');
-      final resizeStartTime = DateTime.now();
-      // Tối ưu hóa cốt lõi: Sử dụng thư viện native Kotlin/Swift để resize ảnh xuống 224x224.
-      // Việc này giúp mảng byte giảm từ ~300KB xuống ~5KB. Sau đó hàm img.decodeImage trong Dart
-      // chỉ mất <15ms để giải mã thay vì mất 5-8 giây nếu giải mã ảnh gốc 1080x1080!
-      final resizedBytes = await FlutterImageCompress.compressWithFile(
-        widget.image.absolute.path,
-        minWidth: 224,
-        minHeight: 224,
-        quality: 80,
-      );
-      if (resizedBytes == null) {
-        throw Exception("Không thể nén ảnh về 224x224");
-      }
-      final resizeDuration = DateTime.now().difference(resizeStartTime).inMilliseconds;
-      debugPrint('[TFLITE] Đã nén xong mất ${resizeDuration}ms. Đang chạy tiền xử lý trong Isolate...');
+      debugPrint('[TFLITE] Đang đọc file ảnh...');
+      final imageBytes = await widget.image.readAsBytes();
+      debugPrint('[TFLITE] Đọc xong, đang chạy tiền xử lý trong Background Isolate...');
 
-      final inputData = await compute(_preprocessForClassifier, resizedBytes);
+      final inputData = await compute(_preprocessForClassifier, imageBytes);
       if (inputData.isEmpty) {
         debugPrint('[TFLITE] ❌ Tiền xử lý thất bại (inputData rỗng)');
         return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Lỗi xử lý ảnh', confidence: 0.0);
