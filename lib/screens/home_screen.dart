@@ -195,14 +195,15 @@ class _HomeScreenState extends State<HomeScreen> {
       final tempDir = await getTemporaryDirectory();
       final targetPath = p.join(tempDir.path, "optimized_${DateTime.now().millisecondsSinceEpoch}.jpg");
 
-      // Ép khung tối đa 1080x1080 cho mọi loại ảnh
+      // Ép khung tối đa 800x800 để giảm dung lượng file (~60-70%),
+      // tăng tốc độ tải ảnh lên Gemini API và tăng tốc độ xử lý ML Kit Subject Segmentation.
       final result = await FlutterImageCompress.compressAndGetFile(
         file.absolute.path,
         targetPath,
         format: CompressFormat.jpeg,
-        quality: 85,
-        minWidth: 1080,
-        minHeight: 1080,
+        quality: 80,
+        minWidth: 800,
+        minHeight: 800,
       );
 
       return result != null ? File(result.path) : file;

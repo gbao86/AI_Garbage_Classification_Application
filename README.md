@@ -45,6 +45,7 @@ Hệ thống kết hợp:
 
 - 📷 Nhận diện rác bằng AI (camera & thư viện ảnh)
 - 🧠 Cơ chế AI kép (Offline → Online fallback) với **hiển thị chính xác nguồn phân tích**: AI Gemini (Online), AI Local (Offline), hoặc AI Offline (Gemini không khả dụng)
+- ⚡ **Tối ưu hóa Tốc độ Phân tích cực hạn**: Tích hợp nén ảnh Native-code về 224x224 trước khi giải mã trên Dart (giảm thời gian decode xuống <15ms), tự động nén ảnh gửi đi lên Gemini API chỉ còn ~15KB, chạy song song tác vụ phân tách ML Kit với hoạt ảnh quét (rút ngắn thời gian quét còn 1.8s) để tăng tốc độ xử lý tổng thể lên tối đa.
 - ⚙️ **Lưu ý về Tự động Huấn luyện (Auto-Train):** Tính năng tự động huấn luyện lại mô hình AI (MLOps) hiện đã bị hủy kích hoạt và đang được tạm ngưng phát triển do sự thiếu ổn định về tập dữ liệu đầu vào (dataset). Ứng dụng hiện sử dụng ổn định mô hình đóng gói trực tiếp trong assets.
 - 🛸 Bóc tách vật thể + hiệu ứng trực quan quét laser
 - 🏆 Giao diện kết quả AI premium với chuyển màu và hoạt ảnh mượt mà

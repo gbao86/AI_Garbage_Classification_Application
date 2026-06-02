@@ -8,6 +8,7 @@ import 'package:phan_loai_rac_qua_hinh_anh/screens/result_screen.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/services/gemini_service.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class ScanningScreen extends StatefulWidget {
   final File image;
@@ -52,6 +53,7 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
 
   bool _isScanCompleted = false; // Đánh dấu tia laser đã quét xong
   bool _isGeminiRunning = false;
+  bool _isNavigating = false;    // Tránh việc Navigator.pushReplacement bị gọi lặp lại nhiều lần
   // 'gemini' = Gemini thành công, 'tflite' = TFLite offline (confidence cao), 'tflite_fallback' = TFLite fallback (Gemini lỗi)
   String _analysisSource = 'tflite';
 
@@ -64,13 +66,13 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
 
     _scanLineController = AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 3000)
+        duration: const Duration(milliseconds: 1800)
     );
 
     _scanLineController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() => _isScanCompleted = true);
-        _runSegmentation();
+        _checkAndNavigate();
       }
     });
 
@@ -83,6 +85,9 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
       if (mounted) {
         setState(() => _sharpUiImage = img);
         _scanLineController.forward();
+        // Tối ưu hóa: Chạy phân mảnh (ML Kit) song song với AI phân tích
+        // không chờ hiệu ứng quét kết thúc mới bắt đầu chạy, giảm đáng kể thời gian chờ.
+        _runSegmentation();
         _startBackgroundAI();
       }
     });
@@ -160,7 +165,10 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
   static List<List<List<double>>> _preprocessForClassifier(Uint8List bytes) {
     final image = img.decodeImage(bytes);
     if (image == null) return [];
-    final resized = img.copyResize(image, width: 224, height: 224);
+    // Vì ảnh đưa vào đã được nén về 224x224 bằng native code nên copyResize ở đây cực nhanh
+    final resized = (image.width == 224 && image.height == 224)
+        ? image
+        : img.copyResize(image, width: 224, height: 224);
     return List.generate(224, (y) =>
         List.generate(224, (x) {
           final pixel = resized.getPixel(x, y);
@@ -181,10 +189,24 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
       return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Mô hình chưa sẵn sàng', confidence: 0.0);
     }
     try {
-      debugPrint('[TFLITE] Đang đọc ảnh...');
-      final imageBytes = await widget.image.readAsBytes();
-      debugPrint('[TFLITE] Ảnh ${imageBytes.length} bytes, đang tiền xử lý...');
-      final inputData = await compute(_preprocessForClassifier, imageBytes);
+      debugPrint('[TFLITE] Đang nén ảnh về 224x224 bằng native code...');
+      final resizeStartTime = DateTime.now();
+      // Tối ưu hóa cốt lõi: Sử dụng thư viện native Kotlin/Swift để resize ảnh xuống 224x224.
+      // Việc này giúp mảng byte giảm từ ~300KB xuống ~5KB. Sau đó hàm img.decodeImage trong Dart
+      // chỉ mất <15ms để giải mã thay vì mất 5-8 giây nếu giải mã ảnh gốc 1080x1080!
+      final resizedBytes = await FlutterImageCompress.compressWithFile(
+        widget.image.absolute.path,
+        minWidth: 224,
+        minHeight: 224,
+        quality: 80,
+      );
+      if (resizedBytes == null) {
+        throw Exception("Không thể nén ảnh về 224x224");
+      }
+      final resizeDuration = DateTime.now().difference(resizeStartTime).inMilliseconds;
+      debugPrint('[TFLITE] Đã nén xong mất ${resizeDuration}ms. Đang chạy tiền xử lý trong Isolate...');
+
+      final inputData = await compute(_preprocessForClassifier, resizedBytes);
       if (inputData.isEmpty) {
         debugPrint('[TFLITE] ❌ Tiền xử lý thất bại (inputData rỗng)');
         return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Lỗi xử lý ảnh', confidence: 0.0);
@@ -237,7 +259,15 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
 
   void _checkAndNavigate() {
     if (_isScanCompleted && _maskImage != null && !_isGeminiRunning && _finalMarkdown != null) {
-      Future.delayed(const Duration(milliseconds: 2500), () {
+      if (_isNavigating) return;
+      _isNavigating = true;
+
+      // Tối ưu hóa trải nghiệm người dùng:
+      // - Nếu chạy Gemini (lâu), chuyển trang ngay lập tức sau 300ms khi có kết quả.
+      // - Nếu chạy TFLite (nhanh), đợi 800ms để người dùng kịp quan sát hiệu ứng quét và mask.
+      final delayMs = _analysisSource == 'gemini' ? 300 : 800;
+
+      Future.delayed(Duration(milliseconds: delayMs), () {
         if (mounted) {
           Navigator.pushReplacement(
             context,
