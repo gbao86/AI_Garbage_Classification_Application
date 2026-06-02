@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/services/gemini_service.dart';
 
 class ResultScreen extends StatefulWidget {
   final File image;
