@@ -14,6 +14,8 @@ class ResultScreen extends StatefulWidget {
   final String? tfliteLabel;
   final double tfliteConfidence;
   final String classificationType;
+  // 'gemini' = Gemini thành công, 'tflite' = TFLite offline, 'tflite_fallback' = Gemini lỗi dùng TFLite
+  final String analysisSource;
 
   const ResultScreen({
     super.key,
@@ -22,6 +24,7 @@ class ResultScreen extends StatefulWidget {
     this.tfliteLabel,
     this.tfliteConfidence = 0.0,
     this.classificationType = '',
+    this.analysisSource = 'tflite',
   });
 
   @override
@@ -37,6 +40,7 @@ class _ResultScreenState extends State<ResultScreen> {
   bool _hasSavedScan = false;
   late String _currentResultText;
   late String _currentClassificationType;
+  late String _currentAnalysisSource;
   bool _isReanalyzing = false;
   bool _isReanalyzed = false;
   String? _insertedScanEventId;
@@ -46,6 +50,7 @@ class _ResultScreenState extends State<ResultScreen> {
     super.initState();
     _currentResultText = widget.processingResult;
     _currentClassificationType = widget.classificationType;
+    _currentAnalysisSource = widget.analysisSource;
     _calculateImageHash();
   }
 
@@ -213,6 +218,7 @@ class _ResultScreenState extends State<ResultScreen> {
       setState(() {
         _currentResultText = geminiResult;
         _currentClassificationType = newClassType;
+        _currentAnalysisSource = 'gemini';
         _isReanalyzed = true;
       });
 
@@ -767,7 +773,22 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Widget _buildInfoChips(ThemeData theme, Color statusColor) {
-    final isGemini = widget.tfliteConfidence < 0.8;
+    String sourceLabel;
+    IconData sourceIcon;
+    switch (_currentAnalysisSource) {
+      case 'gemini':
+        sourceLabel = 'AI Gemini (Online)';
+        sourceIcon = Icons.auto_awesome;
+        break;
+      case 'tflite_fallback':
+        sourceLabel = 'AI Offline (Gemini không khả dụng)';
+        sourceIcon = Icons.cloud_off_rounded;
+        break;
+      case 'tflite':
+      default:
+        sourceLabel = 'AI Local (Offline) · ${(widget.tfliteConfidence * 100).toStringAsFixed(0)}%';
+        sourceIcon = Icons.memory_rounded;
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -790,12 +811,10 @@ class _ResultScreenState extends State<ResultScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(isGemini ? Icons.auto_awesome : Icons.memory_rounded, color: statusColor, size: 16),
+              Icon(sourceIcon, color: statusColor, size: 16),
               const SizedBox(width: 6),
               Text(
-                isGemini 
-                    ? 'AI Gemini (Online)' 
-                    : 'AI Local (TFLite) · ${(widget.tfliteConfidence * 100).toStringAsFixed(0)}%',
+                sourceLabel,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 12,

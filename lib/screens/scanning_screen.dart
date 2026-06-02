@@ -52,6 +52,8 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
 
   bool _isScanCompleted = false; // Đánh dấu tia laser đã quét xong
   bool _isGeminiRunning = false;
+  // 'gemini' = Gemini thành công, 'tflite' = TFLite offline (confidence cao), 'tflite_fallback' = TFLite fallback (Gemini lỗi)
+  String _analysisSource = 'tflite';
 
   final SegmentationService _segmentationService = SegmentationService();
   final GeminiService _geminiService = GeminiService();
@@ -106,7 +108,13 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
   }
 
   Future<void> _startBackgroundAI() async {
+    debugPrint('=== [FLOW] _startBackgroundAI() BẮT ĐẦU ===');
+    debugPrint('[FLOW] interpreter null? ${widget.classifierInterpreter == null}');
+    debugPrint('[FLOW] labels count: ${widget.labels.length}');
+
     final offlineResult = await _classifyLocal();
+    debugPrint('[FLOW] TFLite xong → label="${offlineResult.label}", originalLabel="${offlineResult.originalLabel}", confidence=${offlineResult.confidence}');
+
     if (mounted) {
       setState(() {
         _label = offlineResult.label;
@@ -118,28 +126,33 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
     }
 
     if (offlineResult.confidence < 0.8) {
+      debugPrint('[FLOW] Confidence ${offlineResult.confidence} < 0.8 → GỌI GEMINI API');
       setState(() => _isGeminiRunning = true);
       try {
         final geminiResult = await _geminiService.processImageAndGetGuidance(widget.image);
+        debugPrint('[FLOW] Gemini trả về thành công (${geminiResult.length} ký tự)');
         if (mounted) {
           setState(() {
             _label = "Đã phân tích bằng AI";
             _finalMarkdown = geminiResult;
             _isGeminiRunning = false;
+            _analysisSource = 'gemini';
           });
         }
       } catch (e) {
-        debugPrint('Lỗi Gemini, chuyển hướng fallback sang Offline: $e');
+        debugPrint('[FLOW] Lỗi Gemini, fallback sang Offline: $e');
         if (mounted) {
           setState(() {
             _label = "${offlineResult.label} (Offline)";
             _finalMarkdown = "${offlineResult.markdown}\n\n*(Lưu ý: Không thể kết nối với Gemini AI do lỗi mạng, đang sử dụng kết quả Offline)*";
             _isGeminiRunning = false;
+            _analysisSource = 'tflite_fallback';
           });
         }
       }
       _checkAndNavigate();
     } else {
+      debugPrint('[FLOW] Confidence ${offlineResult.confidence} >= 0.8 → DÙNG KẾT QUẢ TFLITE OFFLINE');
       _checkAndNavigate();
     }
   }
@@ -162,25 +175,40 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
   }
 
   Future<({String label, String originalLabel, String markdown, double confidence})> _classifyLocal() async {
+    debugPrint('[TFLITE] _classifyLocal() BẮT ĐẦU');
     if (widget.classifierInterpreter == null || widget.labels.isEmpty) {
+      debugPrint('[TFLITE] ❌ SKIP: interpreter=${widget.classifierInterpreter == null ? "NULL" : "OK"}, labels=${widget.labels.length}');
       return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Mô hình chưa sẵn sàng', confidence: 0.0);
     }
     try {
+      debugPrint('[TFLITE] Đang đọc ảnh...');
       final imageBytes = await widget.image.readAsBytes();
+      debugPrint('[TFLITE] Ảnh ${imageBytes.length} bytes, đang tiền xử lý...');
       final inputData = await compute(_preprocessForClassifier, imageBytes);
       if (inputData.isEmpty) {
+        debugPrint('[TFLITE] ❌ Tiền xử lý thất bại (inputData rỗng)');
         return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Lỗi xử lý ảnh', confidence: 0.0);
       }
 
+      debugPrint('[TFLITE] Tiền xử lý xong, shape: ${inputData.length}x${inputData[0].length}x${inputData[0][0].length}');
       final input = [inputData];
       final output = List.generate(1, (_) => List.filled(widget.labels.length, 0.0));
+      debugPrint('[TFLITE] Đang chạy interpreter.run()...');
       widget.classifierInterpreter!.run(input, output);
+      debugPrint('[TFLITE] ✅ interpreter.run() XONG');
+
+      // Log toàn bộ output scores
+      for (int i = 0; i < output[0].length; i++) {
+        debugPrint('[TFLITE] Score[$i] ${widget.labels[i].trim()}: ${output[0][i].toStringAsFixed(4)}');
+      }
 
       final maxScore = output[0].reduce((a, b) => a > b ? a : b);
       final maxScoreIndex = output[0].indexOf(maxScore);
 
       String originalLabel = widget.labels[maxScoreIndex].trim().replaceFirst(RegExp(r'^\d+\s+'), '');
       final translatedLabel = widget.labelTranslations[originalLabel] ?? originalLabel;
+
+      debugPrint('[TFLITE] ✅ KẾT QUẢ: "$translatedLabel" ("$originalLabel") confidence=${maxScore.toStringAsFixed(4)} (${(maxScore * 100).toStringAsFixed(1)}%)');
 
       final markdown = widget.buildLocalGuidanceMarkdown(
         translatedLabel: translatedLabel,
@@ -191,7 +219,9 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
       );
 
       return (label: translatedLabel, originalLabel: originalLabel, markdown: markdown, confidence: maxScore);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('[TFLITE] ❌ EXCEPTION: $e');
+      debugPrint('[TFLITE] StackTrace: $stackTrace');
       return (label: 'Lỗi', originalLabel: 'N/A', markdown: 'Lỗi: $e', confidence: 0.0);
     }
   }
@@ -218,6 +248,7 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
                 tfliteLabel: _tfliteLabel,
                 tfliteConfidence: _tfliteConfidence,
                 classificationType: _classificationType,
+                analysisSource: _analysisSource,
               ),
             ),
           );

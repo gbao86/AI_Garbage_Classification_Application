@@ -61,27 +61,33 @@ class _HomeScreenState extends State<HomeScreen> {
     String where;
     String harm;
     String tip;
+    String classificationVi;
 
     switch (classification) {
-      case 'tái chế':
+      case 'recyclable':
+        classificationVi = 'Tái chế ♻️';
         disposal = 'Làm sạch (nếu có thể), để khô và tháo rời các phần khác vật liệu.';
         where = 'Bỏ vào thùng/túi tái chế hoặc mang đến điểm thu gom tái chế gần nhất.';
         harm = 'Lẫn bẩn/dính dầu mỡ có thể làm giảm khả năng tái chế và tăng rác thải chôn lấp.';
         tip = 'Ưu tiên tái sử dụng trước khi tái chế (refill, dùng lại hộp/chai).';
         break;
-      case 'hữu cơ':
+      case 'organic':
+        classificationVi = 'Hữu cơ 🍂';
         disposal = 'Tách khỏi rác tái chế, để trong túi kín hoặc thùng có nắp.';
         where = 'Bỏ vào thùng rác hữu cơ (nếu có) hoặc ủ compost tại nhà.';
         harm = 'Để lẫn rác tái chế gây mùi, thu hút côn trùng và làm hỏng vật liệu tái chế.';
         tip = 'Giảm rác hữu cơ bằng cách lên kế hoạch bữa ăn, bảo quản thực phẩm đúng cách.';
         break;
-      case 'nguy hại':
+      case 'hazardous':
+        classificationVi = 'Nguy hại ☠️';
         disposal = 'Giữ nguyên trạng, không đập vỡ/khui mở; bọc kín nếu có nguy cơ rò rỉ.';
         where = 'Mang đến điểm thu gom rác nguy hại (pin, ắc quy, hóa chất) hoặc chương trình thu hồi.';
         harm = 'Có thể gây ô nhiễm đất/nước và ảnh hưởng sức khỏe nếu rò rỉ hoặc bị đốt.';
         tip = 'Ưu tiên sản phẩm sạc lại, dùng bền để giảm phát sinh rác nguy hại.';
         break;
+      case 'trash':
       default:
+        classificationVi = 'Không tái chế 🗑️';
         disposal = 'Buộc kín, hạn chế để lẫn với nhóm tái chế/hữu cơ.';
         where = 'Bỏ vào thùng rác thường theo quy định địa phương.';
         harm = 'Lẫn nhóm tái chế/hữu cơ sẽ làm tăng chi phí xử lý và giảm hiệu quả phân loại.';
@@ -93,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
         : '';
 
     return '**Loại rác:** $translatedLabel ($originalLabel)  \n'
-        '**Phân loại:** $classification  \n'
+        '**Phân loại:** $classificationVi  \n'
         '**Độ tin cậy:** $confidenceText%$note\n'
         '\n'
         '**Hướng dẫn xử lý:**\n'

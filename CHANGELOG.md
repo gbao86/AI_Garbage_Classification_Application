@@ -11,7 +11,13 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 - 🔄 **Đồng bộ hóa mã phân loại rác**: Cập nhật hàm `_getClassification` trong `scanning_screen.dart` và switch-case phân loại trong `result_screen.dart` sang các mã tiếng Anh chuẩn database (`hazardous`, `organic`, `recyclable`, `trash`). Khắc phục lỗi lệch ngôn ngữ khiến hệ số giảm thiểu CO₂ luôn bị lùi về giá trị mặc định.
 - 🎨 **Sửa lỗi hiển thị màu sắc Lịch sử**: Sửa logic gán `groupColor` dựa theo code nhóm rác thực tế từ CSDL trong `history_screen.dart`, giúp các thẻ lịch sử hiển thị đúng màu đặc trưng của từng nhóm rác (Xanh dương cho Tái chế, Đỏ cho Nguy hại, Xanh lá cho Hữu cơ) thay vì tất cả hiển thị màu xám.
 
+### 🩺 Sửa lỗi Hiển thị Kết quả AI (AI Result Display Fixes)
+- 🏷️ **Dịch phân loại sang Tiếng Việt**: Sửa lỗi hàm `buildLocalGuidanceMarkdown` hiển thị mã phân loại thô tiếng Anh (`recyclable`, `organic`...) trong markdown kết quả. Nguyên nhân do switch-case dùng key tiếng Việt (`'tái chế'`, `'hữu cơ'`) nhưng `_getClassification()` trả về mã tiếng Anh → luôn rơi vào default. Giờ hiển thị đúng: `Tái chế ♻️`, `Hữu cơ 🍂`, `Nguy hại ☠️`, `Không tái chế 🗑️`.
+- 🔍 **Hiển thị đúng nguồn phân tích AI**: Thêm field `analysisSource` truyền từ `ScanningScreen` → `ResultScreen` để theo dõi chính xác nguồn kết quả thực tế. Trước đây chip badge luôn hiển thị "AI Gemini (Online)" kể cả khi Gemini lỗi 503 và đang dùng kết quả TFLite offline. Giờ hiển thị đúng 3 trạng thái: **AI Gemini (Online)** khi Gemini thành công, **AI Local (Offline) · XX%** khi TFLite confidence ≥ 80%, và **AI Offline (Gemini không khả dụng)** khi Gemini lỗi/mất mạng và fallback về TFLite.
+- 🔬 **Bổ sung Debug Logging Pipeline cho TFLite**: Thêm hệ thống logging chi tiết `[FLOW]` và `[TFLITE]` xuyên suốt luồng phân loại ảnh (`_startBackgroundAI`, `_classifyLocal`) giúp theo dõi chính xác: trạng thái interpreter, kích thước ảnh, shape tiền xử lý, toàn bộ output scores của 10 lớp rác, và quyết định gọi Gemini hay dùng TFLite offline.
+
 ---
+
 
 ## [0.5.4] - 2026-05-30
 

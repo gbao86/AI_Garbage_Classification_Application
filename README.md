@@ -35,7 +35,7 @@ Hệ thống kết hợp:
 
 ## 🎥 Video Demo
 
-> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v0.0.2**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v0.5.4**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
+> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v0.0.2**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v0.5.5**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
 
 👉 [Xem Video Demo trên YouTube (v0.0.2)](https://youtu.be/YuI4tK1fNLU?si=LTzk0kVj0328i7m5)
 
@@ -44,10 +44,11 @@ Hệ thống kết hợp:
 ## 🚀 Tính năng nổi bật
 
 - 📷 Nhận diện rác bằng AI (camera & thư viện ảnh)
-- 🧠 Cơ chế AI kép (Offline → Online fallback)
+- 🧠 Cơ chế AI kép (Offline → Online fallback) với **hiển thị chính xác nguồn phân tích**: AI Gemini (Online), AI Local (Offline), hoặc AI Offline (Gemini không khả dụng)
 - ⚙️ **Lưu ý về Tự động Huấn luyện (Auto-Train):** Tính năng tự động huấn luyện lại mô hình AI (MLOps) hiện đã bị hủy kích hoạt và đang được tạm ngưng phát triển do sự thiếu ổn định về tập dữ liệu đầu vào (dataset). Ứng dụng hiện sử dụng ổn định mô hình đóng gói trực tiếp trong assets.
 - 🛸 Bóc tách vật thể + hiệu ứng trực quan quét laser
 - 🏆 Giao diện kết quả AI premium với chuyển màu và hoạt ảnh mượt mà
+- 🏷️ Phân loại rác hiển thị **tiếng Việt đầy đủ** kèm emoji trực quan (Tái chế ♻️, Hữu cơ 🍂, Nguy hại ☠️, Không tái chế 🗑️)
 - 🌓 Đồng bộ màu sắc toàn diện (Full Light/Dark Mode)
 - 🗺️ Bản đồ điểm bỏ rác hiện đại (CartoDB voyager/positron/dark) tích hợp định vị GPS tươi, tìm địa chỉ và lọc lớp phủ giao thông/đường đi xe đạp.
 - 🤝 Đóng góp điểm bỏ rác mới (Crowdsourcing) thông qua định vị GPS thực tế hiện tại hoặc ghim vị trí tùy chọn trực quan trên bản đồ (di chuyển bản đồ dưới tâm ghim cố định), tự động dịch ngược địa chỉ, kèm ảnh chụp thực tế và phần thưởng XP.
@@ -57,6 +58,7 @@ Hệ thống kết hợp:
 - 🔐 Chống spam bằng hash MD5 ảnh chụp
 - 🖥️ Dashboard quản trị (Supabase)
 - 🎨 Cấu trúc điều hướng Tab hiện đại (`IndexedStack`), mượt mà và responsive
+- 🔬 Pipeline Debug Logging chi tiết `[FLOW]`/`[TFLITE]` để giám sát luồng AI trên thiết bị thực
 
 ---
 
