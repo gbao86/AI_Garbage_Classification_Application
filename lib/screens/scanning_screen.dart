@@ -151,7 +151,12 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
     return List.generate(224, (y) =>
         List.generate(224, (x) {
           final pixel = resized.getPixel(x, y);
-          return [pixel.r.toDouble(), pixel.g.toDouble(), pixel.b.toDouble()];
+          // Chuẩn hóa pixel về dải [-1, 1] cho mô hình float32 (Teachable Machine unquantized)
+          return [
+            (pixel.r.toDouble() / 127.5) - 1.0,
+            (pixel.g.toDouble() / 127.5) - 1.0,
+            (pixel.b.toDouble() / 127.5) - 1.0,
+          ];
         })
     );
   }

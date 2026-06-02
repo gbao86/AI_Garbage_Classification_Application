@@ -124,25 +124,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initializeModelAndLabels() async {
     try {
-      final options = InterpreterOptions();
-      try {
-        if (Platform.isAndroid) {
-          options.addDelegate(GpuDelegateV2());
-        }
-      } catch (e) {
-        debugPrint('Không thể tải GPU Delegate: $e');
-      }
-
-      _interpreter = await Interpreter.fromAsset('assets/models/model_unquant.tflite', options: options);
       final labelsData = await rootBundle.loadString('assets/models/labels.txt');
-
       if (mounted) {
         setState(() {
           _labels = labelsData.split('\n').where((label) => label.isNotEmpty).toList();
         });
       }
+
+      // Thử khởi tạo với GPU Delegate để tăng tốc
+      try {
+        final options = InterpreterOptions();
+        if (Platform.isAndroid) {
+          options.addDelegate(GpuDelegateV2());
+        }
+        _interpreter = await Interpreter.fromAsset('assets/models/model_unquant.tflite', options: options);
+        debugPrint('Khởi tạo TFLite thành công với GPU Delegate.');
+      } catch (gpuError) {
+        debugPrint('Lỗi khởi tạo GPU Delegate, đang thử lùi về CPU: $gpuError');
+        // Fallback lùi về CPU thuần
+        _interpreter = await Interpreter.fromAsset('assets/models/model_unquant.tflite');
+        debugPrint('Khởi tạo TFLite thành công với CPU Fallback.');
+      }
     } catch (e) {
-      debugPrint('Lỗi khởi tạo TFLite: $e');
+      debugPrint('Lỗi khởi tạo mô hình/nhãn TFLite: $e');
     }
   }
 
