@@ -379,7 +379,7 @@ class _ResultScreenState extends State<ResultScreen> {
     LinearGradient statusGradient;
 
     switch (widget.classificationType) {
-      case 'nguy hại':
+      case 'hazardous':
         statusColor = Colors.redAccent;
         statusIcon = Icons.warning_amber_rounded;
         statusText = 'Rác Nguy hại';
@@ -389,7 +389,7 @@ class _ResultScreenState extends State<ResultScreen> {
           end: Alignment.bottomRight,
         );
         break;
-      case 'hữu cơ':
+      case 'organic':
         statusColor = Colors.brown;
         statusIcon = Icons.eco_rounded;
         statusText = 'Rác Hữu cơ';
@@ -399,7 +399,7 @@ class _ResultScreenState extends State<ResultScreen> {
           end: Alignment.bottomRight,
         );
         break;
-      case 'tái chế':
+      case 'recyclable':
         statusColor = Colors.green;
         statusIcon = Icons.recycling_rounded;
         statusText = 'Có thể Tái chế';
@@ -409,6 +409,7 @@ class _ResultScreenState extends State<ResultScreen> {
           end: Alignment.bottomRight,
         );
         break;
+      case 'trash':
       default:
         statusColor = Colors.orangeAccent;
         statusIcon = Icons.delete_outline_rounded;

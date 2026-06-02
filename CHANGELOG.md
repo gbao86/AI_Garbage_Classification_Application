@@ -2,6 +2,15 @@
 
 Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
+## [0.5.5] - 2026-06-02
+
+### 🛠️ Đồng bộ dữ liệu CSDL & Sửa lỗi hiển thị UI phân loại (Database Sync & Classification UI Fix)
+- 💾 **Sửa lỗi thiếu cột CSDL Supabase**: Thêm file migration `20260602173000_add_missing_scan_columns.sql` để bổ sung các cột còn thiếu trong database gồm `image_url`, `weight_grams`, `co2_saved_grams` (cho bảng `user_scan_events`) và `image_url` (cho bảng `collection_points`). Khắc phục triệt để lỗi crash API khi lưu lịch sử quét rác và khi gửi địa điểm đóng góp mới.
+- 🔄 **Đồng bộ hóa mã phân loại rác**: Cập nhật hàm `_getClassification` trong `scanning_screen.dart` và switch-case phân loại trong `result_screen.dart` sang các mã tiếng Anh chuẩn database (`hazardous`, `organic`, `recyclable`, `trash`). Khắc phục lỗi lệch ngôn ngữ khiến hệ số giảm thiểu CO₂ luôn bị lùi về giá trị mặc định.
+- 🎨 **Sửa lỗi hiển thị màu sắc Lịch sử**: Sửa logic gán `groupColor` dựa theo code nhóm rác thực tế từ CSDL trong `history_screen.dart`, giúp các thẻ lịch sử hiển thị đúng màu đặc trưng của từng nhóm rác (Xanh dương cho Tái chế, Đỏ cho Nguy hại, Xanh lá cho Hữu cơ) thay vì tất cả hiển thị màu xám.
+
+---
+
 ## [0.5.4] - 2026-05-30
 
 ### 🗺️ Cách tân Bản đồ & Tìm kiếm địa điểm (CartoDB Map Layers & Address Search)

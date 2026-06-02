@@ -191,10 +191,10 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
   String _getClassification(String label) {
     final l = label.toLowerCase();
     const recyclable = ['glass', 'cardboard', 'paper', 'plastic', 'metal', 'clothes', 'shoes'];
-    if (l.contains('battery')) return 'nguy hại';
-    if (l.contains('biological')) return 'hữu cơ';
-    if (recyclable.any((item) => l.contains(item))) return 'tái chế';
-    return 'không tái chế';
+    if (l.contains('battery')) return 'hazardous';
+    if (l.contains('biological')) return 'organic';
+    if (recyclable.any((item) => l.contains(item))) return 'recyclable';
+    return 'trash';
   }
 
   void _checkAndNavigate() {

@@ -1,7 +1,7 @@
 # ♻️ EcoSort by Bao - Ứng Dụng Phân Loại Rác Thông Minh
 > Ứng dụng phân loại rác bằng AI sử dụng Flutter, TFLite và Gemini AI.
 
-[![Version](https://img.shields.io/badge/version-0.5.4-green.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.5.5-green.svg)](./CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Flutter-blue.svg)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](./LICENSE)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-red.svg)](./SECURITY.md)

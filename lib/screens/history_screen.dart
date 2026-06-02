@@ -278,21 +278,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     Color groupColor;
     switch (groupCode) {
-      case 'plastic':
+      case 'recyclable':
         groupColor = Colors.blue;
-        break;
-      case 'paper':
-        groupColor = Colors.orange;
-        break;
-      case 'glass':
-        groupColor = Colors.teal;
-        break;
-      case 'metal':
-        groupColor = Colors.red;
         break;
       case 'organic':
         groupColor = Colors.green;
         break;
+      case 'hazardous':
+        groupColor = Colors.redAccent;
+        break;
+      case 'trash':
       default:
         groupColor = Colors.blueGrey;
     }
