@@ -167,8 +167,6 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
       try {
         if (Platform.isAndroid) {
           options.addDelegate(GpuDelegateV2());
-        } else if (Platform.isIOS) {
-          options.addDelegate(MetalDelegate());
         }
       } catch (e) {
         debugPrint('Không thể tải GPU Delegate, tự động fallback sang CPU: $e');
@@ -212,7 +210,7 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
       });
 
       if (res.containsKey('error')) {
-        return (label: 'Lỗi', originalLabel: 'N/A', markdown: res['error'], confidence: 0.0);
+        return (label: 'Lỗi', originalLabel: 'N/A', markdown: res['error'].toString(), confidence: 0.0);
       }
 
       final String label = res['label'];
