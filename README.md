@@ -6,10 +6,10 @@
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-0.5.6-green.svg?style=for-the-badge&logo=flutter)](./CHANGELOG.md)
-[![Platform](https://img.shields.io/badge/platform-Flutter%20%7C%20Dart-blue.svg?style=for-the-badge&logo=flutter)](https://flutter.dev)
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-red.svg?style=for-the-badge&logo=gnu)](./LICENSE)
-[![Security Policy](https://img.shields.io/badge/Security-Policy-yellow.svg?style=for-the-badge&logo=google-cloud)](./SECURITY.md)
+[![Version](https://img.shields.io/badge/version-0.5.6-green.svg?style=for-the-badge&logo=flutter&logoColor=white)](./CHANGELOG.md)
+[![Platform](https://img.shields.io/badge/platform-Flutter%20%7C%20Dart-blue.svg?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-red.svg?style=for-the-badge&logo=gnu&logoColor=white)](./LICENSE)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-yellow.svg?style=for-the-badge&logo=google-cloud&logoColor=white)](./SECURITY.md)
 
 </div>
 
@@ -19,9 +19,50 @@
 
 **EcoSort by Bao** là một giải pháp công nghệ toàn diện hỗ trợ cộng đồng phân loại rác thải sinh hoạt chính xác và nhanh chóng. Bằng việc kết hợp sức mạnh xử lý cục bộ trên thiết bị và phân tích ngữ cảnh thông minh trên đám mây, ứng dụng mang lại trải nghiệm phân loại rác liền mạch và chuyên nghiệp nhất.
 
+---
+
+## 🎬 Quy trình xử lý song song & Dự phòng (Pipeline & Sequence Diagram)
+
+Sự kết hợp giữa xử lý thời gian thực cục bộ và đám mây được tối ưu hóa thông qua cơ chế song song (Parallelization) để đảm bảo ứng dụng không bao giờ bị trễ:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Người dùng
+    participant App as Mobile App (Flutter)
+    participant ML as ML Kit Segmentation
+    participant TF as TFLite Interpreter (Local)
+    participant API as Gemini 3.5 Flash (Cloud)
+    participant DB as Supabase CSDL
+
+    User->>App: Chụp ảnh rác thải
+    Note over App: Khởi chạy hai luồng song song (Multithreading)
+    par Tách nền chủ thể (Visual Masking)
+        App->>ML: Trích xuất viền đối tượng
+        ML-->>App: Trả về mặt nạ ảnh (Mask)
+    and Chạy suy luận Offline (Edge AI)
+        App->>TF: Đẩy ảnh kích thước 224x224
+        TF-->>App: Kết quả dự đoán + Độ tin cậy (Confidence)
+    end
+    
+    alt Độ tin cậy (Confidence) >= 75%
+        Note over App: Sử dụng ngay kết quả cục bộ (Tiết kiệm Quota)
+        App->>DB: Lưu lịch sử & Thưởng XP trực tiếp
+    else Độ tin cậy (Confidence) < 75%
+        Note over App: Tự động kích hoạt Cloud Fallback
+        App->>API: Gửi ảnh siêu nhẹ 15KB (Đã nén)
+        API-->>App: Trả về payload JSON có cấu trúc
+        App->>DB: Ghi nhận lịch sử kèm nhãn chính xác từ Gemini
+    end
+    
+    App-->>User: Vẽ viền Neon chuyển động quanh rác & Hiển thị hướng dẫn
+```
+
+<details>
+<summary><b>📐 Xem thêm sơ đồ khối luồng dữ liệu (Dataflow Flowchart)</b></summary>
+
 ```mermaid
 graph TD
-    %% Định nghĩa Style cho sơ đồ %%
     classDef startEnd fill:#00E676,stroke:#00C853,stroke-width:2px,color:#000;
     classDef process fill:#29B6F6,stroke:#0288D1,stroke-width:2px,color:#000;
     classDef decision fill:#FFD54F,stroke:#FFB300,stroke-width:2px,color:#000;
@@ -29,7 +70,7 @@ graph TD
     classDef local fill:#FF7043,stroke:#F4511E,stroke-width:2px,color:#fff;
 
     A([Người dùng chụp/chọn ảnh]) --> B(Tiền xử lý & Trích xuất đặc trưng)
-    B --> C{sử dụng TFLite Offline}:::decision
+    B --> C{Sử dụng TFLite Offline}:::decision
     
     C -->|Thực hiện Suy luận Cục bộ| D[interpreter.run]:::local
     D --> E{Độ tự tin >= 75%?}:::decision
@@ -53,6 +94,8 @@ graph TD
     class H,J cloud;
     class D local;
 ```
+
+</details>
 
 ---
 
@@ -126,6 +169,9 @@ Mô hình học máy Offline được huấn luyện dựa trên bộ dữ liệ
 
 ## 📁 Cấu trúc thư mục dự án
 
+<details>
+<summary>📂 <b>Nhấp vào đây để xem chi tiết cây thư mục dự án (Directory Tree)</b></summary>
+
 ```text
 phan_loai_rac_qua_hinh_anh/
 ├── lib/                      # Mã nguồn ứng dụng Flutter
@@ -144,9 +190,14 @@ phan_loai_rac_qua_hinh_anh/
 └── README.md                 # Tài liệu hướng dẫn này
 ```
 
+</details>
+
 ---
 
 ## 🏗️ Hướng dẫn cài đặt & Chạy dự án
+
+<details>
+<summary>🛠️ <b>Nhấp vào đây để xem chi tiết quy trình thiết lập môi trường và chạy ứng dụng</b></summary>
 
 ### Yêu cầu tiên quyết
 *   Flutter SDK v3.x.x
@@ -180,6 +231,8 @@ phan_loai_rac_qua_hinh_anh/
     ```bash
     flutter run
     ```
+
+</details>
 
 ---
 
