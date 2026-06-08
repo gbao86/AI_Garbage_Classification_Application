@@ -162,7 +162,7 @@ graph TD
 
 ## 📸 Giao diện ứng dụng
 
-| 🏠 Màn hình chính | 🗺️ Bản đồ sinh thái |
+| 🏠 Màn hình chính | 🗺️ Bản đồ điểm đổ rác |
 |:---:|:---:|
 | ![Home](assets/images/home_preview_ver0.5.4.jpg) | ![Map](assets/images/map_review_v0.5.4.jpg) |
 
@@ -221,17 +221,6 @@ phan_loai_rac_qua_hinh_anh/
 
 </details>
 
----
-
-## 🤪 Developer Meme
-
-<div align="center">
-  <img src="./assets/images/garbage_ai_meme.gif" width="420px" alt="Edge AI goes brr"/>
-  <br/>
-  <sub><i>Khi TFLite tự phân loại rác mà không cần hỏi cloud một lần nào.</i></sub>
-</div>
-
----
 
 ## 📥 Tải xuống
 
