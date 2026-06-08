@@ -237,10 +237,10 @@ phan_loai_rac_qua_hinh_anh/
 ---
 
 ## 🤪 Góc giải trí (Developer Memes)
-Khi mô hình Offline TFLite cố gắng đoán rác thải phức tạp và đành phải cầu cứu Gemini 3.5 Flash:
+Khi mô hình Edge AI Offline tự phân loại rác mà không có kết nối đám mây:
 
 <div align="center">
-  <img src="./assets/images/garbage_ai_meme.png" width="550px" alt="AI Garbage Classification Meme"/>
+  <img src="https://media.giphy.com/media/l41lTjJp7jY4G0JuU/giphy.gif" width="450px" alt="Robotic Garbage Truck Fail"/>
 </div>
 
 ---
