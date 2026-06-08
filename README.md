@@ -5,7 +5,7 @@
 
 <!-- TYPING ANIMATION -->
 <a href="https://github.com/gbao86/AI_Garbage_Classification_Application">
-  <img src="https://readme-typing-svg.demolab.com?font=Space+Mono&weight=700&size=18&duration=3000&pause=800&color=00FF88&center=true&vCenter=true&multiline=true&width=700&height=70&lines=♻+Edge+AI+%7C+TFLite+%3C15ms+%7C+GPU+Delegate;☁+Gemini+3.5+Flash+Cloud+Fallback+%7C+Neon+Segmentation" alt="Typing SVG"/>
+  <img src="https://readme-typing-svg.herokuapp.com?font=Space+Mono&weight=700&size=18&duration=3000&pause=800&color=00FF88&center=true&vCenter=true&multiline=true&width=700&height=70&lines=♻+Edge+AI+%7C+TFLite+%3C15ms+%7C+GPU+Delegate;☁+Gemini+3.5+Flash+Cloud+Fallback+%7C+Neon+Segmentation" alt="Typing SVG"/>
 </a>
 
 <br/>
