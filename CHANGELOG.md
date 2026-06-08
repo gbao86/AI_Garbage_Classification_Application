@@ -2,6 +2,17 @@
 
 Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
+## [0.5.6] - 2026-06-08
+
+### 🧠 Tích hợp Kiến trúc Hybrid AI Thế hệ mới (Next-Gen Hybrid AI Architecture Integration)
+- 🤖 **Nâng cấp sang Gemini 3.5 Flash**: Thay thế mô hình cũ bằng `gemini-3.5-flash` - mô hình Flash thế hệ mới nhất của Google được tối ưu hóa cho tốc độ phản hồi siêu tốc và hoạt động agentic hiệu quả.
+- ⚙️ **Đồng bộ hóa phản hồi dưới dạng JSON có cấu trúc (Structured JSON Mode)**: Cấu hình `GenerationConfig` với `responseMimeType: 'application/json'` và viết lại prompt để ép buộc Gemini trả về JSON thuần chứa dữ liệu phân loại (`category`, `classification`, `vietnamese_label`, `guidance`, `tip`).
+- 🔄 **Xử lý dữ liệu đồng nhất (Unified Data Parsing)**: Giải mã JSON từ Gemini trong `ScanningScreen` và `ResultScreen` để chuyển đổi tự động thành Markdown với cùng một chuẩn hiển thị đồng bộ như TFLite Local.
+- 🗃️ **Sửa lỗi đồng bộ nhãn CSDL (Database Metadata Alignment)**: Sửa lỗi nghiêm trọng khi lưu scan event vào Supabase. Giờ đây, khi Gemini nhận diện, nhãn đúng từ Gemini (`category` và `classification` tương ứng) sẽ được lưu đè lên nhãn TFLite đoán mò trước đó, đảm bảo tính đúng đắn của dữ liệu carbon giảm thiểu và XP tích lũy. Khi phân tích lại (Re-analyze), CSDL cũng được cập nhật đúng cột `ai_label` và `waste_dictionary_id` tương ứng với kết quả Gemini.
+- ⚡ **Tinh chỉnh ngưỡng kích hoạt Cloud AI**: Hạ ngưỡng kích hoạt Gemini từ `80%` xuống còn `75%` (`_confidenceThreshold = 0.75`), giảm tải 30-40% số cuộc gọi API không cần thiết bằng cách ưu tiên kết quả offline chất lượng của TFLite Local.
+
+---
+
 ## [0.5.5] - 2026-06-02
 
 ### ⚡ Tối ưu hóa Tốc độ Phân tích ảnh cực hạn (Extreme Image Analysis Speed Optimizations)

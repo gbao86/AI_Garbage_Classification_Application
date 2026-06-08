@@ -1,7 +1,7 @@
 # ♻️ EcoSort by Bao - Ứng Dụng Phân Loại Rác Thông Minh
 > Ứng dụng phân loại rác bằng AI sử dụng Flutter, TFLite và Gemini AI.
 
-[![Version](https://img.shields.io/badge/version-0.5.5-green.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.5.6-green.svg)](./CHANGELOG.md)
 [![Platform](https://img.shields.io/badge/platform-Flutter-blue.svg)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](./LICENSE)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-red.svg)](./SECURITY.md)
@@ -35,7 +35,7 @@ Hệ thống kết hợp:
 
 ## 🎥 Video Demo
 
-> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v0.0.2**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v0.5.5**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
+> ⚠️ **Lưu ý**: Video demo hiện tại đang ở phiên bản **v0.0.2**. Ứng dụng đã được cập nhật rất nhiều về giao diện (Modern UI) và các chức năng mới ở phiên bản hiện tại (**v0.5.6**). Video demo cho phiên bản mới nhất sẽ sớm được cập nhật.
 
 👉 [Xem Video Demo trên YouTube (v0.0.2)](https://youtu.be/YuI4tK1fNLU?si=LTzk0kVj0328i7m5)
 
@@ -71,7 +71,7 @@ Hệ thống kết hợp:
 
 ### 1. Cơ chế AI Kép (Hybrid Workflow)
 * **Mô hình TFLite (Offline - Ưu tiên):** Khi nhận diện ảnh, mô hình TensorFlow Lite tích hợp sẵn (`model_unquant.tflite`) sẽ chạy trực tiếp trên thiết bị (Edge AI). Quá trình xử lý ảnh đầu vào kích thước `224x224` pixel diễn ra cục bộ, không cần mạng internet, tốc độ phản hồi cực nhanh và tiết kiệm tài nguyên.
-* **Gemini API Fallback (Online - Phân tích sâu):** Nếu độ tự tin của mô hình TFLite dưới **80% (confidence < 0.8)**, ứng dụng tự động gửi ảnh lên API **Gemini Flash** (`gemini-flash-latest`) trực tuyến để phân tích chuyên sâu, nhận diện chính xác các vật thể phức tạp và trả về cẩm nang phân loại/tái chế chi tiết.
+* **Gemini API Fallback (Online - Phân tích sâu):** Nếu độ tự tin của mô hình TFLite dưới **75% (confidence < 0.75)**, ứng dụng tự động gửi ảnh lên API **Gemini 3.5 Flash** (`gemini-3.5-flash`) trực tuyến để phân tích chuyên sâu dưới dạng JSON cấu trúc, đồng bộ hiển thị và ghi nhận nhãn CSDL chính xác.
 * **Offline Fallback (Sự cố kết nối):** Khi hệ thống ngoại tuyến hoặc không thể gọi đến Gemini API (lỗi mạng, quá giới hạn lượt dùng), ứng dụng tự động kích hoạt chế độ dự phòng, hiển thị kết quả phân loại từ mô hình TFLite Offline kèm thông báo lưu ý trực quan trên giao diện thay vì báo lỗi thô cho người dùng.
 
 ### 2. Bộ Dữ Liệu Huấn Luyện (Kaggle Garbage Dataset)
@@ -121,9 +121,15 @@ phan_loai_rac_qua_hinh_anh/
 │   ├── models/               # Cấu trúc dữ liệu
 │   ├── screens/              # Giao diện người dùng
 │   ├── services/             # Logic AI, Supabase & API
-│   └── utils/                # Tiện ích & Cấu hình (Env, Constants)
-├── web_admin/                # Mã nguồn Web Quản trị (HTML/JS/Supabase)
-├── assets/                   # Tài nguyên (Ảnh, Models AI)
+│   ├── theme/                # Cấu hình giao diện và màu sắc sáng/tối
+│   ├── utils/                # Tiện ích & Cấu hình (Env, Constants)
+│   ├── widgets/              # Các UI Component dùng chung
+│   ├── app_theme.dart        # Định nghĩa ThemeData cho ứng dụng
+│   └── main.dart             # Điểm khởi chạy ứng dụng (Entrypoint)
+├── web_admin/                # Mã nguồn Web Quản trị (Vite/HTML/JS/Supabase)
+├── supabase/                 # Cấu hình Supabase (Migrations, Schema DB)
+├── assets/                   # Tài nguyên (Hình ảnh, Mô hình AI, Nhãn)
+├── .env.example              # Tệp mẫu cấu hình các biến môi trường
 ├── SECURITY.md               # Chính sách bảo mật dự án
 ├── CHANGELOG.md              # Nhật ký thay đổi phiên bản
 └── README.md                 # Hướng dẫn này
@@ -151,7 +157,11 @@ phan_loai_rac_qua_hinh_anh/
    ```
 
 3. **Cấu hình môi trường**:
-   Tạo file `.env` và chạy lệnh sau để mã hóa:
+   Sao chép tệp cấu hình mẫu và điền thông tin của bạn vào `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Sau đó chạy lệnh sau để tự động mã hóa và sinh file cấu hình `env.g.dart`:
    ```bash
    dart run build_runner build --delete-conflicting-outputs
    ```

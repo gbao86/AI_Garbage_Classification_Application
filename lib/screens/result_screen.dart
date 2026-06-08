@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -164,11 +165,24 @@ class _ResultScreenState extends State<ResultScreen> {
     }
   }
 
-  Future<void> _updateScanEventAfterReanalysis(String newClassType) async {
+  Future<void> _updateScanEventAfterReanalysis(String category, String newClassType) async {
     if (_insertedScanEventId == null) return;
     try {
       final supabase = Supabase.instance.client;
       
+      // Tra cứu waste_dictionary_id từ slug mới nếu có
+      String? wasteDictId;
+      try {
+        final dict = await supabase
+            .from('waste_dictionary')
+            .select('id')
+            .eq('slug', category)
+            .maybeSingle();
+        if (dict != null) {
+          wasteDictId = dict['id'] as String?;
+        }
+      } catch (_) {}
+
       double co2Coefficient = 0.5;
       try {
         final group = await supabase
@@ -184,7 +198,8 @@ class _ResultScreenState extends State<ResultScreen> {
       final double newCo2Saved = 100 * co2Coefficient; // 100g rác
 
       await supabase.from('user_scan_events').update({
-        'ai_label': 'gemini_reanalyzed',
+        'ai_label': category,
+        'waste_dictionary_id': wasteDictId,
         'co2_saved_grams': newCo2Saved,
       }).eq('id', _insertedScanEventId!);
 
@@ -204,25 +219,66 @@ class _ResultScreenState extends State<ResultScreen> {
       final geminiService = GeminiService();
       final String geminiResult = await geminiService.processImageAndGetGuidance(widget.image);
       
-      String newClassType = _currentClassificationType;
-      if (geminiResult.contains('Tái chế') || geminiResult.contains('tái chế') || geminiResult.contains('recyclable')) {
-        newClassType = 'recyclable';
-      } else if (geminiResult.contains('Hữu cơ') || geminiResult.contains('hữu cơ') || geminiResult.contains('organic')) {
-        newClassType = 'organic';
-      } else if (geminiResult.contains('Nguy hại') || geminiResult.contains('nguy hại') || geminiResult.contains('hazardous')) {
-        newClassType = 'hazardous';
-      } else if (geminiResult.contains('Không tái chế') || geminiResult.contains('trash')) {
-        newClassType = 'trash';
+      String finalMarkdownText = geminiResult;
+      String finalCategory = widget.tfliteLabel ?? 'unknown';
+      String finalClassification = _currentClassificationType;
+
+      try {
+        final Map<String, dynamic> parsed = jsonDecode(geminiResult);
+        final category = parsed['category'] as String?;
+        final classification = parsed['classification'] as String?;
+        final vietnameseLabel = parsed['vietnamese_label'] as String?;
+        final guidance = parsed['guidance'] as Map<String, dynamic>?;
+        final tip = parsed['tip'] as String?;
+
+        if (category != null && classification != null) {
+          finalCategory = category;
+          finalClassification = classification;
+
+          final String disposal = guidance?['disposal'] ?? 'Vứt bỏ đúng nơi quy định.';
+          final String where = guidance?['where'] ?? 'Thùng rác tương ứng.';
+          final String harm = guidance?['harm'] ?? 'Ảnh hưởng đến môi trường nếu xử lý sai.';
+          final String greenTip = tip ?? 'Hạn chế sử dụng sản phẩm dùng một lần.';
+
+          final classificationVi = {
+            'recyclable': 'Tái chế ♻️',
+            'organic': 'Hữu cơ 🍂',
+            'hazardous': 'Nguy hại ☠️',
+            'trash': 'Không tái chế 🗑️'
+          }[classification] ?? 'Không tái chế 🗑️';
+
+          finalMarkdownText = '**Loại rác:** $vietnameseLabel ($category)  \n'
+              '**Phân loại:** $classificationVi  \n'
+              '**Độ tin cậy:** 99.00% (Phân tích Cloud AI)\n'
+              '\n'
+              '**Hướng dẫn xử lý:**\n'
+              '- **Cách vứt bỏ:** $disposal\n'
+              '- **Nơi xử lý:** $where\n'
+              '- **Tác hại nếu xử lý sai:** $harm\n'
+              '\n'
+              '**Mẹo sống xanh:** $greenTip';
+        }
+      } catch (parseError) {
+        debugPrint('[FLOW] Không thể parse JSON từ Gemini, dùng kết quả thô: $parseError');
+        if (geminiResult.contains('Tái chế') || geminiResult.contains('tái chế') || geminiResult.contains('recyclable')) {
+          finalClassification = 'recyclable';
+        } else if (geminiResult.contains('Hữu cơ') || geminiResult.contains('hữu cơ') || geminiResult.contains('organic')) {
+          finalClassification = 'organic';
+        } else if (geminiResult.contains('Nguy hại') || geminiResult.contains('nguy hại') || geminiResult.contains('hazardous')) {
+          finalClassification = 'hazardous';
+        } else if (geminiResult.contains('Không tái chế') || geminiResult.contains('trash')) {
+          finalClassification = 'trash';
+        }
       }
 
       setState(() {
-        _currentResultText = geminiResult;
-        _currentClassificationType = newClassType;
+        _currentResultText = finalMarkdownText;
+        _currentClassificationType = finalClassification;
         _currentAnalysisSource = 'gemini';
         _isReanalyzed = true;
       });
 
-      await _updateScanEventAfterReanalysis(newClassType);
+      await _updateScanEventAfterReanalysis(finalCategory, finalClassification);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

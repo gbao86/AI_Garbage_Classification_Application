@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,9 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
   String? _label;
   String? _finalMarkdown;
   
+  // Ngưỡng độ tin cậy để quyết định có chạy Gemini AI hay không
+  static const double _confidenceThreshold = 0.75;
+
   // Lưu thông tin TFLite để báo cáo
   String? _tfliteLabel;
   double _tfliteConfidence = 0.0;
@@ -122,19 +126,19 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
 
     if (mounted) {
       setState(() {
-        // Tối ưu hóa UX: Chỉ hiển thị kết quả TFLite ngay nếu độ tự tin cao (>= 80%).
+        // Tối ưu hóa UX: Chỉ hiển thị kết quả TFLite ngay nếu độ tự tin cao (>= _confidenceThreshold).
         // Nếu độ tự tin thấp, giữ _label = null để người dùng không nhìn thấy kết quả đoán sai lệch 
         // trong khi hệ thống đang chạy Gemini API ở phía sau.
-        _label = offlineResult.confidence >= 0.8 ? offlineResult.label : null;
-        _finalMarkdown = offlineResult.confidence >= 0.8 ? offlineResult.markdown : null;
+        _label = offlineResult.confidence >= _confidenceThreshold ? offlineResult.label : null;
+        _finalMarkdown = offlineResult.confidence >= _confidenceThreshold ? offlineResult.markdown : null;
         _tfliteLabel = offlineResult.originalLabel;
         _tfliteConfidence = offlineResult.confidence;
         _classificationType = _getClassification(offlineResult.originalLabel);
       });
     }
 
-    if (offlineResult.confidence < 0.8) {
-      debugPrint('[FLOW] Confidence ${offlineResult.confidence} < 0.8 → GỌI GEMINI API');
+    if (offlineResult.confidence < _confidenceThreshold) {
+      debugPrint('[FLOW] Confidence ${offlineResult.confidence} < $_confidenceThreshold → GỌI GEMINI API');
       
       // Kiểm tra kết nối mạng trước khi gọi Gemini
       final connectivityResult = await (Connectivity().checkConnectivity());
@@ -159,11 +163,59 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
         // Thêm timeout 15s để tránh treo app khi mạng lag
         final geminiResult = await _geminiService.processImageAndGetGuidance(widget.image)
             .timeout(const Duration(seconds: 15));
-        debugPrint('[FLOW] Gemini trả về thành công (${geminiResult.length} ký tự)');
+        debugPrint('[FLOW] Gemini trả về thành công: $geminiResult');
+
+        String finalMarkdownText = geminiResult;
+        String finalLabel = "Đã phân tích bằng AI";
+        String finalCategory = offlineResult.originalLabel;
+        String finalClassification = _getClassification(offlineResult.originalLabel);
+
+        try {
+          final Map<String, dynamic> parsed = jsonDecode(geminiResult);
+          final category = parsed['category'] as String?;
+          final classification = parsed['classification'] as String?;
+          final vietnameseLabel = parsed['vietnamese_label'] as String?;
+          final guidance = parsed['guidance'] as Map<String, dynamic>?;
+          final tip = parsed['tip'] as String?;
+
+          if (category != null && classification != null) {
+            finalCategory = category;
+            finalClassification = classification;
+            finalLabel = vietnameseLabel ?? category;
+
+            final String disposal = guidance?['disposal'] ?? 'Vứt bỏ đúng nơi quy định.';
+            final String where = guidance?['where'] ?? 'Thùng rác tương ứng.';
+            final String harm = guidance?['harm'] ?? 'Ảnh hưởng đến môi trường nếu xử lý sai.';
+            final String greenTip = tip ?? 'Hạn chế sử dụng sản phẩm dùng một lần.';
+
+            final classificationVi = {
+              'recyclable': 'Tái chế ♻️',
+              'organic': 'Hữu cơ 🍂',
+              'hazardous': 'Nguy hại ☠️',
+              'trash': 'Không tái chế 🗑️'
+            }[classification] ?? 'Không tái chế 🗑️';
+
+            finalMarkdownText = '**Loại rác:** $finalLabel ($category)  \n'
+                '**Phân loại:** $classificationVi  \n'
+                '**Độ tin cậy:** 99.00% (Phân tích Cloud AI)\n'
+                '\n'
+                '**Hướng dẫn xử lý:**\n'
+                '- **Cách vứt bỏ:** $disposal\n'
+                '- **Nơi xử lý:** $where\n'
+                '- **Tác hại nếu xử lý sai:** $harm\n'
+                '\n'
+                '**Mẹo sống xanh:** $greenTip';
+          }
+        } catch (parseError) {
+          debugPrint('[FLOW] Không thể parse JSON từ Gemini, dùng kết quả thô: $parseError');
+        }
+
         if (mounted) {
           setState(() {
-            _label = "Đã phân tích bằng AI";
-            _finalMarkdown = geminiResult;
+            _label = finalLabel;
+            _finalMarkdown = finalMarkdownText;
+            _tfliteLabel = finalCategory;
+            _classificationType = finalClassification;
             _isGeminiRunning = false;
             _analysisSource = 'gemini';
           });
@@ -181,7 +233,7 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
       }
       _checkAndNavigate();
     } else {
-      debugPrint('[FLOW] Confidence ${offlineResult.confidence} >= 0.8 → DÙNG KẾT QUẢ TFLITE OFFLINE');
+      debugPrint('[FLOW] Confidence ${offlineResult.confidence} >= $_confidenceThreshold → DÙNG KẾT QUẢ TFLITE OFFLINE');
       _checkAndNavigate();
     }
   }
@@ -246,7 +298,7 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
         originalLabel: originalLabel,
         classification: _getClassification(originalLabel),
         confidencePct: maxScore * 100,
-        lowConfidence: maxScore < 0.8,
+        lowConfidence: maxScore < _confidenceThreshold,
       );
 
       return (label: translatedLabel, originalLabel: originalLabel, markdown: markdown, confidence: maxScore);

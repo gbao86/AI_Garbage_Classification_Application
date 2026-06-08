@@ -242,6 +242,8 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     if (_isLoading) {
       return Scaffold(
         body: Center(
@@ -253,7 +255,8 @@ class _GameScreenState extends State<GameScreen> {
                 width: 200,
                 height: 200,
                 errorBuilder: (_, __, ___) => const SizedBox(
-                  width: 60, height: 60,
+                  width: 60,
+                  height: 60,
                   child: CircularProgressIndicator(strokeWidth: 3),
                 ),
               ),
@@ -334,9 +337,8 @@ class _GameScreenState extends State<GameScreen> {
     final progress = (_currentIndex + 1) / _questions.length;
     final timerRatio = _timeLeft / _questionTimeLimit;
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     final horizontalPadding = (screenWidth * 0.045).clamp(12.0, 24.0);
-    final sectionGap = (screenWidth * 0.045).clamp(12.0, 20.0);
-    final titleSize = (screenWidth * 0.05).clamp(16.0, 24.0);
     final scoreSize = (screenWidth * 0.043).clamp(14.0, 18.0);
 
     return Scaffold(
@@ -364,144 +366,247 @@ class _GameScreenState extends State<GameScreen> {
           )
         ],
       ),
-      body: ListView(
-        padding: EdgeInsets.only(bottom: sectionGap),
-        children: [
-          Container(
-            margin: EdgeInsets.fromLTRB(horizontalPadding, 14, horizontalPadding, 0),
-            padding: EdgeInsets.all((screenWidth * 0.035).clamp(10.0, 16.0)),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF0A7B24), Color(0xFF36A844)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header Stats Area
+            Container(
+              margin: EdgeInsets.fromLTRB(horizontalPadding, 8, horizontalPadding, 4),
+              padding: EdgeInsets.all((screenWidth * 0.035).clamp(10.0, 16.0)),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0A7B24), Color(0xFF36A844)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular((screenWidth * 0.045).clamp(12.0, 18.0)),
               ),
-              borderRadius: BorderRadius.circular((screenWidth * 0.05).clamp(14.0, 20.0)),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    _statChip(Icons.local_fire_department_rounded, 'Streak', 'x$_streak'),
-                    const SizedBox(width: 8),
-                    _statChip(Icons.verified_rounded, 'Đúng', '$_correctAnswers'),
-                    const SizedBox(width: 8),
-                    _statChip(Icons.flag_rounded, 'Vòng', '$_round'),
-                  ],
-                ),
-                SizedBox(height: (screenWidth * 0.025).clamp(8.0, 12.0)),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: LinearProgressIndicator(
-                          minHeight: 8,
-                          value: progress.clamp(0, 1),
-                          backgroundColor: Colors.white.withValues(alpha: 0.25),
-                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      _statChip(Icons.local_fire_department_rounded, 'Streak', 'x$_streak'),
+                      const SizedBox(width: 8),
+                      _statChip(Icons.verified_rounded, 'Đúng', '$_correctAnswers'),
+                      const SizedBox(width: 8),
+                      _statChip(Icons.flag_rounded, 'Vòng', '$_round'),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: LinearProgressIndicator(
+                            minHeight: 6,
+                            value: progress.clamp(0, 1),
+                            backgroundColor: Colors.white.withValues(alpha: 0.25),
+                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: (screenWidth * 0.03).clamp(8.0, 14.0)),
-                    Text(
-                      '${_currentIndex + 1}/${_questions.length}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: (screenWidth * 0.036).clamp(12.0, 15.0),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: (screenWidth * 0.025).clamp(8.0, 12.0)),
-                Row(
-                  children: [
-                    const Icon(Icons.timer_rounded, color: Colors.white),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Thời gian còn lại: ${_timeLeft}s',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: (screenWidth * 0.035).clamp(12.0, 15.0),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: LinearProgressIndicator(
-                          minHeight: 6,
-                          value: timerRatio.clamp(0, 1),
-                          backgroundColor: Colors.white.withValues(alpha: 0.2),
-                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.orangeAccent),
+                      const SizedBox(width: 10),
+                      Text(
+                        '${_currentIndex + 1}/${_questions.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.timer_rounded, color: Colors.white, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Thời gian còn lại: ${_timeLeft}s',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: LinearProgressIndicator(
+                            minHeight: 5,
+                            value: timerRatio.clamp(0, 1),
+                            backgroundColor: Colors.white.withValues(alpha: 0.2),
+                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.orangeAccent),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          SizedBox(height: sectionGap),
-          if (gameProvider.earnedBadges.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: gameProvider.earnedBadges.map((badgeName) {
-                    final icon = gameProvider.badgeIcons[badgeName] ?? '🏅';
-                    return Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.green.withValues(alpha: 0.25)),
-                      ),
-                      child: Text(
-                        '$icon $badgeName',
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
+            
+            // Badges display (conditionally show only on taller screens to prevent overlap)
+            if (gameProvider.earnedBadges.isNotEmpty && screenHeight > 660)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 6),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: gameProvider.earnedBadges.map((badgeName) {
+                      final icon = gameProvider.badgeIcons[badgeName] ?? '🏅';
+                      return Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.green.withValues(alpha: 0.25)),
+                        ),
+                        child: Text(
+                          '$icon $badgeName',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+
+            // Game Board Area
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final boardWidth = constraints.maxWidth;
+
+                    // Dynamically calculate bin sizes
+                    final binSize = (boardWidth * 0.25).clamp(80.0, 110.0);
+
+                    final cardWidth = (boardWidth * 0.46).clamp(150.0, 240.0);
+
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        // Top-Left: Recyclable (Tái chế - Blue)
+                        Positioned(
+                          top: 8,
+                          left: 8,
+                          child: _buildDragTarget(
+                            category: WasteCategory.recyclable,
+                            label: 'Tái chế',
+                            emoji: '♻️',
+                            color: Colors.blue,
+                            textColor: Colors.blue.shade900,
+                            size: binSize,
+                            isDarkMode: isDarkMode,
+                            gameProvider: gameProvider,
+                          ),
+                        ),
+
+                        // Top-Right: Organic (Hữu cơ - Green)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: _buildDragTarget(
+                            category: WasteCategory.organic,
+                            label: 'Hữu cơ',
+                            emoji: '🍃',
+                            color: Colors.green,
+                            textColor: Colors.green.shade900,
+                            size: binSize,
+                            isDarkMode: isDarkMode,
+                            gameProvider: gameProvider,
+                          ),
+                        ),
+
+                        // Bottom-Left: Hazardous (Nguy hại - Red)
+                        Positioned(
+                          bottom: 8,
+                          left: 8,
+                          child: _buildDragTarget(
+                            category: WasteCategory.hazardous,
+                            label: 'Nguy hại',
+                            emoji: '☠️',
+                            color: Colors.red,
+                            textColor: Colors.red.shade900,
+                            size: binSize,
+                            isDarkMode: isDarkMode,
+                            gameProvider: gameProvider,
+                          ),
+                        ),
+
+                        // Bottom-Right: Trash (Rác khác - Grey)
+                        Positioned(
+                          bottom: 8,
+                          right: 8,
+                          child: _buildDragTarget(
+                            category: WasteCategory.trash,
+                            label: 'Rác khác',
+                            emoji: '🗑️',
+                            color: Colors.grey,
+                            textColor: Colors.grey.shade900,
+                            size: binSize,
+                            isDarkMode: isDarkMode,
+                            gameProvider: gameProvider,
+                          ),
+                        ),
+
+                        // Center: Draggable Card
+                        Center(
+                          child: _questions.isEmpty
+                              ? const SizedBox()
+                              : SizedBox(
+                                  width: cardWidth,
+                                  child: Draggable<GameQuestion>(
+                                    data: _questions[_currentIndex],
+                                    maxSimultaneousDrags: _isAnswerLocked ? 0 : 1,
+                                    feedback: Material(
+                                      color: Colors.transparent,
+                                      child: Transform.rotate(
+                                        angle: 0.05,
+                                        child: Opacity(
+                                          opacity: 0.85,
+                                          child: SizedBox(
+                                            width: cardWidth,
+                                            child: WasteCard(question: _questions[_currentIndex]),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    childWhenDragging: Opacity(
+                                      opacity: 0.15,
+                                      child: WasteCard(question: _questions[_currentIndex]),
+                                    ),
+                                    child: WasteCard(question: _questions[_currentIndex]),
+                                  ),
+                                ),
+                        ),
+                      ],
                     );
-                  }).toList(),
+                  },
                 ),
               ),
             ),
-          SizedBox(height: (sectionGap * 0.8)),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-            child: WasteCard(question: _questions[_currentIndex]),
-          ),
-          SizedBox(height: sectionGap),
-          Text(
-            "Đây là loại rác nào?",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: titleSize * 0.78, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
-          ),
-          SizedBox(height: (screenWidth * 0.015).clamp(4.0, 8.0)),
-          Text(
-            _questions[_currentIndex].name,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w800),
-          ),
-          SizedBox(height: sectionGap),
-          _buildActionButtons(gameProvider),
-          Padding(
-            padding: EdgeInsets.only(top: sectionGap),
-            child: Text(
-              'Điểm vòng hiện tại: $_roundScore',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.black54,
-                fontSize: (screenWidth * 0.037).clamp(12.0, 15.0),
+
+            // Footer / Score info
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                'Điểm vòng hiện tại: $_roundScore',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white70 : Colors.black54,
+                  fontSize: 13,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -521,7 +626,7 @@ class _GameScreenState extends State<GameScreen> {
             const SizedBox(width: 4),
             Text(
               '$label: $value',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 11),
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
             ),
           ],
         ),
@@ -529,47 +634,74 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Widget _buildActionButtons(GameProvider provider) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final horizontalPadding = (screenWidth * 0.06).clamp(14.0, 30.0);
-    final gap = (screenWidth * 0.04).clamp(10.0, 18.0);
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-      child: Column(
-        children: [
-          Row(
+  Widget _buildDragTarget({
+    required WasteCategory category,
+    required String label,
+    required String emoji,
+    required Color color,
+    required Color textColor,
+    required double size,
+    required bool isDarkMode,
+    required GameProvider gameProvider,
+  }) {
+    return DragTarget<GameQuestion>(
+      onWillAcceptWithDetails: (details) => !_isAnswerLocked,
+      onAcceptWithDetails: (details) {
+        _checkAnswer(category, gameProvider);
+      },
+      builder: (context, candidateData, rejectedData) {
+        final isHovered = candidateData.isNotEmpty;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          width: isHovered ? size * 1.14 : size,
+          height: isHovered ? size * 1.14 : size,
+          decoration: BoxDecoration(
+            color: isHovered ? color : color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(size * 0.22),
+            border: Border.all(
+              color: color.withValues(alpha: isHovered ? 1.0 : 0.4),
+              width: isHovered ? 3.0 : 1.5,
+            ),
+            boxShadow: isHovered
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.4),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    )
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    )
+                  ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(child: _gameButton("Tái chế", Colors.blue, () => _checkAnswer(WasteCategory.recyclable, provider))),
-              SizedBox(width: gap),
-              Expanded(child: _gameButton("Hữu cơ", Colors.brown, () => _checkAnswer(WasteCategory.organic, provider))),
+              Text(
+                emoji,
+                style: TextStyle(
+                  fontSize: isHovered ? size * 0.32 : size * 0.28,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: isHovered ? Colors.white : (isDarkMode ? color.withValues(alpha: 0.9) : textColor),
+                  fontWeight: FontWeight.bold,
+                  fontSize: isHovered ? size * 0.125 : size * 0.115,
+                ),
+              ),
             ],
           ),
-          SizedBox(height: gap),
-          Row(
-            children: [
-              Expanded(child: _gameButton("Nguy hại", Colors.red, () => _checkAnswer(WasteCategory.hazardous, provider))),
-              SizedBox(width: gap),
-              Expanded(child: _gameButton("Thông thường", Colors.grey, () => _checkAnswer(WasteCategory.trash, provider))),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _gameButton(String label, Color color, VoidCallback onTap) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final verticalPadding = (screenWidth * 0.048).clamp(12.0, 20.0);
-    final fontSize = (screenWidth * 0.043).clamp(14.0, 17.0);
-    final radius = (screenWidth * 0.05).clamp(14.0, 20.0);
-    return ElevatedButton(
-      onPressed: onTap,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        padding: EdgeInsets.symmetric(vertical: verticalPadding),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
-      ),
-      child: Text(label, style: TextStyle(color: Colors.white, fontSize: fontSize, fontWeight: FontWeight.w700)),
+        );
+      },
     );
   }
 }

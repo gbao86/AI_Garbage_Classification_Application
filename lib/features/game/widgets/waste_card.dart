@@ -11,10 +11,10 @@ class WasteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final cardWidth = constraints.maxWidth.clamp(240.0, 420.0);
-        final borderRadius = (cardWidth * 0.08).clamp(16.0, 28.0);
-        final titleSize = (cardWidth * 0.07).clamp(16.0, 24.0);
-        final subtitleSize = (cardWidth * 0.038).clamp(11.0, 14.0);
+        final cardWidth = constraints.maxWidth;
+        final borderRadius = (cardWidth * 0.08).clamp(12.0, 24.0);
+        final titleSize = (cardWidth * 0.075).clamp(13.0, 20.0);
+        final subtitleSize = (cardWidth * 0.045).clamp(9.0, 13.0);
 
         return Center(
           child: SizedBox(
@@ -87,8 +87,8 @@ class WasteCard extends StatelessWidget {
                               ),
                               SizedBox(height: cardWidth * 0.018),
                               Text(
-                                'Quan sát kỹ hình ảnh trước khi chọn đáp án',
-                                style: TextStyle(fontSize: subtitleSize, color: Colors.grey.shade600),
+                                'Kéo thả vào đúng nhóm rác',
+                                style: TextStyle(fontSize: subtitleSize, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
                               ),
                             ],
                           ),

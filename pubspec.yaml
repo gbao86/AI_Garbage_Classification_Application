@@ -2,7 +2,7 @@ name: phan_loai_rac_qua_hinh_anh
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 0.5.5
+version: 0.5.6
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

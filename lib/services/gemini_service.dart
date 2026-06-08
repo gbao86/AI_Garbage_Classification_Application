@@ -7,8 +7,11 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class GeminiService {
   final GenerativeModel _model = GenerativeModel(
-    model: 'gemini-flash-latest',
+    model: 'gemini-3.5-flash',
     apiKey: Env.geminiApiKey,
+    generationConfig: GenerationConfig(
+      responseMimeType: 'application/json',
+    ),
   );
 
   Future<String> processImageAndGetGuidance(File imageFile) async {
@@ -35,24 +38,27 @@ class GeminiService {
       }
 
       final prompt = """
-Bạn là một chuyên gia về quản lý và phân loại rác thải tại Việt Nam. 
-Dựa trên ảnh được cung cấp, hãy thực hiện các bước sau:
+Bạn là một chuyên gia về quản lý và phân loại rác thải tại Việt Nam.
+Hãy phân tích hình ảnh rác thải được cung cấp và trả về một đối tượng JSON duy nhất theo cấu trúc bên dưới.
 
-1. Xác định loại rác chính trong ảnh. Hãy chọn MỘT trong các nhãn sau để khớp với hệ thống: 
+Yêu cầu phân loại rác:
+1. Xác định loại rác chính trong ảnh và chọn MỘT trong các nhãn tiếng Anh (category) sau để khớp với hệ thống của chúng tôi: 
    battery, biological, cardboard, clothes, glass, metal, paper, plastic, shoes, trash.
-2. Phân loại rác vào nhóm: Tái chế, Hữu cơ, Nguy hại, hoặc Không tái chế.
-3. Cung cấp hướng dẫn xử lý ngắn gọn, chuyên nghiệp.
+2. Xác định nhóm phân loại (classification) từ một trong các giá trị sau:
+   recyclable, organic, hazardous, trash.
 
-Định dạng kết quả (Bắt buộc dùng Markdown):
-**Loại rác**: [Tên tiếng Việt] ([nhãn tiếng Anh tương ứng])  
-**Phân loại**: [Tái chế/Hữu cơ/Nguy hại/Không tái chế]
-
-**Hướng dẫn xử lý**:
-- **Cách vứt bỏ**: [Cách chuẩn bị rác]
-- **Nơi xử lý**: [Thùng rác hoặc điểm thu gom]
-- **Tác hại nếu xử lý sai**: [Ảnh hưởng môi trường/sức khỏe]
-
-**Mẹo sống xanh**: [Một lời khuyên nhỏ từ chuyên gia]
+Cấu trúc JSON bắt buộc phải trả về:
+{
+  "category": "nhãn_tiếng_anh_ở_trên",
+  "classification": "nhóm_phân_loại_ở_trên",
+  "vietnamese_label": "tên tiếng việt cụ thể của vật thể rác",
+  "guidance": {
+    "disposal": "hướng dẫn chuẩn bị/làm sạch rác chi tiết để vứt bỏ",
+    "where": "thùng rác màu gì hoặc điểm thu gom cụ thể",
+    "harm": "tác hại nghiêm trọng đến môi trường/sức khỏe nếu xử lý sai"
+  },
+  "tip": "một mẹo sống xanh nhỏ từ chuyên gia liên quan đến loại rác này"
+}
 """;
 
       final content = [
@@ -63,7 +69,7 @@ Dựa trên ảnh được cung cấp, hãy thực hiện các bước sau:
       ];
 
       final response = await _model.generateContent(content);
-      return response.text?.trim() ?? 'Không nhận được kết quả từ Gemini.';
+      return response.text?.trim() ?? '{"error": "Không nhận được kết quả từ Gemini."}';
     } catch (e) {
       debugPrint('Lỗi khi xử lý ảnh với Gemini: $e');
       rethrow;
