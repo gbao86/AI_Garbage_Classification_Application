@@ -236,6 +236,15 @@ phan_loai_rac_qua_hinh_anh/
 
 ---
 
+## 🤪 Góc giải trí (Developer Memes)
+Khi mô hình Offline TFLite cố gắng đoán rác thải phức tạp và đành phải cầu cứu Gemini 3.5 Flash:
+
+<div align="center">
+  <img src="./assets/images/garbage_ai_meme.png" width="550px" alt="AI Garbage Classification Meme"/>
+</div>
+
+---
+
 ## 📥 Tải xuống & Trải nghiệm
 👉 **[Tải tệp APK cài đặt bản v0.5.6 tại đây](https://drive.google.com/drive/folders/1swY2GXq4YbI0cJ71cbgdRxbpDXIc1g91?usp=sharing)**
 
