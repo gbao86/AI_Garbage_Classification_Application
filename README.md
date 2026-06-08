@@ -99,16 +99,15 @@ Mô hình Offline được huấn luyện dựa trên bộ dữ liệu **Garbage
   Thống kê Precision, Recall và F1-Score cho 10 lớp rác thải.
   [![Classification Report](assets/images/report.png)](https://www.kaggle.com/code/jisy736386/phan-loai-rac)
 
----
-
 ## 🛠️ Công nghệ sử dụng
 
-- **Flutter / Dart**
-- **Supabase** (Auth, Database, Storage, Realtime)
-- **TensorFlow Lite**
-- **Google ML Kit**
-- **Gemini API**
-- **OpenStreetMap**
+- **Flutter / Dart**: Nền tảng phát triển ứng dụng di động đa nền tảng.
+- **Supabase (Auth, Database, Storage, Realtime)**: Hệ thống Backend-as-a-Service để quản lý người dùng, cơ sở dữ liệu, lưu trữ hình ảnh quét và đồng bộ hóa điểm số realtime.
+- **TensorFlow Lite**: Thư viện chạy mô hình học máy (`model_unquant.tflite`) cục bộ ngay trên thiết bị mà không cần kết nối mạng.
+- **Google ML Kit**: Sử dụng thư viện `Subject Segmentation` để bóc tách vật thể rác thải khỏi hình nền phục vụ các hiệu ứng quét laser và neon phát sáng trực quan.
+- **Gemini API (Gemini 3.5 Flash)**: Phân tích sâu hình ảnh rác thải bằng trí tuệ nhân tạo trên đám mây, trả về kết quả định dạng JSON có cấu trúc để đồng bộ hóa và lưu trữ chính xác.
+- **OpenStreetMap / Nominatim API**: Tích hợp bản đồ hiển thị điểm thu gom rác, định vị vị trí GPS thực tế và tìm kiếm/giải mã địa chỉ.
+- **HTML5 / CSS3 / JavaScript (Vite)**: Công nghệ xây dựng Trang quản trị trực quan dành cho Quản trị viên (Web Admin Dashboard).
 
 ---
 
