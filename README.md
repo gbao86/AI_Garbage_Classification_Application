@@ -1,254 +1,256 @@
-# ♻️ EcoSort by Bao - Ứng Dụng Phân Loại Rác Thông Minh
-
-> **Sự kết hợp hoàn hảo giữa Trí tuệ nhân tạo biên (Edge AI), Mô hình ngôn ngữ lớn (LLM Cloud) và Công nghệ Tách nền thị giác (Subject Segmentation).**
-
----
-
 <div align="center">
 
-[![Version](https://img.shields.io/badge/version-0.5.6-green.svg?style=for-the-badge&logo=flutter&logoColor=white)](./CHANGELOG.md)
-[![Platform](https://img.shields.io/badge/platform-Flutter%20%7C%20Dart-blue.svg?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-red.svg?style=for-the-badge&logo=gnu&logoColor=white)](./LICENSE)
-[![Security Policy](https://img.shields.io/badge/Security-Policy-yellow.svg?style=for-the-badge&logo=google-cloud&logoColor=white)](./SECURITY.md)
+<!-- HEADER BANNER -->
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:00ff88,50:00c9ff,100:00ff88&height=220&section=header&text=EcoSort%20by%20Bao&fontSize=64&fontAlignY=38&fontColor=ffffff&desc=AI-Powered%20Waste%20Classification&descAlignY=60&descSize=18&animation=fadeIn" width="100%"/>
+
+<!-- TYPING ANIMATION -->
+<a href="https://github.com/gbao86/AI_Garbage_Classification_Application">
+  <img src="https://readme-typing-svg.demolab.com?font=Space+Mono&weight=700&size=18&duration=3000&pause=800&color=00FF88&center=true&vCenter=true&multiline=true&width=700&height=70&lines=♻+Edge+AI+%7C+TFLite+%3C15ms+%7C+GPU+Delegate;☁+Gemini+3.5+Flash+Cloud+Fallback+%7C+Neon+Segmentation" alt="Typing SVG"/>
+</a>
+
+<br/>
+
+<!-- BADGES -->
+[![Version](https://img.shields.io/badge/version-0.5.6-00ff88?style=for-the-badge&logo=flutter&logoColor=white&labelColor=0c1419)](./CHANGELOG.md)
+[![Platform](https://img.shields.io/badge/Flutter%20%7C%20Dart-blue?style=for-the-badge&logo=flutter&logoColor=white&labelColor=0c1419)](https://flutter.dev)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-ff3d5a?style=for-the-badge&logo=gnu&logoColor=white&labelColor=0c1419)](./LICENSE)
+[![Kaggle](https://img.shields.io/badge/Kaggle-Notebook-20BEFF?style=for-the-badge&logo=kaggle&logoColor=white&labelColor=0c1419)](https://www.kaggle.com/code/jisy736386/phan-loai-rac)
+[![APK](https://img.shields.io/badge/↓%20APK-v0.5.6-00ff88?style=for-the-badge&logo=android&logoColor=white&labelColor=0c1419)](https://drive.google.com/drive/folders/1swY2GXq4YbI0cJ71cbgdRxbpDXIc1g91?usp=sharing)
 
 </div>
 
 ---
 
-## 📌 Tổng quan dự án
+## 📌 Tổng quan
 
-**EcoSort by Bao** là một giải pháp công nghệ toàn diện hỗ trợ cộng đồng phân loại rác thải sinh hoạt chính xác và nhanh chóng. Bằng việc kết hợp sức mạnh xử lý cục bộ trên thiết bị và phân tích ngữ cảnh thông minh trên đám mây, ứng dụng mang lại trải nghiệm phân loại rác liền mạch và chuyên nghiệp nhất.
+**EcoSort by Bao** là giải pháp phân loại rác sinh hoạt kết hợp 3 tầng công nghệ:
+
+| Tầng | Công nghệ | Vai trò |
+|:---:|:---|:---|
+| 🧠 **Edge AI** | TFLite · GPU Delegate | Suy luận cục bộ &lt;15ms, không cần mạng |
+| ☁ **LLM Cloud** | Gemini 3.5 Flash | Fallback thông minh khi confidence &lt;75% |
+| 👁 **Vision** | ML Kit Segmentation | Vẽ viền Neon phát sáng quanh rác |
 
 ---
 
-## 🎬 Quy trình xử lý song song & Dự phòng (Pipeline & Sequence Diagram)
-
-Sự kết hợp giữa xử lý thời gian thực cục bộ và đám mây được tối ưu hóa thông qua cơ chế song song (Parallelization) để đảm bảo ứng dụng không bao giờ bị trễ:
+## 🎬 Hybrid AI Pipeline
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Người dùng
-    participant App as Mobile App (Flutter)
-    participant ML as ML Kit Segmentation
-    participant TF as TFLite Interpreter (Local)
-    participant API as Gemini 3.5 Flash (Cloud)
-    participant DB as Supabase CSDL
+    actor User as 👤 Người dùng
+    participant App as 📱 Flutter App
+    participant ML  as 👁 ML Kit Segmentation
+    participant TF  as ⚡ TFLite (Local GPU)
+    participant API as ✨ Gemini 3.5 Flash
+    participant DB  as 🗄 Supabase
 
     User->>App: Chụp ảnh rác thải
-    Note over App: Khởi chạy hai luồng song song (Multithreading)
-    par Tách nền chủ thể (Visual Masking)
+    Note over App: Khởi 2 luồng song song
+
+    par Visual Masking
         App->>ML: Trích xuất viền đối tượng
-        ML-->>App: Trả về mặt nạ ảnh (Mask)
-    and Chạy suy luận Offline (Edge AI)
-        App->>TF: Đẩy ảnh kích thước 224x224
-        TF-->>App: Kết quả dự đoán + Độ tin cậy (Confidence)
+        ML-->>App: Mask ảnh trả về
+    and Edge AI Inference
+        App->>TF: Ảnh 224×224px → GPU Delegate
+        TF-->>App: Label + Confidence score
     end
-    
-    alt Độ tin cậy (Confidence) >= 75%
-        Note over App: Sử dụng ngay kết quả cục bộ (Tiết kiệm Quota)
-        App->>DB: Lưu lịch sử & Thưởng XP trực tiếp
-    else Độ tin cậy (Confidence) < 75%
-        Note over App: Tự động kích hoạt Cloud Fallback
-        App->>API: Gửi ảnh siêu nhẹ 15KB (Đã nén)
-        API-->>App: Trả về payload JSON có cấu trúc
-        App->>DB: Ghi nhận lịch sử kèm nhãn chính xác từ Gemini
+
+    alt Confidence ≥ 75%
+        Note over App,DB: ✅ Dùng kết quả local — tiết kiệm quota
+        App->>DB: Lưu lịch sử · Cộng XP · Ghi CO₂
+    else Confidence < 75%
+        Note over App,API: ☁ Kích hoạt Cloud Fallback
+        App->>API: Gửi ảnh 15KB đã nén
+        API-->>App: JSON payload chuẩn
+        App->>DB: Ghi nhận với nhãn Gemini đã hiệu chỉnh
     end
-    
-    App-->>User: Vẽ viền Neon chuyển động quanh rác & Hiển thị hướng dẫn
+
+    App-->>User: Vẽ viền Neon · Hiển thị hướng dẫn · +XP
 ```
 
 <details>
-<summary><b>📐 Xem thêm sơ đồ khối luồng dữ liệu (Dataflow Flowchart)</b></summary>
+<summary><b>📐 Xem sơ đồ Dataflow Flowchart</b></summary>
 
 ```mermaid
 graph TD
-    classDef startEnd fill:#00E676,stroke:#00C853,stroke-width:2px,color:#000;
-    classDef process fill:#29B6F6,stroke:#0288D1,stroke-width:2px,color:#000;
-    classDef decision fill:#FFD54F,stroke:#FFB300,stroke-width:2px,color:#000;
-    classDef cloud fill:#AB47BC,stroke:#7B1FA2,stroke-width:2px,color:#fff;
-    classDef local fill:#FF7043,stroke:#F4511E,stroke-width:2px,color:#fff;
+    classDef start   fill:#00ff88,stroke:#00c853,color:#000,font-weight:bold
+    classDef process fill:#0d2b38,stroke:#00c9ff,color:#cde4e0
+    classDef decide  fill:#1a2400,stroke:#ffd600,color:#ffd600
+    classDef cloud   fill:#1a0d2b,stroke:#b46fff,color:#b46fff
+    classDef local   fill:#2b0d10,stroke:#ff3d5a,color:#ff7a8a
 
-    A([Người dùng chụp/chọn ảnh]) --> B(Tiền xử lý & Trích xuất đặc trưng)
-    B --> C{Sử dụng TFLite Offline}:::decision
-    
-    C -->|Thực hiện Suy luận Cục bộ| D[interpreter.run]:::local
-    D --> E{Độ tự tin >= 75%?}:::decision
-    
-    E -->|Có - Đủ tin cậy| F[Hiển thị kết quả Offline ngay]:::process
-    E -->|Không - Thấp| G{Kiểm tra Kết nối Mạng}:::decision
-    
-    G -->|Có Mạng| H[Gửi ảnh lên Gemini 3.5 Flash Cloud]:::cloud
-    G -->|Mất Mạng| I[Tự động Fallback dùng TFLite Local]:::process
-    
-    H --> J[Trả về kết quả định dạng JSON]:::cloud
-    J --> K[Đồng bộ hiển thị & Ghi nhận CSDL chuẩn]:::process
-    
-    F --> L([Tách nền rác bằng ML Kit Subject Segmentation & Vẽ viền Neon])
+    A([📸 Chụp / Chọn ảnh]):::start --> B(Tiền xử lý · Kotlin Native):::process
+    B --> D[TFLite · GPU Delegate]:::local
+    D --> E{Confidence ≥ 75%?}:::decide
+    E -->|✅ Đủ tin cậy| F[Hiển thị kết quả local]:::process
+    E -->|❌ Thấp| G{Có kết nối mạng?}:::decide
+    G -->|📶 Online| H[Gemini 3.5 Flash · Cloud]:::cloud
+    G -->|📵 Offline| I[Fallback TFLite · Outbox Queue]:::process
+    H --> J[JSON payload → Supabase sync]:::cloud
+    F --> L([✨ ML Kit Neon Render · +XP · CO₂]):::start
     I --> L
-    K --> L
-    
-    class A,L startEnd;
-    class B,F,I,K process;
-    class C,E,G decision;
-    class H,J cloud;
-    class D local;
+    J --> L
 ```
 
 </details>
 
 ---
 
-## 📸 Giao diện ứng dụng (UI/UX)
+## 🚀 Tính năng đột phá
 
-Ứng dụng sở hữu ngôn ngữ thiết kế **Premium Dark Mode & Glassmorphism**, tối ưu hóa hiển thị và mang lại cảm giác công nghệ tương lai:
+### 🧠 Dual AI Brain
+- **TFLite Local** — `model_unquant.tflite` chạy trên GPU Delegate, 224×224px, 10 lớp, **&lt;15ms** hoàn toàn offline
+- **Gemini 3.5 Flash** — auto kích hoạt khi confidence &lt;75%, trả JSON cấu trúc với hướng dẫn xử lý chi tiết
+- **DB Label Sync** — Gemini hiệu chỉnh nhãn → tự đồng bộ ngược Supabase, cập nhật CO₂ + XP tương ứng
 
-| Màn hình chính (Home) | Bản đồ sinh thái (v0.5.4) |
-|:---:|:---:|
-| ![Home Screen v0.5.4](assets/images/home_preview_ver0.5.4.jpg) | ![Map Screen v0.5.4](assets/images/map_review_v0.5.4.jpg) |
+### 🛸 Neon Segmentation
+- **ML Kit Subject Segmentation** chạy song song với luồng AI — không thêm latency
+- Vẽ mask phát sáng theo màu nhóm: `🟢 Tái chế` · `🟤 Hữu cơ` · `🔴 Nguy hại`
 
-| Nhật ký & Tác động CO₂ | Thông tin ứng dụng (About) |
-|:---:|:---:|
-| ![Scan History v0.5.4](assets/images/new_ver0.5.4.jpg) | ![About Screen v0.5.4](assets/images/about_screen_v0.5.4.jpg) |
+### ⚡ Native Performance
+- Nén ảnh tầng **Kotlin/Swift** trước khi vào Dart Isolate → Main Thread **0% blocked**
+- Đạt **60/120 FPS** mượt, zero jank khi quét liên tục
 
----
+### 📡 Offline-First Architecture
+- **Outbox Pattern** — điểm, streak, nhiệm vụ offline ghi vào `SharedPreferences`
+- Tự đồng bộ tuần tự lên Supabase khi có mạng trở lại — không bao giờ mất dữ liệu
 
-## 🚀 Các tính năng đột phá
-
-### 🧠 Luồng xử lý AI kép (Hybrid AI Pipeline)
-*   **Edge AI (TFLite Local):** Chạy suy luận trực tiếp trên nhân xử lý đồ họa di động (GPU Delegate) bằng mô hình [model_unquant.tflite](file:///D:/App/AI%20Phan%20Loai%20Rac%20Qua%20Hinh%20Anh/phan_loai_rac_qua_hinh_anh/assets/models/model_unquant.tflite) (224x224, 10 lớp rác thải), trả kết quả trong vòng **< 15ms** mà không tốn dung lượng mạng.
-*   **LLM API Cloud (Gemini 3.5 Flash):** Tích hợp gọi API thông minh bằng mô hình `gemini-3.5-flash` khi độ tin cậy của TFLite dưới **`75%`**, trả về cẩm nang xử lý rác chi tiết bằng ngôn ngữ JSON có cấu trúc.
-*   **Đồng bộ hóa nhãn CSDL**: Khi Gemini hiệu chỉnh nhãn đúng, hệ thống tự động đồng bộ đè nhãn chính xác lên cơ sở dữ liệu Supabase, chỉnh sửa lượng CO₂ giảm thiểu và XP tích lũy tương ứng cho người dùng.
-
-### 🛸 Tách nền và Vẽ hiệu ứng Neon trực quan (Subject Segmentation)
-*   Tận dụng sức mạnh của **Google ML Kit Subject Segmentation** chạy ngầm song song với luồng AI phân tích.
-*   Bóc tách pixel vật thể rác khỏi phông nền tĩnh và vẽ mặt nạ (Masking) phát sáng neon theo màu sắc nhóm rác (Xanh cho *Tái chế*, Nâu cho *Hữu cơ*, Đỏ cho *Nguy hại*).
-
-### ⚡ Tối ưu hóa hiệu năng cực hạn (Extreme Engineering)
-*   **Native Preprocessing**: Giải nén và nén ảnh bằng mã Kotlin/Swift ở tầng Native trước khi đưa vào luồng Dart Isolate, giải phóng 100% Main Thread tránh hiện tượng giật lag khung hình khi quét (đạt 60/120 FPS mượt mà).
-*   **Offline Outbox Pattern**: Điểm số, Streak và nhiệm vụ ngày hoàn thành khi mất mạng được lưu vào hàng đợi Outbox cục bộ (`SharedPreferences`) và tự động đồng bộ tuần tự lên Supabase ngay khi thiết bị kết nối mạng trở lại.
-
-### 🗺️ Bản đồ sinh thái Crowdsourcing
-*   Sử dụng CartoDB Vector Map với các giao diện sáng/tối tự động đồng bộ với hệ thống.
-*   Cho phép người dùng ghim trạm rác mới, dịch ngược địa chỉ bằng Nominatim API và tải ảnh thực tế lên hệ thống để nhận phần thưởng XP.
+### 🗺️ Eco Map Crowdsourcing
+- CartoDB Vector Map · dark/light auto-sync
+- Ghim trạm rác mới · geocode Nominatim · upload ảnh thực tế nhận XP
 
 ---
 
-## 🧠 Chi tiết mô hình AI Offline
+## 🧠 Mô hình AI Offline
 
-> 📓 **Kaggle Notebook**: Bạn có thể xem toàn bộ mã nguồn huấn luyện, xử lý dữ liệu và ma trận phân tích tại [Kaggle Notebook - Phân loại rác](https://www.kaggle.com/code/jisy736386/phan-loai-rac).
+> 📓 **Kaggle Notebook**: [Xem toàn bộ training pipeline tại đây](https://www.kaggle.com/code/jisy736386/phan-loai-rac)
 
-Mô hình học máy Offline được huấn luyện dựa trên bộ dữ liệu **Garbage Dataset** gồm **13,348 hình ảnh** với cấu trúc 10 lớp chi tiết:
+**Dataset: 13,348 ảnh · 10 lớp phân loại**
 
-| Lớp rác thải (Class) | Số lượng ảnh | Nhóm phân loại chính |
-| :--- | :---: | :--- |
-| 🔋 **Battery** (Pin cũ) | 756 | Rác Nguy hại ☠️ |
-| 🥬 **Biological** (Hữu cơ sinh học) | 699 | Rác Hữu cơ 🍂 |
-| 📦 **Cardboard** (Bìa Carton) | 1,411 | Rác Tái chế ♻️ |
-| 👕 **Clothes** (Quần áo cũ) | 1,892 | Rác Tái chế ♻️ |
-| 🥛 **Glass** (Chai lọ thủy tinh) | 1,736 | Rác Tái chế ♻️ |
-| 🔩 **Metal** (Lon, mảnh kim loại) | 930 | Rác Tái chế ♻️ |
-| 📝 **Paper** (Giấy vụn, sách cũ) | 1,336 | Rác Tái chế ♻️ |
-| 🥤 **Plastic** (Chai nhựa, túi nilon) | 1,597 | Rác Tái chế ♻️ |
-| 👟 **Shoes** (Giày dép hỏng) | 1,449 | Rác Tái chế ♻️ |
-| 🗑️ **Trash** (Rác không tái chế khác) | 453 | Không tái chế 🗑️ |
-
----
-
-## 🛠️ Công nghệ sử dụng
-
-*   **Flutter / Dart**: SDK phát triển ứng dụng di động đa nền tảng.
-*   **Supabase (Auth, Database, Storage, Realtime)**: Hệ thống Backend-as-a-Service để quản lý người dùng, lưu trữ hình ảnh quét và đồng bộ hóa tiến trình, điểm số thời gian thực.
-*   **TensorFlow Lite**: Công cụ chạy mô hình học máy cục bộ tối ưu hóa cho di động.
-*   **Google ML Kit**: Cung cấp công nghệ phân mảnh chủ thể (Subject Segmentation).
-*   **Gemini API (Gemini 3.5 Flash)**: Xử lý ngôn ngữ tự nhiên và phân tích sâu hình ảnh đám mây bằng cấu trúc JSON đồng bộ.
-*   **OpenStreetMap / Nominatim API**: Hệ thống bản đồ và tìm kiếm vị trí.
-*   **HTML5 / CSS3 / JavaScript (Vite)**: Dành cho Dashboard trang quản trị Web Admin.
+| Lớp | Tên tiếng Việt | Số ảnh | Nhóm |
+|:---:|:---|:---:|:---|
+| 🔋 Battery | Pin cũ | 756 | ☠️ Nguy hại |
+| 🥬 Biological | Hữu cơ sinh học | 699 | 🍂 Hữu cơ |
+| 📦 Cardboard | Bìa Carton | 1,411 | ♻️ Tái chế |
+| 👕 Clothes | Quần áo cũ | 1,892 | ♻️ Tái chế |
+| 🥛 Glass | Chai lọ thủy tinh | 1,736 | ♻️ Tái chế |
+| 🔩 Metal | Lon, mảnh kim loại | 930 | ♻️ Tái chế |
+| 📝 Paper | Giấy vụn, sách cũ | 1,336 | ♻️ Tái chế |
+| 🥤 Plastic | Chai nhựa, túi nilon | 1,597 | ♻️ Tái chế |
+| 👟 Shoes | Giày dép hỏng | 1,449 | ♻️ Tái chế |
+| 🗑️ Trash | Rác không tái chế khác | 453 | 🗑️ Không tái chế |
 
 ---
 
-## 📁 Cấu trúc thư mục dự án
-
-<details>
-<summary>📂 <b>Nhấp vào đây để xem chi tiết cây thư mục dự án (Directory Tree)</b></summary>
-
-```text
-phan_loai_rac_qua_hinh_anh/
-├── lib/                      # Mã nguồn ứng dụng Flutter
-│   ├── features/             # Các tính năng Game, Quiz, Outbox
-│   ├── models/               # Cấu trúc dữ liệu & Model Class
-│   ├── screens/              # Giao diện chính (Home, Scanning, Map, Result)
-│   ├── services/             # Dịch vụ tích hợp (AI Gemini, TFLite, Supabase)
-│   ├── theme/                # Cấu hình giao diện và màu sắc Dark/Light Mode
-│   ├── utils/                # Tiện ích mở rộng, biến môi trường (Env)
-│   └── widgets/              # Các UI Component tái sử dụng (Camera, Dialog)
-├── web_admin/                # Trang web quản trị viên (HTML/JS/Vite)
-├── supabase/                 # Cấu hình cơ sở dữ liệu & các hàm RPC, Migrations
-├── assets/                   # Tài nguyên ảnh, mô hình AI (.tflite), danh sách nhãn
-├── SECURITY.md               # Chính sách bảo mật dự án
-├── CHANGELOG.md              # Nhật ký cập nhật phiên bản chi tiết
-└── README.md                 # Tài liệu hướng dẫn này
-```
-
-</details>
-
----
-
-## 🏗️ Hướng dẫn cài đặt & Chạy dự án
-
-<details>
-<summary>🛠️ <b>Nhấp vào đây để xem chi tiết quy trình thiết lập môi trường và chạy ứng dụng</b></summary>
-
-### Yêu cầu tiên quyết
-*   Flutter SDK v3.x.x
-*   Cài đặt Gradle và JDK 17+
-*   Tài khoản Supabase đã kích hoạt các bảng trong thư mục `supabase/`
-
-### Các bước cài đặt chi tiết
-
-1.  **Clone dự án**:
-    ```bash
-    git clone https://github.com/gbao86/AI_Garbage_Classification_Application.git
-    cd AI_Garbage_Classification_Application
-    ```
-
-2.  **Cài đặt các gói phụ thuộc (Dependencies)**:
-    ```bash
-    flutter pub get
-    ```
-
-3.  **Cấu hình biến môi trường**:
-    Sao chép tệp cấu hình mẫu:
-    ```bash
-    cp .env.example .env
-    ```
-    Điền đầy đủ thông tin API Key của Gemini và Supabase vào tệp `.env`. Sau đó chạy lệnh sinh file cấu hình bảo mật `env.g.dart`:
-    ```bash
-    dart run build_runner build --delete-conflicting-outputs
-    ```
-
-4.  **Chạy dự án trên thiết bị**:
-    ```bash
-    flutter run
-    ```
-
-</details>
-
----
-
-## 🤪 Góc giải trí (Developer Memes)
-Khi mô hình Edge AI Offline tự phân loại rác mà không có kết nối đám mây:
+## 🛠️ Tech Stack
 
 <div align="center">
-  <img src="./assets/images/garbage_ai_meme.gif" width="450px" alt="Robotic Garbage Truck Fail"/>
+
+![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/TFLite-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
+![Google Cloud](https://img.shields.io/badge/Gemini%203.5-4285F4?style=for-the-badge&logo=google&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
+![OpenStreetMap](https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+
 </div>
 
 ---
 
-## 📥 Tải xuống & Trải nghiệm
-👉 **[Tải tệp APK cài đặt bản v0.5.6 tại đây](https://drive.google.com/drive/folders/1swY2GXq4YbI0cJ71cbgdRxbpDXIc1g91?usp=sharing)**
+## 📸 Giao diện ứng dụng
+
+| 🏠 Màn hình chính | 🗺️ Bản đồ sinh thái |
+|:---:|:---:|
+| ![Home](assets/images/home_preview_ver0.5.4.jpg) | ![Map](assets/images/map_review_v0.5.4.jpg) |
+
+| 📊 Nhật ký & CO₂ | ℹ️ Về ứng dụng |
+|:---:|:---:|
+| ![History](assets/images/new_ver0.5.4.jpg) | ![About](assets/images/about_screen_v0.5.4.jpg) |
 
 ---
 
-**Phát triển bởi Trịnh Gia Bao (gbao86)**  
-📧 Hỗ trợ kỹ thuật: tiktokthu10@gmail.com
+## 🏗️ Cài đặt & Chạy dự án
+
+<details>
+<summary><b>🛠️ Xem chi tiết quy trình thiết lập</b></summary>
+
+### Yêu cầu
+- Flutter SDK `v3.x.x`
+- JDK `17+` · Gradle latest
+- Tài khoản Supabase đã migrate tables
+- Gemini API Key đã kích hoạt
+
+### Các bước
+
+```bash
+# 1. Clone dự án
+git clone https://github.com/gbao86/AI_Garbage_Classification_Application.git
+cd AI_Garbage_Classification_Application
+
+# 2. Cài dependencies
+flutter pub get
+
+# 3. Config biến môi trường
+cp .env.example .env
+# → Điền Gemini API Key + Supabase URL/Key vào .env
+
+# 4. Build runner (sinh env.g.dart)
+dart run build_runner build --delete-conflicting-outputs
+
+# 5. Chạy!
+flutter run
+```
+
+### Cấu trúc thư mục
+
+```
+phan_loai_rac_qua_hinh_anh/
+├── lib/
+│   ├── features/     # Game, Quiz, Outbox
+│   ├── screens/      # Home, Scanning, Map, Result
+│   ├── services/     # AI Gemini, TFLite, Supabase
+│   ├── theme/        # Dark/Light Mode config
+│   └── widgets/      # Camera, Dialog components
+├── web_admin/        # HTML/JS/Vite Admin Panel
+├── supabase/         # Migrations, RPC functions
+└── assets/models/    # model_unquant.tflite
+```
+
+</details>
+
+---
+
+## 🤪 Developer Meme
+
+<div align="center">
+  <img src="./assets/images/garbage_ai_meme.gif" width="420px" alt="Edge AI goes brr"/>
+  <br/>
+  <sub><i>Khi TFLite tự phân loại rác mà không cần hỏi cloud một lần nào.</i></sub>
+</div>
+
+---
+
+## 📥 Tải xuống
+
+<div align="center">
+
+[![Download APK](https://img.shields.io/badge/↓%20Download%20APK%20v0.5.6-00ff88?style=for-the-badge&logo=android&logoColor=white&labelColor=0c1419)](https://drive.google.com/drive/folders/1swY2GXq4YbI0cJ71cbgdRxbpDXIc1g91?usp=sharing)
+
+</div>
+
+---
+
+<div align="center">
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:00ff88,50:00c9ff,100:00ff88&height=120&section=footer&reversal=false&animation=fadeIn" width="100%"/>
+
+**Phát triển bởi [Trịnh Gia Bảo](https://github.com/gbao86) · HCMUNRE**
+
+📧 `tiktokthu10@gmail.com`
+
+*Garbage in, wisdom out.*
+
+</div>
