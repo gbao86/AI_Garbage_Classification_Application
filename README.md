@@ -240,7 +240,7 @@ phan_loai_rac_qua_hinh_anh/
 Khi mô hình Edge AI Offline tự phân loại rác mà không có kết nối đám mây:
 
 <div align="center">
-  <img src="https://media.giphy.com/media/l41lTjJp7jY4G0JuU/giphy.gif" width="450px" alt="Robotic Garbage Truck Fail"/>
+  <img src="./assets/images/garbage_ai_meme.gif" width="450px" alt="Robotic Garbage Truck Fail"/>
 </div>
 
 ---
