@@ -29,13 +29,6 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
   - Tích hợp và mã hóa `STADIA_MAPS_API_KEY` trong `.env` / `.env.example` qua `Envied` (`Env.stadiaMapsApiKey`), hỗ trợ cơ chế tự động fallback về OpenStreetMap nếu thiếu key.
 - ✅ **Kết quả**: Bản đồ hiển thị nét, mượt mà và sạch bóng watermark.
 
-### 🗄️ Động hóa Dữ liệu Bản đồ Toàn quốc qua Supabase CSDL (`collection_points`)
-- 🔴 **Lý do chi tiết**: Khu vực Bến Cát (Bình Dương) và một số tỉnh thành chưa có dữ liệu điểm rác công cộng đầy đủ từ OpenStreetMap.
-- 🛠️ **Cách sửa**:
-  - Động hóa việc nạp dữ liệu bản đồ bằng cách truy vấn trực tiếp bảng `collection_points` trên CSDL Supabase qua `Supabase.instance.client`.
-  - Bổ sung 2 cột `latitude` và `longitude` vào bảng `public.collection_points` và khởi tạo script nạp tự động dữ liệu 69 điểm rác Bến Cát và các điểm rác toàn quốc (Cà Mau, Cần Thơ, Đà Nẵng, Huế, Hà Nội, Sa Pa...) lên Supabase Cloud (`scripts/seed_vietnam.dart`).
-- ✅ **Kết quả**: Bản đồ nạp tức thì dữ liệu điểm rác thực tế theo vị trí GPS toàn quốc mà không hardcode trong mã nguồn Flutter.
-
 ### 📦 Cập nhật Dependencies
 - ⬆️ **`supabase_flutter`**: Nâng từ `^2.12.0` lên `^2.16.0` — cập nhật `gotrue` (2.20→2.27), `postgrest` (2.7→2.9), `realtime_client` (2.7→2.13), `storage_client` (2.5→2.8). Cải thiện auth deep link và real-time subscriptions trên Android 16.
 - ⬆️ **`google_sign_in`**: Giữ `^7.2.0`, tự động resolve lên bản mới nhất tương thích — cập nhật Android platform plugin hỗ trợ Credential Manager API trên Android 16.
