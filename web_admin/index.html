@@ -4,47 +4,61 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>EcoSort by Bao Admin - Đăng nhập Bảo mật</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSort Admin Portal - Đăng nhập Bảo mật</title>
     <link rel="stylesheet" href="./src/tailwind.css">
 </head>
 
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-6 font-sans">
-    <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md border border-slate-100">
+<body class="bg-[#070a12] text-slate-100 min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+    <!-- Ambient Background Glows -->
+    <div class="absolute top-1/4 left-1/3 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/3 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="glass-panel p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md relative z-10 border border-slate-700/50">
+        <!-- Logo & Branding -->
         <div class="text-center mb-10">
-            <div
-                class="bg-green-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-green-200">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04m17.236 0a11.955 11.955 0 01-11 11.21 11.955 11.955 0 01-11-11.21M3 7l9 6 9-6">
-                    </path>
-                </svg>
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 mx-auto mb-5 shadow-lg shadow-emerald-500/30 glow-emerald">
+                <div class="w-full h-full bg-slate-900 rounded-[0.9rem] flex items-center justify-center">
+                    <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04m17.236 0a11.955 11.955 0 01-11 11.21 11.955 11.955 0 01-11-11.21M3 7l9 6 9-6">
+                        </path>
+                    </svg>
+                </div>
             </div>
-            <h1 class="text-3xl font-black text-slate-800 tracking-tight">EcoSort by Bao Admin</h1>
-            <p class="text-slate-400 mt-2 font-medium">Hệ thống quản trị nội bộ</p>
+            <h1 class="text-3xl font-black tracking-tight text-white font-heading">EcoSort Admin</h1>
+            <p class="text-slate-400 mt-2 font-medium text-sm">Hệ thống Điều hành & Quản trị Nội bộ</p>
         </div>
 
+        <!-- Login Form Container -->
         <div id="login-form" class="space-y-6">
             <div class="space-y-4">
-                <input type="email" id="email" placeholder="Email quản trị"
-                    class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium">
-                <input type="password" id="pass" placeholder="Mật khẩu"
-                    class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 transition-all font-medium">
+                <div class="relative">
+                    <input type="email" id="email" placeholder="Email quản trị..."
+                        class="w-full p-4 bg-slate-900/90 border border-slate-700/80 rounded-2xl outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-white placeholder-slate-500 transition-all text-sm font-medium">
+                </div>
+                <div class="relative">
+                    <input type="password" id="pass" placeholder="Mật khẩu..."
+                        class="w-full p-4 bg-slate-900/90 border border-slate-700/80 rounded-2xl outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-white placeholder-slate-500 transition-all text-sm font-medium">
+                </div>
                 <button onclick="handleEmailLogin()" id="btn-login"
-                    class="w-full bg-slate-800 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-slate-900 transition-all active:scale-95">ĐĂNG
-                    NHẬP</button>
+                    class="w-full bg-gradient-to-r from-emerald-600 to-teal-500 text-white py-4 rounded-2xl font-black text-sm tracking-wider shadow-lg shadow-emerald-500/25 hover:from-emerald-500 hover:to-teal-400 transition-all active:scale-[0.98]">
+                    ĐĂNG NHẬP HỆ THỐNG
+                </button>
             </div>
 
-            <div class="relative py-4">
+            <div class="relative py-3">
                 <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-slate-100"></div>
+                    <div class="w-full border-t border-slate-800"></div>
                 </div>
-                <div class="relative flex justify-center text-xs uppercase"><span
-                        class="bg-white px-4 text-slate-300 font-bold tracking-widest">Hoặc dùng Magic Link</span></div>
+                <div class="relative flex justify-center text-[10px] uppercase">
+                    <span class="bg-[#0f172a] px-4 text-slate-400 font-bold tracking-widest">Hoặc dùng Magic Link</span>
+                </div>
             </div>
 
             <button onclick="handleMagicLink()" id="btn-magic"
-                class="w-full border-2 border-slate-100 text-slate-600 py-4 rounded-2xl flex items-center justify-center gap-3 font-bold hover:bg-slate-50 transition-all">
-                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="w-full border border-slate-700 bg-slate-900/50 hover:bg-slate-800 text-slate-300 py-3.5 rounded-2xl flex items-center justify-center gap-3 font-bold text-sm transition-all hover:border-slate-600">
+                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                     </path>
@@ -52,9 +66,11 @@
                 Gửi Link đăng nhập qua Email
             </button>
 
-            <p class="text-[10px] text-center text-slate-400 leading-relaxed uppercase tracking-tighter font-bold">
-                Chỉ dành cho tài khoản có quyền Admin.<br>Hệ thống tự động từ chối truy cập trái phép.
-            </p>
+            <div class="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-center">
+                <p class="text-[11px] text-emerald-400/90 leading-relaxed uppercase tracking-wider font-bold">
+                    🔒 Cổng đăng nhập dành riêng cho Admin.<br>Quyền truy cập được xác thực tự động bởi Supabase RBAC.
+                </p>
+            </div>
         </div>
     </div>
 
@@ -94,7 +110,6 @@
                 await loginWithEmail(email, pass);
                 console.log('[DEBUG] loginWithEmail hoàn tất!');
 
-                // Cưỡng chế chuyển trang nếu onAuthStateChange không hoạt động
                 window.location.replace('dashboard.html');
             } catch (e) {
                 console.error('[admin-login] Lỗi thật sự:', e);

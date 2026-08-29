@@ -25,12 +25,12 @@ const ACTION_TYPE_MAP = {
 };
 
 const STATE_BADGE_MAP = {
-    'draft': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-slate-100 text-slate-600">Bản thảo</span>',
-    'awaiting_second_approval': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-amber-100 text-amber-700 animate-pulse">Chờ duyệt lần 2</span>',
-    'approved': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-green-100 text-green-700">Đã duyệt (Chờ thực thi)</span>',
-    'rejected': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-red-100 text-red-700">Đã từ chối</span>',
-    'executed': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-blue-100 text-blue-700">Đã thực thi</span>',
-    'expired': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-gray-200 text-gray-500">Đã hết hạn</span>'
+    'draft': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-slate-800 text-slate-400 border border-slate-700">Bản thảo</span>',
+    'awaiting_second_approval': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 animate-pulse">Chờ duyệt lần 2</span>',
+    'approved': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Đã duyệt (Chờ thực thi)</span>',
+    'rejected': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-red-500/10 text-red-400 border border-red-500/30">Đã từ chối</span>',
+    'executed': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">Đã thực thi</span>',
+    'expired': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-gray-800 text-gray-400 border border-gray-700">Đã hết hạn</span>'
 };
 
 // UI Helper functions
@@ -82,25 +82,27 @@ window.fetchSubmissions = async () => {
         loader.classList.add('hidden');
 
         if (allSubmissions.length === 0) {
-            grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-300 font-bold">Không có báo cáo nào ở trạng thái ${escapeHTML(status)}</div>`;
+            grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold">Không có báo cáo nào ở trạng thái ${escapeHTML(status)}</div>`;
             return;
         }
 
         allSubmissions.forEach(item => {
             const card = document.createElement('div');
-            card.className = 'bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300';
+            card.className = 'glass-panel glass-panel-hover rounded-[2rem] border border-slate-800 overflow-hidden flex flex-col justify-between';
             card.innerHTML = `
-                <div class="h-44 bg-slate-50 relative group">
-                    ${item.scan_image_path ? `<img src="${escapeHTML(item.scan_image_path)}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-slate-300 text-[10px] font-bold">NO IMAGE</div>'}
+                <div class="h-48 bg-slate-950 relative group border-b border-slate-800">
+                    ${item.scan_image_path ? `<img src="${escapeHTML(item.scan_image_path)}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-slate-600 text-[10px] font-bold tracking-widest">NO IMAGE</div>'}
                 </div>
-                <div class="p-8">
-                    <h3 class="font-black text-slate-800 text-lg truncate">${escapeHTML(item.suggested_name_vi || 'Yêu cầu mới')}</h3>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 mb-6 italic">${escapeHTML(item.tflite_top_label || 'AI chưa phân loại')}</p>
+                <div class="p-6 flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-black text-white text-lg truncate font-heading">${escapeHTML(item.suggested_name_vi || 'Yêu cầu mới')}</h3>
+                        <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-1 mb-6 italic">${escapeHTML(item.tflite_top_label || 'AI chưa phân loại')}</p>
+                    </div>
 
                     <div class="flex gap-2">
-                        <button onclick="showDetail('${escapeHTML(item.id)}')" class="flex-1 bg-slate-800 text-white py-3 rounded-2xl text-xs font-black hover:bg-slate-900 transition">CHI TIẾT</button>
+                        <button onclick="showDetail('${escapeHTML(item.id)}')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl text-xs font-black transition">CHI TIẾT</button>
                         ${status === 'pending_review' ? `
-                            <button onclick="updateStatus('${escapeHTML(item.id)}', 'rejected')" class="bg-red-50 text-red-500 px-4 rounded-2xl font-bold text-xs hover:bg-red-100 transition">HỦY</button>
+                            <button onclick="updateStatus('${escapeHTML(item.id)}', 'rejected')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-4 rounded-xl font-bold text-xs transition">HỦY</button>
                         ` : ''}
                     </div>
                 </div>
@@ -111,7 +113,7 @@ window.fetchSubmissions = async () => {
         loader.classList.add('hidden');
         grid.innerHTML = '';
         const errorDiv = document.createElement('div');
-        errorDiv.className = 'col-span-full p-10 bg-red-50 text-red-500 rounded-3xl text-sm font-bold';
+        errorDiv.className = 'col-span-full p-8 bg-red-950/20 border border-red-900/40 text-red-400 rounded-2xl text-sm font-bold';
         errorDiv.textContent = `Lỗi: ${e && e.message ? e.message : 'Không xác định'}`;
         grid.appendChild(errorDiv);
     }
@@ -124,36 +126,36 @@ window.showDetail = (id) => {
     const content = document.getElementById('detail-content');
     content.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-slate-50 rounded-[2rem] overflow-hidden border border-slate-100">
-                ${item.scan_image_path ? `<img src="${escapeHTML(item.scan_image_path)}" class="w-full h-full object-contain">` : '<p class="p-20 text-center text-slate-300 font-bold">KHÔNG CÓ ẢNH</p>'}
+            <div class="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                ${item.scan_image_path ? `<img src="${escapeHTML(item.scan_image_path)}" class="w-full h-full object-contain">` : '<p class="p-20 text-center text-slate-600 font-bold">KHÔNG CÓ ẢNH</p>'}
             </div>
             <div class="space-y-4">
-                <div class="bg-slate-50 p-6 rounded-3xl">
+                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tên đề xuất</span>
-                    <p class="text-xl font-black text-slate-800">${escapeHTML(item.suggested_name_vi || 'N/A')}</p>
+                    <p class="text-xl font-black text-white mt-1 font-heading">${escapeHTML(item.suggested_name_vi || 'N/A')}</p>
                 </div>
-                <div class="bg-slate-50 p-6 rounded-3xl">
+                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nhãn AI (TFLite)</span>
-                    <p class="font-bold text-slate-800">${escapeHTML(item.tflite_top_label || 'N/A')} (${(item.tflite_confidence * 100).toFixed(1)}%)</p>
+                    <p class="font-bold text-emerald-400 mt-1">${escapeHTML(item.tflite_top_label || 'N/A')} (${(item.tflite_confidence * 100).toFixed(1)}%)</p>
                 </div>
-                 <div class="bg-slate-50 p-6 rounded-3xl">
+                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trạng thái</span>
-                    <p class="font-bold text-green-600 uppercase">${escapeHTML(item.status)}</p>
+                    <p class="font-bold text-emerald-400 uppercase mt-1">${escapeHTML(item.status)}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-slate-50 p-6 rounded-3xl">
+        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phân tích Gemini</span>
-            <p class="text-slate-600 text-sm mt-2 leading-relaxed">${escapeHTML(item.gemini_payload?.result_text || 'Chưa có phân tích')}</p>
+            <p class="text-slate-300 text-sm mt-2 leading-relaxed">${escapeHTML(item.gemini_payload?.result_text || 'Chưa có phân tích')}</p>
         </div>
-        <div class="bg-slate-50 p-6 rounded-3xl">
+        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kiến thức bổ sung (Fun Fact)</span>
-            <p class="text-slate-600 text-sm mt-2">${escapeHTML(item.suggested_fun_fact || 'N/A')}</p>
+            <p class="text-slate-300 text-sm mt-2">${escapeHTML(item.suggested_fun_fact || 'N/A')}</p>
         </div>
         ${item.status === 'pending_review' ? `
-            <div class="pt-6 border-t border-slate-100 flex gap-4">
-                <button onclick="approveWithData('${escapeHTML(item.id)}')" class="flex-[2] bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition">DUYỆT VÀO HỆ THỐNG</button>
-                <button onclick="updateStatus('${escapeHTML(item.id)}', 'rejected')" class="flex-1 bg-red-50 text-red-500 py-4 rounded-2xl font-bold hover:bg-red-100 transition">TỪ CHỐI</button>
+            <div class="pt-6 border-t border-slate-800 flex gap-4">
+                <button onclick="approveWithData('${escapeHTML(item.id)}')" class="flex-[2] bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white py-4 rounded-2xl font-black text-sm transition shadow-lg shadow-emerald-500/25">DUYỆT VÀO HỆ THỐNG</button>
+                <button onclick="updateStatus('${escapeHTML(item.id)}', 'rejected')" class="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 py-4 rounded-2xl font-bold text-sm transition">TỪ CHỐI</button>
             </div>
         ` : ''}
     `;
@@ -332,26 +334,26 @@ window.fetchUsers = async (page = 1) => {
 
         filteredData.forEach(u => {
             const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-50 transition border-b border-slate-50 last:border-none';
+            tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/50 last:border-none';
 
-            const roleColor = u.role === 'super_admin' ? 'bg-purple-100 text-purple-700' :
-                u.role === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600';
+            const roleColor = u.role === 'super_admin' ? 'bg-purple-500/10 border border-purple-500/30 text-purple-400' :
+                u.role === 'admin' ? 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400' : 'bg-slate-800 border border-slate-700 text-slate-400';
 
             const statusHtml = u.is_locked
-                ? '<span class="px-3 py-1 rounded-full bg-red-100 text-red-600 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 w-max mx-auto"><div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Bị khóa</span>'
-                : '<span class="px-3 py-1 rounded-full bg-green-100 text-green-600 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 w-max mx-auto"><div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> Hoạt động</span>';
+                ? '<span class="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 w-max mx-auto"><div class="w-1.5 h-1.5 rounded-full bg-red-400"></div> Bị khóa</span>'
+                : '<span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 w-max mx-auto"><div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div> Hoạt động</span>';
 
             const isProtected = u.role === 'super_admin' && currentUserRole !== 'super_admin';
 
             tr.innerHTML = `
                 <td class="p-4">
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-black text-slate-400">
+                        <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center font-black text-emerald-400 font-heading">
                             ${(u.display_name || u.email || '?').charAt(0).toUpperCase()}
                         </div>
                         <div>
-                            <p class="font-bold text-slate-800 text-sm">${u.display_name || 'Chưa cập nhật'}</p>
-                            <p class="text-xs text-slate-500 font-medium">${u.email || 'Ẩn email (Cần RPC)'}</p>
+                            <p class="font-bold text-white text-sm font-heading">${escapeHTML(u.display_name || 'Chưa cập nhật')}</p>
+                            <p class="text-xs text-slate-400 font-medium">${escapeHTML(u.email || 'Ẩn email (Cần RPC)')}</p>
                         </div>
                     </div>
                 </td>
@@ -359,10 +361,10 @@ window.fetchUsers = async (page = 1) => {
                     <span class="px-3 py-1 rounded-lg ${roleColor} font-black text-[10px] uppercase tracking-widest">${u.role}</span>
                 </td>
                 <td class="p-4 text-center">${statusHtml}</td>
-                <td class="p-4 text-xs text-slate-500 font-bold">${u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : 'Chưa có data'}</td>
+                <td class="p-4 text-xs text-slate-400 font-bold">${u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : 'Chưa có data'}</td>
                 <td class="p-4 text-right">
                     <button onclick="openUserActionModal('${u.id}', '${u.email}', '${u.role}', ${u.is_locked})" 
-                        class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 transition ${isProtected ? 'opacity-50 cursor-not-allowed' : ''}"
+                        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-bold transition ${isProtected ? 'opacity-50 cursor-not-allowed' : ''}"
                         ${isProtected ? 'disabled title="Không có quyền thao tác lên Super Admin"' : ''}>
                         QUẢN LÝ
                     </button>
@@ -580,7 +582,7 @@ window.fetchPrivilegedActions = async (page = 1) => {
 
         privilegedActions.forEach(item => {
             const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-50 transition border-b border-slate-50 last:border-none';
+            tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/50 last:border-none';
 
             const actionName = ACTION_TYPE_MAP[item.action_type] || item.action_type;
             const stateHtml = STATE_BADGE_MAP[item.state] || item.state;
@@ -588,15 +590,15 @@ window.fetchPrivilegedActions = async (page = 1) => {
 
             tr.innerHTML = `
                 <td class="p-6">
-                    <p class="font-bold text-slate-800 text-sm">${actionName}</p>
+                    <p class="font-bold text-white text-sm font-heading">${actionName}</p>
                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">ID: ${item.id}</p>
                 </td>
-                <td class="p-6 text-center text-sm font-semibold text-slate-600">${requesterName}</td>
+                <td class="p-6 text-center text-sm font-semibold text-slate-300">${requesterName}</td>
                 <td class="p-6 text-center">${stateHtml}</td>
-                <td class="p-6 text-xs text-slate-500 font-semibold">${new Date(item.created_at).toLocaleString()}</td>
+                <td class="p-6 text-xs text-slate-400 font-semibold">${new Date(item.created_at).toLocaleString()}</td>
                 <td class="p-6 text-right">
                     <button onclick="showPADetail('${item.id}')"
-                        class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-black hover:bg-slate-900 transition shadow-sm">
+                        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-bold transition">
                         CHI TIẾT
                     </button>
                 </td>
@@ -643,10 +645,10 @@ window.showPADetail = async (id) => {
         let approvalsHtml = '';
         if (approvals && approvals.length > 0) {
             approvalsHtml = approvals.map(a => `
-                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-xl border border-slate-800">
                     <div>
-                        <p class="font-bold text-slate-800 text-sm">${profilesMap[a.approver_id] || a.approver_id}</p>
-                        <p class="text-xs text-slate-500 mt-0.5">${a.comment || 'Không có bình luận'}</p>
+                        <p class="font-bold text-white text-sm font-heading">${profilesMap[a.approver_id] || a.approver_id}</p>
+                        <p class="text-xs text-slate-300 mt-0.5">${a.comment || 'Không có bình luận'}</p>
                     </div>
                     <span class="text-[10px] text-slate-400 font-bold">${new Date(a.created_at).toLocaleString()}</span>
                 </div>
@@ -660,28 +662,28 @@ window.showPADetail = async (id) => {
         content.innerHTML = `
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-4">
-                    <div class="bg-slate-50 p-6 rounded-3xl">
+                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loại hành động</span>
-                        <p class="text-lg font-black text-slate-800 mt-1">${actionName}</p>
+                        <p class="text-lg font-black text-white mt-1 font-heading">${actionName}</p>
                     </div>
-                    <div class="bg-slate-50 p-6 rounded-3xl">
+                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Người yêu cầu</span>
-                        <p class="font-bold text-slate-800 mt-1">${requesterName}</p>
+                        <p class="font-bold text-emerald-400 mt-1">${requesterName}</p>
                     </div>
-                    <div class="bg-slate-50 p-6 rounded-3xl">
+                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trạng thái</span>
                         <div class="mt-2">${stateHtml}</div>
                     </div>
                 </div>
-                <div class="bg-slate-50 p-6 rounded-3xl flex flex-col">
+                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 flex flex-col">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Dữ liệu Payload (JSON)</span>
-                    <pre class="bg-slate-800 text-green-400 p-4 rounded-xl text-xs font-mono overflow-auto flex-1 max-h-[160px]">${payloadStr}</pre>
+                    <pre class="bg-slate-950 text-emerald-400 p-4 rounded-xl text-xs font-mono overflow-auto flex-1 max-h-[160px] border border-slate-800/80">${payloadStr}</pre>
                 </div>
             </div>
 
-            <div class="bg-slate-50 p-6 rounded-3xl">
+            <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lý do tạo yêu cầu</span>
-                <p class="text-slate-600 text-sm mt-2 leading-relaxed">${item.execution_note || 'N/A'}</p>
+                <p class="text-slate-300 text-sm mt-2 leading-relaxed">${item.execution_note || 'N/A'}</p>
             </div>
 
             <div class="space-y-3">
@@ -691,32 +693,32 @@ window.showPADetail = async (id) => {
                 </div>
             </div>
 
-            <div class="pt-6 border-t border-slate-100 flex flex-wrap gap-4">
+            <div class="pt-6 border-t border-slate-800 flex flex-wrap gap-4">
                 ${(item.state === 'draft' || item.state === 'awaiting_second_approval') ? `
                     ${isRequester ? `
-                        <div class="w-full p-4 bg-yellow-50 text-yellow-800 border border-yellow-100 rounded-xl text-xs font-semibold text-center">
+                        <div class="w-full p-4 bg-amber-500/10 text-amber-300 border border-amber-500/20 rounded-xl text-xs font-semibold text-center">
                             ⚠️ Bạn là người tạo yêu cầu này. Hãy nhờ Admin khác phê duyệt để đảm bảo quy trình.
                         </div>
                     ` : `
                         ${hasApproved ? `
-                            <div class="w-full p-4 bg-green-50 text-green-800 border border-green-100 rounded-xl text-xs font-semibold text-center">
+                            <div class="w-full p-4 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-xl text-xs font-semibold text-center">
                                 ✓ Bạn đã phê duyệt yêu cầu này rồi.
                             </div>
                         ` : `
-                            <button onclick="approvePARequest('${item.id}')" class="flex-[2] bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition">PHÊ DUYỆT</button>
-                            <button onclick="rejectPARequest('${item.id}')" class="flex-1 bg-red-50 text-red-500 py-4 rounded-2xl font-bold hover:bg-red-100 transition">TỪ CHỐI</button>
+                            <button onclick="approvePARequest('${item.id}')" class="flex-[2] bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white py-4 rounded-2xl font-black text-sm transition shadow-lg shadow-emerald-500/25">PHÊ DUYỆT</button>
+                            <button onclick="rejectPARequest('${item.id}')" class="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 py-4 rounded-2xl font-bold text-sm transition">TỪ CHỐI</button>
                         `}
                     `}
                 ` : ''}
 
                 ${item.state === 'approved' ? `
-                    <button onclick="executePARequest('${item.id}')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-blue-100 hover:bg-blue-700 transition">THỰC THI HÀNG ĐỘNG</button>
+                    <button onclick="executePARequest('${item.id}')" class="w-full bg-gradient-to-r from-cyan-600 to-blue-500 hover:from-cyan-500 hover:to-blue-400 text-white py-4 rounded-2xl font-black text-sm transition shadow-lg shadow-cyan-500/25">THỰC THI HÀNH ĐỘNG</button>
                 ` : ''}
 
                 ${item.state === 'executed' ? `
-                    <div class="w-full p-5 bg-blue-50/50 text-blue-800 border border-blue-100 rounded-2xl text-xs">
+                    <div class="w-full p-5 bg-cyan-950/30 text-cyan-300 border border-cyan-800/40 rounded-2xl text-xs">
                         <p class="font-bold">✓ Đã thực thi thành công</p>
-                        <p class="mt-1 font-semibold text-blue-600">Ghi chú: ${item.execution_note || 'N/A'}</p>
+                        <p class="mt-1 font-semibold text-cyan-400">Ghi chú: ${item.execution_note || 'N/A'}</p>
                         <p class="text-[10px] text-slate-400 mt-1 font-bold">Lúc: ${new Date(item.executed_at).toLocaleString()}</p>
                     </div>
                 ` : ''}
@@ -944,11 +946,11 @@ window.fetchSystemSettings = async () => {
         if (currentUserRole !== 'super_admin') {
             inputs.forEach(id => document.getElementById(id).disabled = true);
             document.getElementById('settings-save-container').classList.add('hidden');
-            statusBadge.innerHTML = '<span class="px-4 py-2 rounded-xl bg-amber-100 text-amber-800 font-bold text-xs uppercase tracking-widest shadow-sm">Chế độ Chỉ Xem (Chỉ Super Admin được sửa)</span>';
+            statusBadge.innerHTML = '<span class="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-xs uppercase tracking-widest">Chế độ Chỉ Xem (Chỉ Super Admin được sửa)</span>';
         } else {
             inputs.forEach(id => document.getElementById(id).disabled = false);
             document.getElementById('settings-save-container').classList.remove('hidden');
-            statusBadge.innerHTML = '<span class="px-4 py-2 rounded-xl bg-green-100 text-green-800 font-bold text-xs uppercase tracking-widest shadow-sm border border-green-200">Quyền chỉnh sửa Super Admin</span>';
+            statusBadge.innerHTML = '<span class="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs uppercase tracking-widest">Quyền chỉnh sửa Super Admin</span>';
         }
     } catch (e) {
         loader.classList.add('hidden');
