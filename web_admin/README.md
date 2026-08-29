@@ -1,223 +1,212 @@
-# EcoSort Web Admin
+<div align="center">
 
-> Hệ thống quản trị nội bộ cho ứng dụng phân loại rác **EcoSort by Bao**.
-> Giao diện dành riêng cho Admin và Super Admin — không dành cho người dùng thông thường.
-> 
-> 🌐 **Địa chỉ Cloudflare Pages chính thức:** [ecosort-by-bao-admin.pages.dev](https://ecosort-by-bao-admin.pages.dev/)
+# 🌿 EcoSort Web Admin Portal
 
----
+### *Hệ thống Quản trị & Điều hành Nội bộ Thế hệ mới cho EcoSort by Bao*
 
-## 📋 Mục lục
+[![Version](https://img.shields.io/badge/version-0.1.2-00ff88?style=for-the-badge&logo=vite&logoColor=white&labelColor=0c1419)](./CHANGELOG.md)
+[![Vite](https://img.shields.io/badge/Vite-v8.2.2-646CFF?style=for-the-badge&logo=vite&logoColor=white&labelColor=0c1419)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white&labelColor=0c1419)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-v2.101.1-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white&labelColor=0c1419)](https://supabase.com)
+[![Cloudflare Pages](https://img.shields.io/badge/Cloudflare-Pages-F38020?style=for-the-badge&logo=cloudflare&logoColor=white&labelColor=0c1419)](https://ecosort-by-bao-admin.pages.dev/)
+[![Security](https://img.shields.io/badge/Vulnerabilities-0_Patched-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white&labelColor=0c1419)](#-bảo-mật--an-toàn-hệ-thống-zero-vulnerabilities)
 
-- [Giới thiệu](#giới-thiệu)
-- [Công nghệ sử dụng](#công-nghệ-sử-dụng)
-- [Cấu trúc thư mục](#cấu-trúc-thư-mục)
-- [Cài đặt & Khởi chạy](#cài-đặt--khởi-chạy)
-- [Biến môi trường](#biến-môi-trường)
-- [Phân quyền](#phân-quyền)
-- [Tính năng](#tính-năng)
-- [Database & API (Supabase RPC)](#database--api-supabase-rpc)
-- [Changelog](#changelog)
+<br/>
 
----
+> 🌐 **Cổng thông tin Web Admin chính thức:**  
+> 👉 [**ecosort-by-bao-admin.pages.dev**](https://ecosort-by-bao-admin.pages.dev/)
 
-## Giới thiệu
-
-Web Admin là một **Single-Page Application (SPA)** thuần HTML/JS được build bằng **Vite**, kết nối trực tiếp với **Supabase** để:
-- Quản lý và duyệt các báo cáo phân loại rác từ người dùng App.
-- Quản lý tài khoản người dùng (xem, khóa, reset mật khẩu).
-- Đẩy dữ liệu đã duyệt vào bảng Từ điển rác (`waste_dictionary`) phục vụ App hiển thị cho người dùng cuối.
+</div>
 
 ---
 
-## Công nghệ sử dụng
+## 📌 Mục lục
 
-| Công nghệ | Mục đích |
-|---|---|
-| [Vite](https://vitejs.dev/) `^8.2.2` | Build tool & Dev server (HMR) |
-| [Tailwind CSS](https://tailwindcss.com/) `^3.4` | Styling framework |
-| [PostCSS](https://postcss.org/) `^8.5.26` + Autoprefixer | Xử lý CSS pipeline |
-| [esbuild](https://esbuild.github.io/) `^0.28.2` | JavaScript & TypeScript bundler |
-| [@supabase/supabase-js](https://supabase.com/docs/reference/javascript) `^2.101.1` | Kết nối Supabase Auth & Database |
-| HTML5 + Vanilla JS (ES Modules) | Giao diện & Logic |
+- [✨ Giới thiệu](#-giới-thiệu)
+- [🛠️ Công nghệ sử dụng](#️-công-nghệ-sử-dụng)
+- [🗂️ Cấu trúc thư mục](#️-cấu-trúc-thư-mục)
+- [⚡ Cài đặt & Khởi chạy](#-cài-đặt--khởi-chạy)
+- [🔐 Phân quyền RBAC](#-phân-quyền-rbac)
+- [🚀 Tính năng nổi bật](#-tính-năng-nổi-bật)
+- [🛡️ Bảo mật & An toàn Hệ thống](#️-bảo-mật--an-toàn-hệ-thống-zero-vulnerabilities)
+- [☁️ Deploy lên Cloudflare Pages](#️-deploy-lên-cloudflare-pages)
+- [📜 Changelog](#-changelog)
 
 ---
 
-## Cấu trúc thư mục
+## ✨ Giới thiệu
+
+**EcoSort Web Admin** là bảng điều khiển Single-Page Application (SPA) chuyên dụng cho **Admin** và **Super Admin** thuộc dự án phân loại rác **EcoSort by Bao**.
+
+Dự án được thiết kế với kiến trúc decoupled (tách biệt hoàn toàn khỏi ứng dụng di động Flutter), vận hành trực tiếp trên nền tảng **Vite** kết nối với **Supabase Cloud BaaS** nhằm:
+- 📥 **Duyệt báo cáo rác:** Thẩm định dữ liệu hình ảnh & nhãn AI từ người dùng ứng dụng di động, tự động slug hóa và đẩy dữ liệu chuẩn vào Từ điển rác (`waste_dictionary`).
+- 👥 **Quản trị người dùng:** Tra cứu, phân trang, khóa tài khoản (Ban 100 năm), mở khóa, đặt lại mật khẩu và kiểm soát quyền hạn người dùng tức thì.
+- 🛡️ **Phê duyệt 2 bước (Double-Approval):** Cơ chế bảo mật đa chữ ký cho các hành động đặc quyền (Nâng/Hạ quyền Admin, Xóa dữ liệu nhạy cảm, Bật/Tắt Kill Switch khẩn cấp).
+- ⚙️ **Cấu hình hệ thống:** Điều chỉnh thời gian bảo trì, điểm số thưởng trò chơi và mô hình AI Gemini toàn hệ thống.
+
+---
+
+## 🛠️ Công nghệ sử dụng
+
+| Công nghệ | Phiên bản | Mục đích & Vai trò |
+| :--- | :---: | :--- |
+| ⚡ **[Vite](https://vitejs.dev/)** | `v8.2.2` | Build tool thế hệ mới, Dev server với Hot Module Replacement (HMR) cực nhanh |
+| 🎨 **[Tailwind CSS](https://tailwindcss.com/)** | `v3.4.1` | Styling framework với thiết kế hiện đại, responsive & dark mode linh hoạt |
+| ⚙️ **[PostCSS](https://postcss.org/)** | `v8.5.26` | CSS transformation pipeline & Autoprefixer tương thích đa trình duyệt |
+| 📦 **[esbuild](https://esbuild.github.io/)** | `v0.28.2` | JavaScript & TypeScript bundler siêu tốc |
+| ⚡ **[@supabase/supabase-js](https://supabase.com/)** | `v2.101.1` | SDK JavaScript chính thức kết nối Supabase Auth, REST & PostgreSQL RPC |
+| 📜 **Vanilla JS (ES Modules)** | `ES2022` | Tách biệt logic UI/API sạch sẽ, phòng chống lỗ hổng XSS |
+
+---
+
+## 🗂️ Cấu trúc thư mục
 
 ```
 web_admin/
-├── index.html          # Trang đăng nhập Admin
-├── dashboard.html      # Trang Dashboard chính
-├── js/
-│   ├── auth.js         # Logic xác thực Supabase (login, checkAdminPermissions)
-│   ├── config.js       # Cấu hình Supabase URL & Key (tự sinh, không sửa tay)
-│   ├── dashboard_api.js # Logic kết nối API & Gọi Supabase DB/RPC
-│   └── dashboard_ui.js # Logic dựng giao diện, xử lý sự kiện & tab/modal
-├── src/
-│   └── tailwind.css    # Điểm vào CSS (Tailwind directives)
-├── dist/               # Kết quả build production (gitignored)
-├── node_modules/       # Dependencies (gitignored)
-├── package.json
-├── vite.config.js
-├── tailwind.config.cjs
-├── postcss.config.cjs
-├── env.sample          # Mẫu file biến môi trường
-├── README.md           # File này
-└── CHANGELOG.md        # Lịch sử thay đổi
+├── 📄 index.html           # Màn hình Đăng nhập Admin (Supabase Auth)
+├── 📄 dashboard.html       # Màn hình Điều hành chính (Dashboard SPA)
+├── 📁 js/
+│   ├── 🔑 auth.js          # Logic xác thực, Session management & RBAC Guard
+│   ├── ⚙️ config.js        # Cấu hình Supabase URL & Key (Sinh tự động từ script)
+│   ├── 🔌 dashboard_api.js  # Tầng kết nối API, Supabase Database & gọi RPC
+│   └── 🖥️ dashboard_ui.js   # Tầng giao diện, DOM Render & Modal Event Listeners
+├── 📁 src/
+│   └── 🎨 tailwind.css     # Directives nguồn của Tailwind CSS
+├── 📁 dist/                # Bundle sản phẩm tĩnh sau khi build (Deploy target)
+├── 📄 package.json         # Danh sách Dependencies & Scripts npm
+├── 📄 vite.config.js       # Cấu hình Vite Build Tool & Server
+├── 📄 tailwind.config.cjs  # Cấu hình Theme & Design System Tailwind
+├── 📄 postcss.config.cjs   # Cấu hình CSS Plugins
+├── 📄 env.sample           # File mẫu biến môi trường
+├── 📄 README.md            # Tài liệu kỹ thuật chi tiết
+└── 📄 CHANGELOG.md         # Lịch sử cập nhật các phiên bản
 ```
 
 ---
 
-## Cài đặt & Khởi chạy
+## ⚡ Cài đặt & Khởi chạy
 
-### Yêu cầu
+### 📋 Yêu cầu môi trường
+- **Node.js:** `>= 18.x`
+- **npm:** `>= 9.x`
 
-- [Node.js](https://nodejs.org/) >= 18.x
-- npm >= 9.x
-
-### Cài đặt
-
+### 1️⃣ Cài đặt Dependencies
 ```bash
+# Di chuyển vào thư mục web_admin
 cd web_admin
+
+# Cài đặt tất cả các gói phụ thuộc
 npm install
 ```
 
-### Chạy Development Server
+### 2️⃣ Cấu hình Biến môi trường
+Tạo file `.env` tại thư mục `web_admin/` dựa trên mẫu `env.sample`:
+```env
+VITE_SUPABASE_URL=https://<your-supabase-project>.supabase.co
+VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+```
 
+> 💡 **Đồng bộ tự động từ Project chính:**  
+> Bạn có thể chạy script Dart tại gốc project để đồng bộ cấu hình tự động:
+> ```bash
+> dart scripts/sync_env.dart
+> ```
+
+### 3️⃣ Khởi chạy Dev Server
 ```bash
 npm run dev
 ```
+🌐 Trình duyệt tự động khả dụng tại: **`http://localhost:5173`**
 
-Mở trình duyệt tại: **`http://localhost:5173`**
-
-> ⚠️ Luôn dùng `npm run dev` để quản lý log và hot-reload. Không chạy file HTML trực tiếp bằng cách double-click (sẽ thiếu module Supabase).
-
-### Build Production
-
+### 4️⃣ Đóng gói Production (Build)
 ```bash
 npm run build
 ```
-
-Kết quả xuất ra thư mục `dist/`.
-
----
-
-## Biến môi trường
-
-Tạo file `.env` trong thư mục `web_admin/` dựa trên file mẫu `env.sample`:
-
-```env
-VITE_SUPABASE_URL=https://<your-project>.supabase.co
-VITE_SUPABASE_ANON_KEY=<your-anon-key>
-```
-
-> **Lưu ý:** File `js/config.js` hiện tại được tự động sinh bởi script Dart của dự án. Nếu chỉnh sửa cần thận trọng.
+📦 Sản phẩm xuất ra thư mục **`dist/`** sẵn sàng tải lên Cloudflare Pages.
 
 ---
 
-## Phân quyền
+## 🔐 Phân quyền RBAC
 
-Web Admin áp dụng mô hình **RBAC (Role-Based Access Control)** hai tầng:
+Hệ thống bảo mật **Role-Based Access Control (RBAC)** 3 tầng vững chắc:
 
-| Role | Quyền hạn |
-|---|---|
-| `super_admin` | Toàn quyền trên mọi tài khoản và dữ liệu |
-| `admin` | Quản lý `user` và `admin`, **không thể** tác động lên `super_admin` |
-| `user` | **Không được phép đăng nhập** vào Web Admin |
+| Vai trò (Role) | Quyền hạn trên Web Admin |
+| :---: | :--- |
+| 👑 **`super_admin`** | Toàn quyền điều hành: Quản lý người dùng, duyệt rác, cấu hình hệ thống, duyệt & thực thi Yêu cầu đặc quyền. |
+| 🛡️ **`admin`** | Quản lý người dùng cấp `user`/`admin`, duyệt rác, xem cấu hình (Read-only). **Không thể tác động lên `super_admin`**. |
+| 👤 **`user`** | ❌ **Bị chặn tuyệt đối** ngay tại màn hình đăng nhập (Auto SignOut). |
 
-**Cơ chế bảo vệ:**
-1. **Tầng UI (Cosmetic):** Các nút thao tác bị disable, tooltip cảnh báo.
-2. **Tầng JS:** Hàm `openUserActionModal` kiểm tra role trước khi mở bất kỳ modal thao tác nào.
-3. **Tầng Backend:** Các PostgreSQL RPC (`admin_ban_user`, `admin_get_users`) đều kiểm tra `auth.uid()` và role trước khi thực thi — đây là lớp bảo vệ cuối cùng và không thể bị bypass.
-
----
-
-## Tính năng chi tiết
-
-### 🗂️ 1. Tab Duyệt Rác (Waste Submissions)
-* Xem danh sách báo cáo phân loại rác từ người dùng App theo trạng thái (Chờ duyệt / Đã duyệt / Từ chối).
-* Xem chi tiết: Ảnh quét, nhãn AI (TFLite + Gemini), tên đề xuất, fun fact.
-* **Duyệt vào Từ điển:** Form nhập tên chuẩn, chọn nhóm rác, thêm fun fact → tự động slug hóa và lưu vào `waste_dictionary`.
-* Từ chối báo cáo không hợp lệ.
-
-### 👥 2. Tab Quản lý Người dùng (User Management)
-* Bảng dữ liệu phân trang (25 dòng/trang) với đầy đủ thông tin: Avatar, Tên, Email, Role, Trạng thái, Last Login.
-* **Tìm kiếm & Lọc:** Theo email/tên, theo role, theo trạng thái hoạt động.
-* **Ban / Unban:** Khóa tài khoản kèm lý do bắt buộc (Backend kill session ngay lập tức).
-* **Reset Password:** Gửi link đặt lại mật khẩu qua email.
-* **Quản lý quyền hạn nhanh:** Đề xuất nâng cấp lên Admin hoặc hạ cấp xuống User trực tiếp trong modal quản lý bằng cách tạo tự động một yêu cầu đặc quyền duyệt 2 bước.
-
-### 🛡️ 3. Tab Hành động đặc quyền (Privileged Actions - Double-Approval)
-* Bảng quản trị danh sách yêu cầu thay đổi nhạy cảm của hệ thống (`privileged_action_requests`).
-* **Cơ chế Duyệt 2 bước:**
-  * Bất kỳ Admin nào cũng có thể tạo yêu cầu phê duyệt (Nâng quyền Admin, Hạ quyền Admin, Xoá điểm bỏ rác, Bật/Tắt Kill Switch).
-  * Yêu cầu cần có **2 lượt phê duyệt** khác nhau từ 2 Admin/Super Admin (không bao gồm người tạo yêu cầu) thông qua hàm SQL `privileged_action_add_approval` để được duyệt (`approved`).
-  * Một khi yêu cầu được duyệt, nút **Thực thi** xuất hiện trên giao diện để cập nhật thay đổi trực tiếp lên Database.
-* **Tạo yêu cầu thủ công:** Form tạo yêu cầu đặc quyền linh hoạt ngay trên màn hình.
-
-### ⚙️ 4. Tab Cấu hình hệ thống (System Settings)
-* Đồng bộ trực tiếp cấu hình hệ thống từ bảng `system_settings`:
-  * **Bảo trì & Ngắt khẩn cấp (Maintenance & Kill Switch):** Bật/Tắt bảo trì ứng dụng, Bật/Tắt ngắt khẩn cấp khóa API ghi, thay đổi thông điệp hiển thị cho người dùng.
-  * **Điểm số thưởng (Gamification):** Điểm quét rác cơ bản, điểm Quiz, hệ số streak bonus.
-  * **Trí tuệ nhân tạo (Gemini AI):** Tên model Gemini sử dụng của App.
-* **Phân quyền chỉnh sửa (RBAC):** Chỉ có `super_admin` mới hiển thị nút **Lưu cấu hình hệ thống** và có quyền tương tác sửa đổi. `admin` thường chỉ được hiển thị ở chế độ **Chỉ Xem (Read-only)**.
+### 🛡️ Lớp bảo vệ đa tầng:
+1. **Lớp 1 (UI Level):** Tự động ẩn/vô hiệu hóa các nút bấm nhạy cảm kèm Tooltip giải thích.
+2. **Lớp 2 (Client JS Level):** Hàm `checkAdminPermissions` & `openUserActionModal` chặn thao tác trái quyền trước khi mở Modal.
+3. **Lớp 3 (Backend Database Level):** Toàn bộ PostgreSQL RPC Function (`admin_get_users`, `admin_ban_user`, `privileged_action_add_approval`) được viết với `SECURITY DEFINER`, xác thực `auth.uid()` & kiểm tra role trực tiếp trong CSDL — **Không thể bị bypass bằng cURL hay Postman**.
 
 ---
 
-## 🛠️ Đồng bộ biến môi trường (Secrets Sync)
+## 🚀 Tính năng nổi bật
 
-Dự án Web Admin được cấu hình lấy trực tiếp thông tin Supabase thông qua tệp cấu hình `js/config.js`. Để đồng bộ thông tin khóa từ tệp `.env` của thư mục chính, hãy chạy lệnh sau:
-```bash
-# Thực hiện tại thư mục gốc của project (phan_loai_rac_qua_hinh_anh)
-dart scripts/sync_env.dart
-```
-Lệnh này sẽ tự động sinh tệp `web_admin/js/config.js` chứa Supabase URL và Publishable Key mới nhất.
+### 🗂️ 1. Quản lý & Duyệt báo cáo rác (Waste Submissions)
+- Hiển thị báo cáo phân loại rác từ người dùng di động theo trạng thái: **Chờ duyệt**, **Đã duyệt**, **Từ chối**.
+- Xem chi tiết ảnh chụp thực tế, nhãn TFLite Local, nhãn Gemini Cloud AI & độ tin cậy.
+- **Form Duyệt chuyên nghiệp:** Tự động tạo `slug` tiếng Việt không dấu, nạp danh mục nhóm rác từ CSDL và lưu trực tiếp vào Từ điển rác (`waste_dictionary`).
 
----
+### 👥 2. Điều hành người dùng (User Management)
+- Bảng dữ liệu phân trang thông minh (25 bản ghi/trang), hỗ trợ tìm kiếm tên/email & lọc theo Vai trò / Trạng thái.
+- **Ban / Unban tài khoản:** Khóa vĩnh viễn (100 năm) kèm lý do bắt buộc. Backend tự động hủy toàn bộ session active (`auth.sessions`) lập tức đá người dùng ra khỏi app.
+- **Gửi Mail Reset Mật khẩu:** Kích hoạt luồng đặt lại mật khẩu an toàn qua Email Supabase Auth.
+- **Đề xuất Đổi quyền 2 bước:** Tự động tạo Yêu cầu đặc quyền khi nâng/hạ quyền Admin.
 
-## ☁️ Hướng dẫn Deploy lên Cloudflare Pages
+### 🛡️ 3. Phê duyệt 2 bước (Privileged Actions - Double Approval)
+- Ngăn chặn nguy cơ lạm quyền từ 1 Admin đơn lẻ.
+- Các tác vụ nguy hiểm (Đổi Role Admin, Xóa dữ liệu lớn, Bật/Tắt Kill Switch) bắt buộc phải tạo **Yêu cầu phê duyệt**.
+- Cần **ít nhất 2 chữ ký xác nhận** từ 2 Admin/Super Admin khác nhau để chuyển trạng thái sang `approved` trước khi được nhấn nút **Thực thi (Execute)**.
 
-1. **Chuẩn bị:** Đảm bảo tệp `web_admin/js/config.js` đã được chạy đồng bộ khóa mới nhất và được commit/push lên Git.
-2. **Cấu hình trên Cloudflare Pages Dashboard:**
-   * **Root Directory (Thư mục gốc):** `web_admin`
-   * **Framework Preset:** `Vite` (hoặc `None`)
-   * **Build Command (Lệnh build):** `npm run build`
-   * **Build Output Directory (Thư mục đầu ra):** `dist`
-3. **Cấu hình Redirect URL trong Supabase Auth:**
-   * Thêm URL Pages của bạn vào phần **Redirect URLs** của Supabase Auth (ví dụ: `https://ecosort-by-bao-admin.pages.dev/**` để tránh lỗi đăng nhập qua Magic Link).
-
----
-
-## Database & API (Supabase RPC)
-
-Web Admin sử dụng các PostgreSQL Function với `SECURITY DEFINER` để truy cập an toàn vào `auth.users`:
-
-### `public.admin_get_users(p_page, p_limit, p_search)`
-Lấy danh sách người dùng kèm email và `total_count` để phân trang.
-> Kiểm tra role của người gọi trước khi trả về dữ liệu.
-
-### `public.admin_ban_user(p_user_id, p_reason, p_is_locked)`
-Khóa/Mở khóa tài khoản thực hiện đúng 3 bước:
-1. Cập nhật `public.profiles` (is_locked, locked_reason).
-2. Cập nhật `auth.users.banned_until` (100 năm nếu ban).
-3. Xóa `auth.sessions` — đá văng user ra ngay lập tức.
-4. Ghi `public.audit_logs`.
-> Chặn Admin ban Super Admin ở tầng Backend.
-
-### `public.privileged_action_add_approval(p_request_id, p_comment)`
-Đăng ký chữ ký phê duyệt cho yêu cầu đặc quyền. Tự động chuyển đổi trạng thái khi đạt đủ số lượt duyệt tối thiểu.
-
-Xem SQL đầy đủ trong [CHANGELOG.md](./CHANGELOG.md#️-sql--database-hướng-dẫn-thiết-lập).
+### ⚙️ 4. Cấu hình hệ thống (System Settings)
+- Bật/Tắt chế độ Bảo trì toàn ứng dụng (`maintenance_mode`).
+- Bật/Tắt công tắc Ngắt khẩn cấp (`kill_switch`) vô hiệu hóa tính năng ghi API khi có sự cố.
+- Cấu hình hệ số điểm thưởng Gamification & Mô hình AI Gemini toàn hệ thống.
 
 ---
 
-## Changelog
+## 🛡️ Bảo mật & An toàn Hệ thống (Zero Vulnerabilities)
 
-Xem [CHANGELOG.md](./CHANGELOG.md) để biết lịch sử thay đổi chi tiết theo từng phiên bản.
+Dự án Web Admin cam kết đạt chuẩn an toàn bảo mật cao nhất, đã được kiểm tra & vá toàn bộ lỗ hổng qua **GitHub Dependabot**:
+
+| Gói phụ thuộc | Phiên bản an toàn | Mã lỗ hổng đã vá |
+| :--- | :---: | :--- |
+| **Vite** | `v8.2.2` | `CVE-2026-53571` (`server.fs.deny` Windows Alternate Paths Bypass) & `launch-editor` NTLMv2 Leak |
+| **PostCSS** | `v8.5.26` | `GHSA-6g55-p6wh-862q` (Arbitrary File Read) & `GHSA-79ch-rjh7-4835` (Path Traversal) |
+| **esbuild** | `v0.28.2` | Windows `servedir` Path Traversal Arbitrary File Read |
+
+> 🔒 **Chính sách Overrides:** File `package.json` cài đặt chính sách `"overrides"` cố định phiên bản an toàn cho `esbuild`, `postcss`, `vite`, chống hoàn toàn nguy cơ bị downgrade bởi các thư viện trung gian.
 
 ---
 
-<p align="center">
-  Được xây dựng với ❤️ bởi <strong>Bao</strong> · <em>EcoSort by Bao Admin v0.1.2</em>
-</p>
+## ☁️ Deploy lên Cloudflare Pages
+
+Dự án được cấu hình tự động tích hợp CI/CD với **Cloudflare Pages**:
+
+1. **Đồng bộ cấu hình:** Đảm bảo file `web_admin/js/config.js` đã được cập nhật thông tin Supabase mới nhất.
+2. **Cấu hình dự án trên Cloudflare Pages Dashboard:**
+   - **Root Directory:** `web_admin`
+   - **Framework Preset:** `Vite`
+   - **Build Command:** `npm run build`
+   - **Build Output Directory:** `dist`
+3. **Cấu hình Supabase Auth Redirect URLs:**
+   - Thêm URL Cloudflare Pages vào Supabase Dashboard:  
+     `https://ecosort-by-bao-admin.pages.dev/**`
+
+---
+
+## 📜 Changelog
+
+Xem nhật ký lịch sử cập nhật chi tiết theo từng phiên bản tại **[CHANGELOG.md](./CHANGELOG.md)**.
+
+---
+
+<div align="center">
+
+Được thiết kế & phát triển với ❤️ bởi **Bao**  
+*EcoSort by Bao Admin v0.1.2 · GPL v3 License*
+
+</div>
