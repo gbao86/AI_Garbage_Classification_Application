@@ -34,6 +34,15 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 - ⬆️ **`google_sign_in`**: Giữ `^7.2.0`, tự động resolve lên bản mới nhất tương thích — cập nhật Android platform plugin hỗ trợ Credential Manager API trên Android 16.
 - 🔄 **13 dependencies đã được cập nhật** tổng cộng thông qua `flutter pub upgrade`.
 
+### 🧭 Tích hợp Tính năng Chỉ đường Kép OSRM & Google Maps Navigation (Dual Navigation Integration)
+- 🔴 **Lý do chi tiết**: Người dùng khi tìm thấy điểm thu gom rác trên bản đồ cần có 2 lựa chọn linh hoạt: xem tuyến đường đi trực tiếp ngay trên bản đồ ứng dụng (miễn phí 100%) HOẶC bật trực tiếp ứng dụng Google Maps để nghe chỉ đường bằng giọng nói rẽ trái/rẽ phải khi đang lái xe.
+- 🛠️ **Cách sửa**:
+  - Tích hợp dịch vụ chỉ đường miễn phí vĩnh viễn **OSRM (Open Source Routing Machine)**: Truy vấn API OSRM `router.project-osrm.org` để lấy tọa độ chi tiết các khúc ngoặt/ngã tư, vẽ đường đi thực tế màu xanh lam bằng `PolylineLayer` trong `FlutterMap`.
+  - Hiển thị **Thẻ thông tin chỉ đường OSRM (Floating Banner)** ở góc trên bản đồ báo chính xác **Khoảng cách (km/m)** và **Thời gian di chuyển ước tính (phút)** cùng nút hủy đường vẽ.
+  - Tích hợp Intent Android `google.navigation:q=lat,lng` qua package `url_launcher` cho nút **"Google Maps"**: Tự động kích hoạt ứng dụng Google Maps chính thức trên thiết bị và bắt đầu chế độ Turn-by-Turn Voice Navigation.
+- ✅ **Kết quả**: Người dùng có 2 lựa chọn chỉ đường thông minh, vừa xem trực quan trên app vừa hỗ trợ dẫn đường bằng giọng nói tiện lợi khi di chuyển.
+
+
 
 ---
 

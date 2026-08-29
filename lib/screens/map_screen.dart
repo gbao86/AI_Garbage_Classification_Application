@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:phan_loai_rac_qua_hinh_anh/utils/env.dart';
 
 class MapScreen extends StatefulWidget {
@@ -40,6 +41,114 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   bool _isSelectingLocationOnMap = false;
   String _tempGeocodedAddress = "";
   bool _isLoadingGeocoding = false;
+
+  List<LatLng> _routePoints = [];
+  bool _isRouting = false;
+  String? _routeDistance;
+  String? _routeDuration;
+
+  Future<void> _fetchRouteOSRM(LatLng destination, String pointName) async {
+    setState(() {
+      _isRouting = true;
+    });
+
+    final url = Uri.parse(
+      'https://router.project-osrm.org/route/v1/driving/${_userLocation.longitude},${_userLocation.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=geojson',
+    );
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'User-Agent': 'EcoSortApp_by_Jisy/1.0 (Flutter)',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final routes = data['routes'] as List?;
+
+        if (routes != null && routes.isNotEmpty) {
+          final firstRoute = routes[0];
+          final geometry = firstRoute['geometry'] as Map<String, dynamic>?;
+          final coords = geometry?['coordinates'] as List?;
+
+          if (coords != null) {
+            final List<LatLng> points = coords.map((c) {
+              final list = c as List;
+              return LatLng((list[1] as num).toDouble(), (list[0] as num).toDouble());
+            }).toList();
+
+            final double distMeters = (firstRoute['distance'] as num).toDouble();
+            final double durSecs = (firstRoute['duration'] as num).toDouble();
+
+            final String distStr = distMeters >= 1000
+                ? '${(distMeters / 1000).toStringAsFixed(1)} km'
+                : '${distMeters.round()} m';
+            final String durStr = '${(durSecs / 60).round()} phút';
+
+            if (mounted) {
+              setState(() {
+                _routePoints = points;
+                _routeDistance = distStr;
+                _routeDuration = durStr;
+                _isRouting = false;
+              });
+
+              _mapController.move(destination, 15);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Đã vẽ đường đi OSRM đến $pointName ($distStr - $durStr) 🧭'),
+                  backgroundColor: Colors.blueAccent,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('[OSRM] Lỗi tải đường đi: $e');
+    }
+
+    if (mounted) {
+      setState(() => _isRouting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không thể lấy đường đi OSRM. Bạn có thể mở Google Maps!'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
+  }
+
+  Future<void> _launchGoogleMapsDirections(LatLng destination) async {
+    final googleMapsAppUrl = Uri.parse(
+      'google.navigation:q=${destination.latitude},${destination.longitude}',
+    );
+    final googleMapsWebUrl = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}',
+    );
+
+    try {
+      if (await canLaunchUrl(googleMapsAppUrl)) {
+        await launchUrl(googleMapsAppUrl, mode: LaunchMode.externalApplication);
+      } else if (await canLaunchUrl(googleMapsWebUrl)) {
+        await launchUrl(googleMapsWebUrl, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      if (await canLaunchUrl(googleMapsWebUrl)) {
+        await launchUrl(googleMapsWebUrl, mode: LaunchMode.externalApplication);
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không thể mở ứng dụng Google Maps.')),
+        );
+      }
+    }
+  }
 
   String get _voyagerUrl {
     final key = Env.stadiaMapsApiKey;
@@ -151,8 +260,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       title = tags['name'] ?? "Điểm thu gom tái chế";
     }
 
-    if (tags['name'] == null) {
-      tags['name_display'] = title;
+    final Map<String, dynamic> tagsWithPoint = Map<String, dynamic>.from(tags);
+    tagsWithPoint['point'] = LatLng(lat, lon);
+    if (tagsWithPoint['name'] == null) {
+      tagsWithPoint['name_display'] = title;
     }
 
     return Marker(
@@ -160,7 +271,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       width: 50,
       height: 50,
       child: GestureDetector(
-        onTap: () => _showPointDetails(tags),
+        onTap: () => _showPointDetails(tagsWithPoint),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -366,18 +477,68 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 isDark
               ),
               const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Đã hiểu", style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  if (tags['point'] is LatLng) ...[
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: Colors.blueAccent,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        icon: const Icon(Icons.navigation_rounded, size: 20),
+                        label: Text(
+                          _isRouting ? 'Đang tính...' : 'Vẽ đường OSRM',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: _isRouting
+                            ? null
+                            : () {
+                                final LatLng pt = tags['point'] as LatLng;
+                                final String name = tags['name'] ?? tags['name_display'] ?? 'Điểm bỏ rác';
+                                Navigator.pop(context);
+                                _fetchRouteOSRM(pt, name);
+                              },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: const BorderSide(color: Colors.green, width: 1.5),
+                          foregroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        icon: const Icon(Icons.map_rounded, size: 20),
+                        label: const Text(
+                          'Google Maps',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: () {
+                          final LatLng pt = tags['point'] as LatLng;
+                          _launchGoogleMapsDirections(pt);
+                        },
+                      ),
+                    ),
+                  ] else ...[
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(16),
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Đã hiểu", style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ],
               ),
               const SizedBox(height: 20),
             ],
@@ -1271,6 +1432,16 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                     userAgentPackageName: 'com.example.phan_loai_rac_qua_hinh_anh',
                   ),
                 ),
+              if (_routePoints.isNotEmpty)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: _routePoints,
+                      strokeWidth: 5.0,
+                      color: Colors.blueAccent,
+                    ),
+                  ],
+                ),
               MarkerLayer(markers: [
                 Marker(
                   point: _userLocation,
@@ -1289,7 +1460,66 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
               ]),
             ],
           ),
-          
+
+          // Banner chỉ đường OSRM
+          if (_routePoints.isNotEmpty)
+            Positioned(
+              top: 115,
+              left: 20,
+              right: 20,
+              child: Card(
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                elevation: 6,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    children: [
+                      const CircleAvatar(
+                        backgroundColor: Colors.blueAccent,
+                        radius: 18,
+                        child: Icon(Icons.navigation_rounded, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Đường đi OSRM (${_routeDistance ?? ''})',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                            Text(
+                              'Thời gian: ${_routeDuration ?? ''} • Miễn phí 100%',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, color: Colors.red),
+                        onPressed: () {
+                          setState(() {
+                            _routePoints = [];
+                            _routeDistance = null;
+                            _routeDuration = null;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
           // Banner hiển thị ghim vị trí tùy chọn
           if (_selectedPinLocation != null && !_isSelectingLocationOnMap)
             Positioned(
