@@ -34,10 +34,11 @@ Web Admin là một **Single-Page Application (SPA)** thuần HTML/JS được b
 
 | Công nghệ | Mục đích |
 |---|---|
-| [Vite](https://vitejs.dev/) `^5.2` | Build tool & Dev server (HMR) |
+| [Vite](https://vitejs.dev/) `^8.2.2` | Build tool & Dev server (HMR) |
 | [Tailwind CSS](https://tailwindcss.com/) `^3.4` | Styling framework |
-| [PostCSS](https://postcss.org/) + Autoprefixer | Xử lý CSS pipeline |
-| [@supabase/supabase-js](https://supabase.com/docs/reference/javascript) `^2.101` | Kết nối Supabase Auth & Database |
+| [PostCSS](https://postcss.org/) `^8.5.26` + Autoprefixer | Xử lý CSS pipeline |
+| [esbuild](https://esbuild.github.io/) `^0.28.2` | JavaScript & TypeScript bundler |
+| [@supabase/supabase-js](https://supabase.com/docs/reference/javascript) `^2.101.1` | Kết nối Supabase Auth & Database |
 | HTML5 + Vanilla JS (ES Modules) | Giao diện & Logic |
 
 ---
@@ -218,5 +219,5 @@ Xem [CHANGELOG.md](./CHANGELOG.md) để biết lịch sử thay đổi chi ti�
 ---
 
 <p align="center">
-  Được xây dựng với ❤️ bởi <strong>Bao</strong> · <em>EcoSort by Bao Admin v0.1.1</em>
+  Được xây dựng với ❤️ bởi <strong>Bao</strong> · <em>EcoSort by Bao Admin v0.1.2</em>
 </p>
