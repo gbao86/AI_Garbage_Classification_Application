@@ -493,8 +493,6 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     );
   }
 
-  Timer? _debounceTimer;
-
   void _onMapPositionChanged(MapPosition position, bool hasGesture) {
     if (position.center != null) {
       _mapCenter = position.center!;

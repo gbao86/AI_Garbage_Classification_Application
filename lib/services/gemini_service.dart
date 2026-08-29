@@ -14,6 +14,19 @@ class GeminiService {
     ),
   );
 
+  String _cleanJsonResponse(String rawText) {
+    String text = rawText.trim();
+    if (text.startsWith('```json')) {
+      text = text.substring(7);
+    } else if (text.startsWith('```')) {
+      text = text.substring(3);
+    }
+    if (text.endsWith('```')) {
+      text = text.substring(0, text.length - 3);
+    }
+    return text.trim();
+  }
+
   Future<String> processImageAndGetGuidance(File imageFile) async {
     try {
       debugPrint('[GEMINI] Đang nén ảnh tối ưu cho API gửi đi...');
@@ -40,6 +53,7 @@ class GeminiService {
       final prompt = """
 Bạn là một chuyên gia về quản lý và phân loại rác thải tại Việt Nam.
 Hãy phân tích hình ảnh rác thải được cung cấp và trả về một đối tượng JSON duy nhất theo cấu trúc bên dưới.
+CHÚ Ý: Chỉ trả về đoạn JSON thuần không kèm theo bất kỳ văn bản thừa nào hoặc bao quanh bởi cặp ngoặc markdown code block.
 
 Yêu cầu phân loại rác:
 1. Xác định loại rác chính trong ảnh và chọn MỘT trong các nhãn tiếng Anh (category) sau để khớp với hệ thống của chúng tôi: 
@@ -69,7 +83,11 @@ Cấu trúc JSON bắt buộc phải trả về:
       ];
 
       final response = await _model.generateContent(content);
-      return response.text?.trim() ?? '{"error": "Không nhận được kết quả từ Gemini."}';
+      final rawText = response.text?.trim() ?? '';
+      if (rawText.isEmpty) {
+        return '{"error": "Không nhận được kết quả từ Gemini."}';
+      }
+      return _cleanJsonResponse(rawText);
     } catch (e) {
       debugPrint('Lỗi khi xử lý ảnh với Gemini: $e');
       rethrow;

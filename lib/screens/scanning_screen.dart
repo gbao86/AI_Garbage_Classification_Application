@@ -171,7 +171,13 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
         String finalClassification = _getClassification(offlineResult.originalLabel);
 
         try {
-          final Map<String, dynamic> parsed = jsonDecode(geminiResult);
+          String cleanText = geminiResult.trim();
+          if (cleanText.startsWith('```json')) cleanText = cleanText.substring(7);
+          else if (cleanText.startsWith('```')) cleanText = cleanText.substring(3);
+          if (cleanText.endsWith('```')) cleanText = cleanText.substring(0, cleanText.length - 3);
+          cleanText = cleanText.trim();
+
+          final Map<String, dynamic> parsed = jsonDecode(cleanText);
           final category = parsed['category'] as String?;
           final classification = parsed['classification'] as String?;
           final vietnameseLabel = parsed['vietnamese_label'] as String?;
