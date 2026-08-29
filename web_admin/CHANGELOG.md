@@ -6,6 +6,19 @@ Tất cả các thay đổi đáng chú ý của module **Web Admin** sẽ đư�
 
 ---
 
+## [0.1.2] - 2026-08-29
+
+### 🛡️ Nâng cấp Bảo mật & Vá Lỗ hổng Dependency (Security Updates & Dependabot Vulnerability Fixes)
+- 🔒 **Vite (`CVE-2026-53571` & `launch-editor` NTLMv2 Leak)**: Nâng cấp `vite` từ `^6.4.2` lên `^8.2.2` trong `package.json` và `package-lock.json`. Khắc phục triệt để lỗ hổng bypass `server.fs.deny` trên hệ điều hành Windows (CVE-2026-53571) và nguy cơ rò rỉ NTLMv2 hash qua đường dẫn UNC.
+- 🔒 **PostCSS (`Arbitrary File Read` & `Path Traversal`)**: Nâng cấp `postcss` từ `^8.5.10` lên `^8.5.26` và bổ sung cấu hình `"overrides": { "postcss": "$postcss" }` trong `package.json`. Khắc phục triệt me lỗ hổng đọc file trái phép qua comment `sourceMappingURL` trên Windows (GHSA-6g55-p6wh-862q & GHSA-79ch-rjh7-4835).
+- 🔒 **esbuild (`Windows Path Traversal Arbitrary File Read`)**: Nâng cấp `esbuild` từ `^0.28.0` lên `^0.28.2`. Khắc phục lỗ hổng Path Traversal đọc file hệ thống trên Windows khi chạy Dev Server với thuộc tính `servedir`.
+
+### 📦 Đóng gói & Xây dựng (Build & Dependencies)
+- **Cập nhật Overrides**: Thiết lập chính sách `overrides` khóa phiên bản an toàn cho `esbuild`, `postcss`, `vite` nhằm chống bị downgraded từ các gói phụ thuộc trung gian.
+- **Kiểm thử đóng gói sản phẩm**: Chạy `npm run build` kiểm tra bundle sản phẩm tĩnh Vite đảm bảo 51 modules được biên dịch thành công 100% không dính warning hay lỗi cú pháp runtime.
+
+---
+
 ## [0.1.1] - 2026-05-25
 
 ### 🛡️ Hành động đặc quyền & Duyệt 2 bước (Privileged Actions & Double-Approval)
