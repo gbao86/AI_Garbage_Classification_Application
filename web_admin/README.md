@@ -25,7 +25,6 @@
 - [✨ Giới thiệu](#-giới-thiệu)
 - [🛠️ Công nghệ sử dụng](#️-công-nghệ-sử-dụng)
 - [🗂️ Cấu trúc thư mục](#️-cấu-trúc-thư-mục)
-- [⚡ Cài đặt & Khởi chạy](#-cài-đặt--khởi-chạy)
 - [🔐 Phân quyền RBAC](#-phân-quyền-rbac)
 - [🚀 Tính năng nổi bật](#-tính-năng-nổi-bật)
 - [🛡️ Bảo mật & An toàn Hệ thống](#️-bảo-mật--an-toàn-hệ-thống-zero-vulnerabilities)
@@ -36,9 +35,9 @@
 
 ## ✨ Giới thiệu
 
-**EcoSort Web Admin** là bảng điều khiển Single-Page Application (SPA) chuyên dụng cho **Admin** và **Super Admin** thuộc dự án phân loại rác **EcoSort by Bao**.
+**EcoSort Web Admin** là bảng điều khiển Single-Page Application (SPA) chuyên dụng nội bộ cho **Admin** và **Super Admin** thuộc ứng dụng phân loại rác **EcoSort by Bao**.
 
-Dự án được thiết kế với kiến trúc decoupled (tách biệt hoàn toàn khỏi ứng dụng di động Flutter), vận hành trực tiếp trên nền tảng **Vite** kết nối với **Supabase Cloud BaaS** nhằm:
+Dự án vận hành trên nền tảng **Vite** kết nối trực tiếp với **Supabase Cloud BaaS** nhằm:
 - 📥 **Duyệt báo cáo rác:** Thẩm định dữ liệu hình ảnh & nhãn AI từ người dùng ứng dụng di động, tự động slug hóa và đẩy dữ liệu chuẩn vào Từ điển rác (`waste_dictionary`).
 - 👥 **Quản trị người dùng:** Tra cứu, phân trang, khóa tài khoản (Ban 100 năm), mở khóa, đặt lại mật khẩu và kiểm soát quyền hạn người dùng tức thì.
 - 🛡️ **Phê duyệt 2 bước (Double-Approval):** Cơ chế bảo mật đa chữ ký cho các hành động đặc quyền (Nâng/Hạ quyền Admin, Xóa dữ liệu nhạy cảm, Bật/Tắt Kill Switch khẩn cấp).
@@ -81,48 +80,6 @@ web_admin/
 ├── 📄 README.md            # Tài liệu kỹ thuật chi tiết
 └── 📄 CHANGELOG.md         # Lịch sử cập nhật các phiên bản
 ```
-
----
-
-## ⚡ Cài đặt & Khởi chạy
-
-### 📋 Yêu cầu môi trường
-- **Node.js:** `>= 18.x`
-- **npm:** `>= 9.x`
-
-### 1️⃣ Cài đặt Dependencies
-```bash
-# Di chuyển vào thư mục web_admin
-cd web_admin
-
-# Cài đặt tất cả các gói phụ thuộc
-npm install
-```
-
-### 2️⃣ Cấu hình Biến môi trường
-Tạo file `.env` tại thư mục `web_admin/` dựa trên mẫu `env.sample`:
-```env
-VITE_SUPABASE_URL=https://<your-supabase-project>.supabase.co
-VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
-```
-
-> 💡 **Đồng bộ tự động từ Project chính:**  
-> Bạn có thể chạy script Dart tại gốc project để đồng bộ cấu hình tự động:
-> ```bash
-> dart scripts/sync_env.dart
-> ```
-
-### 3️⃣ Khởi chạy Dev Server
-```bash
-npm run dev
-```
-🌐 Trình duyệt tự động khả dụng tại: **`http://localhost:5173`**
-
-### 4️⃣ Đóng gói Production (Build)
-```bash
-npm run build
-```
-📦 Sản phẩm xuất ra thư mục **`dist/`** sẵn sàng tải lên Cloudflare Pages.
 
 ---
 
