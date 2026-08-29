@@ -21,7 +21,7 @@ android {
     defaultConfig {
         applicationId = "com.example.phan_loai_rac_qua_hinh_anh"
         minSdk = flutter.minSdkVersion
-        targetSdk = 34
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -36,7 +36,7 @@ android {
 
     packaging {
         jniLibs {
-            useLegacyPackaging = true
+            useLegacyPackaging = false
         }
     }
 

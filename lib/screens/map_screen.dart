@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:phan_loai_rac_qua_hinh_anh/utils/env.dart';
 
 class MapScreen extends StatefulWidget {
   final bool showBackButton;
@@ -21,6 +22,7 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounceTimer;
   
   LatLng _userLocation = const LatLng(10.762622, 106.660172);
   LatLng _mapCenter = const LatLng(10.762622, 106.660172);
@@ -39,10 +41,34 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   String _tempGeocodedAddress = "";
   bool _isLoadingGeocoding = false;
 
-  final String _voyagerUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
-  final String _positronUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
-  final String _darkMatterUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
-  final String _satelliteUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+  String get _voyagerUrl {
+    final key = Env.stadiaMapsApiKey;
+    return key.isNotEmpty
+        ? 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}.png?api_key=$key'
+        : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  }
+
+  String get _positronUrl {
+    final key = Env.stadiaMapsApiKey;
+    return key.isNotEmpty
+        ? 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png?api_key=$key'
+        : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  }
+
+  String get _darkMatterUrl {
+    final key = Env.stadiaMapsApiKey;
+    return key.isNotEmpty
+        ? 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png?api_key=$key'
+        : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  }
+
+  String get _satelliteUrl {
+    final key = Env.stadiaMapsApiKey;
+    return key.isNotEmpty
+        ? 'https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}.jpg?api_key=$key'
+        : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+  }
+
   final String _trafficUrl = 'https://tile.waymarkedtrails.org/cycling/{z}/{x}/{y}.png'; 
 
   @override
@@ -104,6 +130,102 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     }
   }
 
+  Marker _buildMarkerFromTags(double lat, double lon, Map tags) {
+    final String amenity = tags['amenity'] ?? 'recycling';
+
+    IconData markerIcon;
+    Color markerColor;
+    String title;
+
+    if (amenity == 'waste_disposal') {
+      markerIcon = Icons.delete_sweep_rounded;
+      markerColor = Colors.blue;
+      title = tags['name'] ?? "Trạm thu gom/đổ rác";
+    } else if (amenity == 'waste_basket') {
+      markerIcon = Icons.delete_outline_rounded;
+      markerColor = Colors.orange;
+      title = tags['name'] ?? "Thùng rác công cộng";
+    } else {
+      markerIcon = Icons.recycling_rounded;
+      markerColor = Colors.green;
+      title = tags['name'] ?? "Điểm thu gom tái chế";
+    }
+
+    if (tags['name'] == null) {
+      tags['name_display'] = title;
+    }
+
+    return Marker(
+      point: LatLng(lat, lon),
+      width: 50,
+      height: 50,
+      child: GestureDetector(
+        onTap: () => _showPointDetails(tags),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              )
+            ],
+            border: Border.all(color: markerColor, width: 2.5),
+          ),
+          child: Icon(markerIcon, color: markerColor, size: 28),
+        ),
+      ),
+    );
+  }
+
+  Future<List<Marker>> _fetchSupabaseCollectionPoints() async {
+    final List<Marker> supabaseMarkers = [];
+    try {
+      final supabase = Supabase.instance.client;
+      final response = await supabase
+          .from('collection_points')
+          .select('id, name, description, address, point_type, latitude, longitude, location, is_verified')
+          .eq('is_verified', true);
+
+      for (final item in response) {
+        double? pLat;
+        double? pLon;
+
+        if (item['latitude'] != null && item['longitude'] != null) {
+          pLat = (item['latitude'] as num).toDouble();
+          pLon = (item['longitude'] as num).toDouble();
+        } else if (item['location'] != null && item['location'] is String) {
+          final locStr = item['location'] as String;
+          final match = RegExp(r'POINT\(([-?\d.]+)\s+([-?\d.]+)\)', caseSensitive: false).firstMatch(locStr);
+          if (match != null) {
+            pLon = double.tryParse(match.group(1)!);
+            pLat = double.tryParse(match.group(2)!);
+          }
+        }
+
+        if (pLat != null && pLon != null) {
+          final Map<String, dynamic> tags = {
+            'amenity': item['point_type'] ?? 'recycling',
+            'name': item['name'] ?? 'Điểm thu gom',
+            'name_display': item['name'] ?? 'Điểm thu gom',
+            'description': item['address'] != null && (item['address'] as String).isNotEmpty
+                ? '${item['description'] ?? ''}\n📍 ${item['address']}'
+                : item['description'],
+            'recycling_type': item['point_type'] == 'waste_disposal'
+                ? 'Rác tổng hợp'
+                : (item['point_type'] == 'waste_basket' ? 'Rác công cộng' : 'Rác tái chế ♻️'),
+          };
+          supabaseMarkers.add(_buildMarkerFromTags(pLat, pLon, tags));
+        }
+      }
+    } catch (e) {
+      debugPrint('[SUPABASE] Lỗi tải collection_points từ Supabase: $e');
+    }
+    return supabaseMarkers;
+  }
+
   Future<void> _fetchWastePoints(double lat, double lon) async {
     if (_isFetchingWaste) return;
     final now = DateTime.now();
@@ -121,7 +243,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     setState(() => _isFetchingWaste = true);
     _lastFetchTime = now;
 
-    // Mở rộng bán kính quét lên 0.05 độ (khoảng 5km)
+    // 1. Truy vấn toàn bộ điểm thu gom rác từ Supabase database
+    final List<Marker> allMarkers = await _fetchSupabaseCollectionPoints();
+
+    // 2. Truy vấn bổ sung điểm rác cộng đồng từ OpenStreetMap (nếu có)
     final String bbox = "(${lat - 0.05},${lon - 0.05},${lat + 0.05},${lon + 0.05})";
     final url = Uri.parse("https://overpass-api.de/api/interpreter?data=[out:json];node['amenity'~'waste_disposal|recycling|waste_basket']$bbox;out;");
 
@@ -138,82 +263,34 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         final data = json.decode(response.body);
         final List elements = data['elements'];
 
-        if (elements.isEmpty && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Không tìm thấy điểm thu gom rác nào trong bán kính 5km.'),
-              backgroundColor: Colors.orange,
-              duration: Duration(seconds: 3),
-            ),
-          );
-          setState(() {
-            _markers = [];
-          });
-          return;
+        for (final e in elements) {
+          final tags = e['tags'] ?? {};
+          allMarkers.add(_buildMarkerFromTags((e['lat'] as num).toDouble(), (e['lon'] as num).toDouble(), tags));
         }
-
-        if (mounted) {
-          setState(() {
-            _markers = elements.map((e) {
-              final tags = e['tags'] ?? {};
-              final String amenity = tags['amenity'] ?? 'recycling';
-              
-              IconData markerIcon;
-              Color markerColor;
-              String title;
-              
-              if (amenity == 'waste_disposal') {
-                markerIcon = Icons.delete_sweep_rounded;
-                markerColor = Colors.blue;
-                title = tags['name'] ?? "Trạm thu gom/đổ rác";
-              } else if (amenity == 'waste_basket') {
-                markerIcon = Icons.delete_outline_rounded;
-                markerColor = Colors.orange;
-                title = tags['name'] ?? "Thùng rác công cộng";
-              } else {
-                markerIcon = Icons.recycling_rounded;
-                markerColor = Colors.green;
-                title = tags['name'] ?? "Điểm thu gom tái chế";
-              }
-              
-              if (tags['name'] == null) {
-                tags['name_display'] = title;
-              }
-
-              return Marker(
-                point: LatLng(e['lat'], e['lon']),
-                width: 50,
-                height: 50,
-                child: GestureDetector(
-                  onTap: () => _showPointDetails(tags),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2), 
-                          blurRadius: 8, 
-                          offset: const Offset(0, 2)
-                        )
-                      ],
-                      border: Border.all(color: markerColor, width: 2.5),
-                    ),
-                    child: Icon(markerIcon, color: markerColor, size: 28),
-                  ),
-                ),
-              );
-            }).toList();
-          });
-        }
-      } else {
-        debugPrint("Lỗi API Overpass: Mã ${response.statusCode}");
       }
     } catch (e) {
-      debugPrint("Lỗi tải data (Mất mạng hoặc API sập): $e");
-    } finally {
-      if (mounted) setState(() => _isFetchingWaste = false);
+      debugPrint("Lỗi tải data OSM: $e");
     }
+
+    if (mounted) {
+      setState(() {
+        _markers = allMarkers;
+      });
+
+      if (allMarkers.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Chưa có dữ liệu điểm thu gom rác tại khu vực này.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        debugPrint('✅ Đã nạp ${allMarkers.length} điểm thu gom rác từ Supabase & OSM!');
+      }
+    }
+
+    if (mounted) setState(() => _isFetchingWaste = false);
   }
 
   void _showPointDetails(Map tags) {

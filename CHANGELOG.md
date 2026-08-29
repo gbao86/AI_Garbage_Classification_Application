@@ -2,6 +2,26 @@
 
 Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
+## [0.5.7] - 2026-08-29
+
+### 🤖 Tối ưu hóa Tương thích Android 16 & HyperOS 3.0 (Android 16 & HyperOS 3.0 Compatibility Optimization)
+- 🔴 **Sửa lỗi CRASH trên thiết bị 16KB page**: Nâng cấp `tflite_flutter` từ `0.11.0` lên `^0.12.1`. Phiên bản cũ đóng gói thư viện native `.so` được align 4KB, gây lỗi **SIGSEGV** trên các dòng máy Android 16 sử dụng 16KB memory page size.
+- 📐 **Sửa lỗi 16KB page alignment cho JNI**: Đổi `useLegacyPackaging` từ `true` sang `false` trong `build.gradle.kts`. Setting cũ extract file `.so` không nén, vi phạm chuẩn 16KB page alignment bắt buộc trên Android 16.
+- 🎯 **Nâng `targetSdk` lên API 36**: Cập nhật từ `targetSdk = 34` lên `targetSdk = 36` để tuân thủ chính sách Google Play và kích hoạt đầy đủ các behavior changes của Android 16 (edge-to-edge, predictive back gesture, photo picker mới).
+- 🗑️ **Xóa permission `WRITE_EXTERNAL_STORAGE`**: Gỡ bỏ quyền đã bị vô hiệu hóa hoàn toàn từ Android 13+ (API 33). Trên Android 16, permission này bị bỏ qua và gây cảnh báo không cần thiết.
+- 🚀 **Bật Impeller rendering engine**: Chuyển `EnableImpeller` từ `false` sang `true` trong `AndroidManifest.xml`. Flutter 3.41+ mặc định hỗ trợ Impeller trên Android, mang lại hiệu năng render tốt hơn đáng kể trên Android 16.
+
+### 📦 Cập nhật Dependencies
+- ⬆️ **`supabase_flutter`**: Nâng từ `^2.12.0` lên `^2.16.0` — cập nhật `gotrue` (2.20→2.27), `postgrest` (2.7→2.9), `realtime_client` (2.7→2.13), `storage_client` (2.5→2.8). Cải thiện auth deep link và real-time subscriptions trên Android 16.
+- ⬆️ **`google_sign_in`**: Giữ `^7.2.0`, tự động resolve lên bản mới nhất tương thích — cập nhật Android platform plugin hỗ trợ Credential Manager API trên Android 16.
+- 🔄 **13 dependencies đã được cập nhật** tổng cộng thông qua `flutter pub upgrade`, bao gồm các transitive dependencies quan trọng cho tương thích Android 16.
+
+### 🗺️ Nâng cấp Tile Server Bản đồ (Stadia Maps Integration)
+- 🗺️ **Loại bỏ Watermark CARTO**: Chuyển đổi nhà cung cấp Tile Server từ CARTO (bị dính watermark do siết chính sách API key) sang **Stadia Maps** với các style cao cấp: *Outdoors* (ngoài trời), *Alidade Smooth* (sáng tối giản), *Alidade Smooth Dark* (tối tối giản) và *Alidade Satellite* (vệ tinh).
+- 🔐 **Bảo mật API Key với Envied**: Tích hợp cấu hình `STADIA_MAPS_API_KEY` trong `.env` / `.env.example` và mã hóa byte-level qua `Envied` (`Env.stadiaMapsApiKey`), hỗ trợ cơ chế tự động fallback về OpenStreetMap nếu thiếu key.
+
+---
+
 ## [0.5.6] - 2026-06-08
 
 ### 🧠 Tích hợp Kiến trúc Hybrid AI Thế hệ mới (Next-Gen Hybrid AI Architecture Integration)

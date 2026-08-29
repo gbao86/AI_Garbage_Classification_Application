@@ -20,4 +20,9 @@ abstract class Env {
   /// Trùng với Client ID khi bật Google provider trên Supabase (và trong Firebase / Google Cloud).
   @EnviedField(varName: 'GOOGLE_WEB_CLIENT_ID')
   static final String googleWebClientId = _Env.googleWebClientId;
+
+  /// API Key của Stadia Maps cho Tile Layer bản đồ không watermark.
+  @EnviedField(varName: 'STADIA_MAPS_API_KEY', obfuscate: true, defaultValue: '')
+  static final String stadiaMapsApiKey = _Env.stadiaMapsApiKey;
 }
+
