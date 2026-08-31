@@ -10,7 +10,7 @@ Chúng tôi chỉ cung cấp các bản cập nhật bảo mật cho phiên bả
 
 | Phiên Bản (Version) | Trạng Thái Hỗ Trợ (Supported) | Ghi Chú |
 | ------------------- | ----------------------------- | ------- |
-| `0.5.x`             | ✅ Có hỗ trợ (Yes)            | Phiên bản hiện tại (`v0.5.7`) |
+| `0.5.x`             | ✅ Có hỗ trợ (Yes)            | Phiên bản hiện tại (`v0.5.8`) |
 | `< 0.5.0`           | ❌ Không hỗ trợ (No)          | Vui lòng nâng cấp lên bản mới nhất |
 
 ---

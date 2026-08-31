@@ -266,7 +266,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _processImage(ImageSource source) async {
     try {
-      final XFile? pickedFile = await _picker.pickImage(source: source);
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        imageQuality: 85,
+      );
       if (pickedFile == null) {
         if (mounted) setState(() => _processingMessage = '');
         return;
