@@ -12,6 +12,13 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
   - Tăng cường cơ chế bọc lót try-catch đa tầng (Graceful Degradation) cho ML Kit Subject Segmentation và TFLite GPU Delegate.
 - ✅ **Kết quả**: Ứng dụng hoạt động mượt mà, ổn định 100% trên toàn bộ các phân khúc thiết bị từ Android 32-bit giá rẻ đến Android 64-bit hiện đại mà không gặp tình trạng crash.
 
+### 🍎 Cấu hình Biên dịch Tự động iOS qua GitHub Actions (Automated iOS Build CI/CD Workflow)
+- 🔴 **Lý do chi tiết**: Hỗ trợ xuất file cài đặt iOS (`.ipa`) tự động từ môi trường Windows mà không cần sở hữu máy Mac cá nhân.
+- 🛠️ **Cách làm**:
+  - Bổ sung file workflow tự động `.github/workflows/ios_build.yml`: Khởi chạy máy Mac đám mây (`macos-latest`), nạp Flutter SDK, biên dịch ứng dụng iOS và đóng gói thành file `.ipa` Artifact.
+  - Cập nhật `ios/Runner/Info.plist`: Bổ sung đầy đủ quyền vị trí GPS (`NSLocationWhenInUseUsageDescription` và `NSLocationAlwaysAndWhenInUseUsageDescription`) cho bản đồ trạm rác trên iOS.
+- ✅ **Kết quả**: Dự án sẵn sàng 100% cho việc biên dịch và thử nghiệm ứng dụng trên hệ điều hành iOS từ máy chủ đám mây.
+
 ## [0.5.7] - 2026-08-29
 
 ### 🧩 Khắc phục Lỗi Hiển thị Chuỗi JSON Thô khi Quét AI (Gemini Response Parsing Fix)
