@@ -6,6 +6,10 @@
 <string>This app needs access to camera to take photos of trash for classification</string>
 <key>NSPhotoLibraryUsageDescription</key>
 <string>This app needs access to photos to select images of trash for classification</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Ứng dụng cần quyền vị trí để định vị các điểm thu gom rác gần bạn trên bản đồ.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Ứng dụng cần quyền vị trí để hiển thị tuyến đường đi tới trạm rác.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
