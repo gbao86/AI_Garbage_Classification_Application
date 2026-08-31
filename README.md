@@ -104,6 +104,11 @@ graph TD
 - **Gemini 3.5 Flash** — auto kích hoạt khi confidence &lt;75%, trả JSON cấu trúc với hướng dẫn xử lý chi tiết
 - **DB Label Sync** — Gemini hiệu chỉnh nhãn → tự đồng bộ ngược Supabase, cập nhật CO₂ + XP tương ứng
 
+### 📱 Multi-Device Adaptive Architecture (Tương thích Đa thiết bị)
+- **Hỗ trợ đa dạng Android 32-bit & 64-bit**: Tối ưu mượt mà từ các dòng điện thoại RAM hạn chế (Android 32-bit như Samsung A12, A13, A22 4G...) đến các dòng Flagship/Gaming (Android 64-bit như Poco, Xiaomi, Google Pixel, Samsung S-series).
+- **Auto Graphics Engine Selection**: Tự động nhận diện phần cứng để lựa chọn Impeller Engine (trên máy 64-bit Vulkan) hoặc Skia Engine (trên máy 32-bit / GPU Mali cũ), đảm bảo ứng dụng vận hành ổn định trên nhiều kiến trúc chip khác nhau.
+- **Anti-OOM & Graceful Degradation**: Chuẩn hóa dữ liệu ảnh đầu vào tối đa 1600px giúp hạn chế tràn bộ nhớ RAM (Out of Memory). Hệ thống tự động lùi về CPU Threading nếu GPU Delegate quá tải hoặc tự động tối giản hiệu ứng khi phần cứng máy yếu.
+
 ### 🛸 Neon Segmentation
 - **ML Kit Subject Segmentation** chạy song song với luồng AI — không thêm latency
 - Vẽ mask phát sáng theo màu nhóm: `🟢 Tái chế` · `🟤 Hữu cơ` · `🔴 Nguy hại`
