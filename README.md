@@ -122,8 +122,8 @@ graph TD
 - Tự đồng bộ tuần tự lên Supabase khi có mạng trở lại — không bao giờ mất dữ liệu
 
 ### 🗺️ Eco Map Crowdsourcing
-- CartoDB Vector Map · dark/light auto-sync
-- Ghim trạm rác mới · geocode Nominatim · upload ảnh thực tế nhận XP
+- **Stadia Maps Tile Server** · tích hợp Outdoors, Alidade Smooth, Dark & Satellite · auto-fallback OpenStreetMap/ArcGIS
+- Ghim trạm rác mới · geocode Nominatim · chỉ đường OSRM & Google Maps · upload ảnh thực tế nhận XP
 
 ---
 
