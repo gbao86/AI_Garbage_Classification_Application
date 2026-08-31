@@ -1,0 +1,50 @@
+name: 🚀 Build iOS App (.ipa)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: 📦 Install Flutter dependencies
+        run: flutter pub get
+
+      - name: 🔑 Generate Envied environment variables
+        run: |
+          cp .env.example .env
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: 🔨 Build iOS (Release, No Codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: 📦 Package Runner.app into .ipa
+        run: |
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r phan_loai_rac_v0.5.8.ipa Payload
+
+      - name: 📤 Upload iOS IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: phan_loai_rac_ios_v0.5.8
+          path: build/ios/iphoneos/phan_loai_rac_v0.5.8.ipa
