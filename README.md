@@ -232,7 +232,7 @@ phan_loai_rac_qua_hinh_anh/
 
 <div align="center">
 
-[![Download APK](https://img.shields.io/badge/↓%20Download%20APK%20v0.5.7-00ff88?style=for-the-badge&logo=android&logoColor=white&labelColor=0c1419)](https://drive.google.com/drive/folders/1swY2GXq4YbI0cJ71cbgdRxbpDXIc1g91?usp=drive_link)
+[![Download APK](https://img.shields.io/badge/↓%20Download%20APK%20v0.5.8-00ff88?style=for-the-badge&logo=android&logoColor=white&labelColor=0c1419)](https://drive.google.com/drive/folders/1swY2GXq4YbI0cJ71cbgdRxbpDXIc1g91?usp=drive_link)
 
 </div>
 
