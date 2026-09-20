@@ -25,7 +25,9 @@ Tất cả các thay đổi đáng chú ý của module **Web Admin** sẽ đư�
   - **Xóa câu hỏi (Delete)**: Xác nhận an toàn trước khi xóa câu hỏi khỏi trò chơi.
 - **Tìm kiếm, Lọc & Phân trang**:
   - Ô tìm kiếm thời gian thực theo tên vật phẩm rác.
-  - Bộ lọc câu hỏi theo Nhóm rác (Hữu cơ, Vô cơ, Tái chế, Nguy hại, v.v.).
+  - **Chuẩn hóa Bộ lọc & Danh mục Nhóm Rác (`waste_group_id`)**: Ánh xạ chuẩn xác theo giá trị số định danh trong database (`1`: Rác tái chế / Recyclable, `2`: Rác hữu cơ / Organic, `3`: Rác nguy hại / Hazardous, `4`: Rác khác, không tái chế / Trash).
+  - Bộ lọc nhóm rác liên kết trực tiếp với database Supabase qua Inner Join `waste_dictionary!inner` giúp phân trang và truy vấn chính xác toàn bộ ngân hàng câu hỏi thay vì chỉ lọc cục bộ trên trang hiện tại.
+  - Cập nhật hiển thị màu sắc Huy hiệu (Badge) phân loại và dropdown chọn nhóm trong modal Tạo / Chỉnh sửa câu hỏi đồng bộ với các mã số 1-4.
   - Bộ lọc trạng thái: Đang bật (Hoạt động) / Đã tắt (Tạm ẩn) / Tất cả.
   - Phân trang 12 câu hỏi/trang giúp tải mượt mà trên mọi thiết bị.
 - **Tầng kết nối API (`dashboard_api.js`)**:

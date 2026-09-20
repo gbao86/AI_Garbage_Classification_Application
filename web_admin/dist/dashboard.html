@@ -18,9 +18,9 @@
             display: none !important;
         }
     </style>
-  <script type="module" crossorigin src="/assets/dashboard-C4r09Doy.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/auth-3JZ8j-Zd.js">
-  <link rel="stylesheet" crossorigin href="/assets/auth-CR69Gu8G.css">
+  <script type="module" crossorigin src="/assets/dashboard-BCyzDIpU.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/auth-BN_Q-61b.js">
+  <link rel="stylesheet" crossorigin href="/assets/auth-CtCi2LJU.css">
 </head>
 
 <body class="bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 font-sans min-h-screen relative overflow-x-hidden transition-colors duration-200">
@@ -466,9 +466,13 @@
                             class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-emerald-500 transition">
                     </div>
                     <div class="flex flex-wrap sm:flex-nowrap gap-2.5">
-                        <select id="filter-q-group" onchange="filterQuestionsClient()"
+                        <select id="filter-q-group" onchange="fetchGameQuestions(1)"
                             class="flex-1 sm:flex-initial bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 outline-none focus:border-emerald-500">
                             <option value="">Tất cả Nhóm rác</option>
+                            <option value="1">1: Rác tái chế (Recyclable)</option>
+                            <option value="2">2: Rác hữu cơ (Organic)</option>
+                            <option value="3">3: Rác nguy hại (Hazardous)</option>
+                            <option value="4">4: Rác khác / Không tái chế (Trash)</option>
                         </select>
                         <select id="filter-q-status" onchange="fetchGameQuestions(1)"
                             class="flex-1 sm:flex-initial bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 outline-none focus:border-emerald-500">
@@ -728,6 +732,10 @@
                     <select id="question-group" required
                         class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium text-slate-900 dark:text-slate-100">
                         <option value="">-- Chọn nhóm phân loại đúng --</option>
+                        <option value="1">1 - Rác tái chế (Recyclable)</option>
+                        <option value="2">2 - Rác hữu cơ (Organic)</option>
+                        <option value="3">3 - Rác nguy hại (Hazardous)</option>
+                        <option value="4">4 - Rác khác / Không tái chế (Trash)</option>
                     </select>
                 </div>
 

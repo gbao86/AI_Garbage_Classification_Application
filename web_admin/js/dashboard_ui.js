@@ -238,21 +238,7 @@ window.fetchWasteGroups = async () => {
         if (select) {
             select.innerHTML = '<option value="">-- Chọn nhóm rác --</option>';
             wasteGroups.forEach(g => {
-                select.innerHTML += `<option value="${g.id}">${g.name_vi}</option>`;
-            });
-        }
-        const qSelect = document.getElementById('question-group');
-        if (qSelect) {
-            qSelect.innerHTML = '<option value="">-- Chọn nhóm phân loại đúng --</option>';
-            wasteGroups.forEach(g => {
-                qSelect.innerHTML += `<option value="${g.id}">${g.name_vi}</option>`;
-            });
-        }
-        const qFilter = document.getElementById('filter-q-group');
-        if (qFilter) {
-            qFilter.innerHTML = '<option value="">Tất cả Nhóm rác</option>';
-            wasteGroups.forEach(g => {
-                qFilter.innerHTML += `<option value="${g.id}">${g.name_vi}</option>`;
+                select.innerHTML += `<option value="${g.id}">${g.id}: ${g.name_vi}</option>`;
             });
         }
     } catch (e) {
@@ -1353,11 +1339,39 @@ window.changeQPage = (delta) => {
     window.fetchGameQuestions(qPage + delta);
 };
 
+const WASTE_GROUP_CONFIG = {
+    1: { id: 1, code: 'recyclable', name: 'Tái chế', badgeClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
+    2: { id: 2, code: 'organic', name: 'Hữu cơ', badgeClass: 'bg-lime-500/10 text-lime-400 border-lime-500/30' },
+    3: { id: 3, code: 'hazardous', name: 'Nguy hại', badgeClass: 'bg-rose-500/10 text-rose-400 border-rose-500/30' },
+    4: { id: 4, code: 'trash', name: 'Không tái chế', badgeClass: 'bg-amber-500/10 text-amber-400 border-amber-500/30' }
+};
+
+function resolveQuestionGroupId(q) {
+    const dict = Array.isArray(q.waste_dictionary) 
+        ? (q.waste_dictionary[0] || {}) 
+        : (q.waste_dictionary || {});
+    
+    let raw = dict.waste_group_id ?? dict.waste_groups?.id ?? q.payload?.waste_group_id;
+    if (raw !== undefined && raw !== null && raw !== '') {
+        const num = parseInt(raw);
+        if (!isNaN(num) && num >= 1 && num <= 4) return num;
+    }
+
+    const code = (dict.waste_groups?.code || q.payload?.correctCategory || q.payload?.category || '').toLowerCase();
+    if (code === 'recyclable') return 1;
+    if (code === 'organic') return 2;
+    if (code === 'hazardous') return 3;
+    if (code === 'trash') return 4;
+
+    return 4;
+}
+
 window.fetchGameQuestions = async (page = 1) => {
     qPage = page;
     const grid = document.getElementById('grid-game-questions');
     const loader = document.getElementById('loader-game-questions');
     const statusFilter = document.getElementById('filter-q-status')?.value;
+    const groupFilter = document.getElementById('filter-q-group')?.value;
 
     if (!grid) return;
     grid.innerHTML = '';
@@ -1370,7 +1384,8 @@ window.fetchGameQuestions = async (page = 1) => {
         const { data, count } = await api.apiFetchGameQuestions(
             fromIndex,
             toIndex,
-            statusFilter === '' ? null : statusFilter
+            statusFilter === '' ? null : statusFilter,
+            groupFilter === '' ? null : groupFilter
         );
         if (loader) loader.classList.add('hidden');
         allGameQuestions = data || [];
@@ -1399,11 +1414,10 @@ function renderGameQuestions(questions) {
         const dict = Array.isArray(q.waste_dictionary) 
             ? (q.waste_dictionary[0] || {}) 
             : (q.waste_dictionary || {});
-        const group = Array.isArray(dict.waste_groups) 
-            ? (dict.waste_groups[0] || {}) 
-            : (dict.waste_groups || {});
+        const groupId = resolveQuestionGroupId(q);
+        const groupInfo = WASTE_GROUP_CONFIG[groupId] || WASTE_GROUP_CONFIG[4];
+        const groupName = groupInfo.name;
         const name = dict.name_vi || q.payload?.name_vi || 'Chưa đặt tên';
-        const groupName = group.name_vi || 'Chưa phân loại';
         const imageUrl = dict.image_url || q.payload?.image_url || '';
         const funFact = dict.fun_fact || q.payload?.fun_fact || '';
         const isActive = q.is_active;
@@ -1432,7 +1446,7 @@ function renderGameQuestions(questions) {
 
                 <!-- Waste Group Badge -->
                 <div class="absolute top-3 left-3">
-                    <span class="px-2.5 py-1 text-[11px] font-black rounded-lg bg-slate-900/80 backdrop-blur-sm text-emerald-400 border border-emerald-500/30">
+                    <span class="px-2.5 py-1 text-[11px] font-black rounded-lg bg-slate-900/80 backdrop-blur-sm ${groupInfo.badgeClass} border">
                         ${escapeHTML(groupName)}
                     </span>
                 </div>
@@ -1519,10 +1533,10 @@ window.filterQuestionsClient = () => {
             ? (q.waste_dictionary[0] || {}) 
             : (q.waste_dictionary || {});
         const name = (dict.name_vi || q.payload?.name_vi || '').toLowerCase();
-        const groupId = String(dict.waste_group_id || q.payload?.waste_group_id || '');
+        const groupId = resolveQuestionGroupId(q);
 
         const matchSearch = !search || name.includes(search);
-        const matchGroup = !group || groupId === String(group);
+        const matchGroup = !group || String(groupId) === String(group);
         return matchSearch && matchGroup;
     });
 
@@ -1543,20 +1557,11 @@ window.updateQuestionImagePreview = (url) => {
 };
 
 window.openCreateQuestionModal = () => {
-    // Ensure groups are loaded in dropdown
-    const qSelect = document.getElementById('question-group');
-    if (qSelect && qSelect.options.length <= 1 && wasteGroups && wasteGroups.length > 0) {
-        qSelect.innerHTML = '<option value="">-- Chọn nhóm phân loại đúng --</option>';
-        wasteGroups.forEach(g => {
-            qSelect.innerHTML += `<option value="${g.id}">${g.name_vi}</option>`;
-        });
-    }
-
     document.getElementById('question-modal-title').innerText = '+ Thêm câu hỏi mới vào Game';
     document.getElementById('question-id').value = '';
     document.getElementById('question-dict-id').value = '';
     document.getElementById('question-name').value = '';
-    if (qSelect) qSelect.value = '';
+    document.getElementById('question-group').value = '';
     document.getElementById('question-image-url').value = '';
     document.getElementById('question-funfact').value = '';
     document.getElementById('question-is-active').checked = true;
@@ -1579,22 +1584,13 @@ window.openEditQuestionModal = (id) => {
         ? (q.waste_dictionary[0] || {}) 
         : (q.waste_dictionary || {});
 
-    // Ensure groups are loaded in dropdown
-    const qSelect = document.getElementById('question-group');
-    if (qSelect && qSelect.options.length <= 1 && wasteGroups && wasteGroups.length > 0) {
-        qSelect.innerHTML = '<option value="">-- Chọn nhóm phân loại đúng --</option>';
-        wasteGroups.forEach(g => {
-            qSelect.innerHTML += `<option value="${g.id}">${g.name_vi}</option>`;
-        });
-    }
-
     document.getElementById('question-modal-title').innerText = '✏️ Chỉnh sửa câu hỏi Game';
     document.getElementById('question-id').value = q.id;
     document.getElementById('question-dict-id').value = q.waste_dictionary_id || dict.id || '';
     document.getElementById('question-name').value = dict.name_vi || q.payload?.name_vi || '';
     
-    const selectedGroupId = dict.waste_group_id || q.payload?.waste_group_id || '';
-    if (qSelect) qSelect.value = String(selectedGroupId);
+    const groupId = resolveQuestionGroupId(q);
+    document.getElementById('question-group').value = String(groupId);
 
     const imgUrl = dict.image_url || q.payload?.image_url || '';
     document.getElementById('question-image-url').value = imgUrl;

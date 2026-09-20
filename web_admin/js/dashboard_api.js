@@ -275,9 +275,29 @@ export async function apiRejectCollectionPoint(id) {
 /**
  * Fetch game questions with dictionary items and waste groups.
  */
-export async function apiFetchGameQuestions(fromIndex, toIndex, isActive) {
-    let query = db.from('game_questions')
-        .select(`
+export async function apiFetchGameQuestions(fromIndex, toIndex, isActive, groupId) {
+    const selectClause = groupId
+        ? `
+            id,
+            waste_dictionary_id,
+            game_types,
+            payload,
+            is_active,
+            created_at,
+            waste_dictionary!inner (
+                id,
+                name_vi,
+                image_url,
+                fun_fact,
+                waste_group_id,
+                waste_groups (
+                    id,
+                    code,
+                    name_vi
+                )
+            )
+        `
+        : `
             id,
             waste_dictionary_id,
             game_types,
@@ -296,10 +316,17 @@ export async function apiFetchGameQuestions(fromIndex, toIndex, isActive) {
                     name_vi
                 )
             )
-        `, { count: 'exact' });
+        `;
+
+    let query = db.from('game_questions')
+        .select(selectClause, { count: 'exact' });
 
     if (isActive !== null && isActive !== undefined && isActive !== '') {
         query = query.eq('is_active', isActive === 'true' || isActive === true);
+    }
+
+    if (groupId !== null && groupId !== undefined && groupId !== '') {
+        query = query.eq('waste_dictionary.waste_group_id', parseInt(groupId));
     }
 
     const { data, count, error } = await query
