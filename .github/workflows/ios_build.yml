@@ -47,10 +47,10 @@ jobs:
           cd build/ios/iphoneos
           mkdir -p Payload
           cp -r Runner.app Payload/
-          zip -r phan_loai_rac_v0.5.8.ipa Payload
+          zip -r phan_loai_rac_v0.5.9.ipa Payload
 
       - name: 📤 Upload iOS IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: phan_loai_rac_ios_v0.5.8
-          path: build/ios/iphoneos/phan_loai_rac_v0.5.8.ipa
+          name: phan_loai_rac_ios_v0.5.9
+          path: build/ios/iphoneos/phan_loai_rac_v0.5.9.ipa
