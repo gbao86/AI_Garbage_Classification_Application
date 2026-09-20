@@ -6,6 +6,35 @@ Tất cả các thay đổi đáng chú ý của module **Web Admin** sẽ đư�
 
 ## [0.1.3] - 2026-09-21
 
+### 🎮 Quản lý Ngân hàng Câu hỏi Game Quiz (Game Questions Management)
+- **Tab Quản trị mới trên Sidebar**: Bổ sung tab **Bộ câu hỏi Game** (`game_questions`) với icon puzzle trực quan, hỗ trợ quản lý toàn diện ngân hàng câu hỏi phân loại rác cho tính năng Game Quiz trên ứng dụng di động.
+- **Biên soạn & Thêm câu hỏi trực tiếp qua Modal (Thay thế nhập liệu thủ công qua SQL Supabase)**:
+  - Cho phép Admin thêm câu hỏi mới trực tiếp từ giao diện web mà không cần phải truy cập Supabase viết câu lệnh SQL thủ công.
+  - **Form nhập liệu thông minh (`#question-modal`)**:
+    - Tên vật phẩm / loại rác (`name_vi`).
+    - Nhóm phân loại đúng (`waste_group_id` nạp tự động từ danh mục nhóm rác hệ thống).
+    - Link hình ảnh từ internet (URL bên ngoài giúp tối ưu dung lượng lưu trữ CSDL Supabase).
+    - Khung xem trước hình ảnh trực tiếp (Live Image Preview) kèm cơ chế fallback thông minh khi link ảnh lỗi.
+    - Kiến thức bổ sung / Mẹo sống xanh (`fun_fact`).
+    - Công tắc kích hoạt / tạm ẩn câu hỏi (`is_active`).
+  - Tự động sinh `slug` tiếng Việt chuẩn hóa kết hợp hậu tố bảo mật ngẫu nhiên (`generateSecureRandomString`) để đảm bảo tính toàn vẹn dữ liệu trong `waste_dictionary`.
+  - Tự động tạo bản ghi trong `waste_dictionary` và liên kết với `game_questions` chỉ qua 1 lần nhấn Lưu.
+- **Thao tác nhanh trên từng Card câu hỏi**:
+  - **Kích hoạt / Tạm tắt tức thì (1-Click Toggle)**: Đổi trạng thái hiển thị câu hỏi trong Game chỉ với một chạm mà không cần mở form.
+  - **Chỉnh sửa câu hỏi (Edit Modal)**: Đổ dữ liệu hiện tại lên modal để sửa tên, nhóm rác, link ảnh, mẹo sống xanh và trạng thái kích hoạt.
+  - **Xóa câu hỏi (Delete)**: Xác nhận an toàn trước khi xóa câu hỏi khỏi trò chơi.
+- **Tìm kiếm, Lọc & Phân trang**:
+  - Ô tìm kiếm thời gian thực theo tên vật phẩm rác.
+  - Bộ lọc câu hỏi theo Nhóm rác (Hữu cơ, Vô cơ, Tái chế, Nguy hại, v.v.).
+  - Bộ lọc trạng thái: Đang bật (Hoạt động) / Đã tắt (Tạm ẩn) / Tất cả.
+  - Phân trang 12 câu hỏi/trang giúp tải mượt mà trên mọi thiết bị.
+- **Tầng kết nối API (`dashboard_api.js`)**:
+  - Thêm `apiFetchGameQuestions`: Truy vấn danh sách câu hỏi kèm dữ liệu kết nối lồng nhau (`waste_dictionary` & `waste_groups`).
+  - Thêm `apiInsertGameQuestion`: Tạo mới đồng thời trong `waste_dictionary` và `game_questions`.
+  - Thêm `apiUpdateGameQuestion`: Cập nhật đồng bộ thông tin từ điển và câu hỏi game.
+  - Thêm `apiToggleGameQuestionActive`: Đổi trạng thái `is_active` nhanh chóng.
+  - Thêm `apiDeleteGameQuestion`: Xóa câu hỏi an toàn khỏi CSDL.
+
 ### 📍 Quản lý & Thẩm định Điểm thu gom Cộng đồng (Community Collection Points Approval)
 - **Tab Quản trị mới trên Sidebar**: Bổ sung tab **Điểm thu gom** (`collection_points`) với giao diện Glassmorphism hiện đại, đồng bộ hoàn toàn với ngôn ngữ thiết kế tổng thể của EcoSort Admin.
 - **Duyệt điểm rác đóng góp từ cộng đồng**:

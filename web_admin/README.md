@@ -40,6 +40,7 @@
 Dự án vận hành trên nền tảng **Vite** kết nối trực tiếp với **Supabase Cloud BaaS** nhằm:
 - 📥 **Duyệt báo cáo rác:** Thẩm định dữ liệu hình ảnh & nhãn AI từ người dùng ứng dụng di động, tự động slug hóa và đẩy dữ liệu chuẩn vào Từ điển rác (`waste_dictionary`).
 - 📍 **Duyệt điểm thu gom cộng đồng:** Thẩm định, xác thực hoặc gỡ bỏ các điểm rác do người dân đóng góp trên bản đồ, giúp dữ liệu hiển thị tức thì trên ứng dụng di động.
+- 🎮 **Quản lý Bộ câu hỏi Game Quiz:** Biên soạn và cập nhật ngân hàng câu hỏi phân loại rác cho trò chơi trực tiếp qua Modal, hỗ trợ link ảnh internet và xem trước hình ảnh thời gian thực mà không cần viết lệnh SQL.
 - 👥 **Quản trị người dùng:** Tra cứu, phân trang, khóa tài khoản (Ban 100 năm), mở khóa, đặt lại mật khẩu và kiểm soát quyền hạn người dùng tức thì.
 - 🛡️ **Phê duyệt 2 bước (Double-Approval):** Cơ chế bảo mật đa chữ ký cho các hành động đặc quyền (Nâng/Hạ quyền Admin, Xóa dữ liệu nhạy cảm, Bật/Tắt Kill Switch khẩn cấp).
 - ⚙️ **Cấu hình hệ thống:** Điều chỉnh thời gian bảo trì, điểm số thưởng trò chơi và mô hình AI Gemini toàn hệ thống.
@@ -129,6 +130,12 @@ Hệ thống bảo mật **Role-Based Access Control (RBAC)** 3 tầng vững ch
 - Thẩm định trực quan qua ảnh chụp thực tế, tên, địa chỉ, loại rác thu gom, ngày gửi và ghi chú của người dân.
 - Hỗ trợ thao tác **Duyệt nhanh** và **Từ chối nhanh** ngay trên từng Card hoặc thẩm định chi tiết qua Modal.
 - Điểm sau khi được duyệt (`is_verified = true`) sẽ tự động xuất hiện công khai trên bản đồ EcoSort Flutter của tất cả người dùng.
+
+### 🎮 6. Quản lý Ngân hàng Câu hỏi Game Quiz (Game Questions Management)
+- Biên soạn và thêm câu hỏi phân loại rác mới vào Game Quiz trên ứng dụng di động trực tiếp qua Modal trên Web Admin (thay thế thao tác thêm thủ công qua SQL trên Supabase).
+- Nhập thông tin chi tiết: tên vật phẩm, nhóm phân loại đúng, link ảnh internet (tối ưu dung lượng lưu trữ CSDL) với khung xem trước hình ảnh thời gian thực, kiến thức bổ sung / mẹo sống xanh (Fun Fact) và trạng thái kích hoạt.
+- Thao tác nhanh 1 chạm: Bật/Tắt hoạt động câu hỏi ngay trên thẻ Card, chỉnh sửa dữ liệu và xóa câu hỏi an toàn.
+- Hỗ trợ tìm kiếm theo tên vật phẩm rác, bộ lọc theo nhóm rác, lọc theo trạng thái hoạt động và phân trang linh hoạt.
 
 ---
 

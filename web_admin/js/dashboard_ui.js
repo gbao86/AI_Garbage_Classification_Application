@@ -235,10 +235,26 @@ window.fetchWasteGroups = async () => {
     try {
         wasteGroups = await api.apiFetchWasteGroups();
         const select = document.getElementById('approve-group');
-        select.innerHTML = '<option value="">-- Chọn nhóm rác --</option>';
-        wasteGroups.forEach(g => {
-            select.innerHTML += `<option value="${g.id}">${g.name_vi}</option>`;
-        });
+        if (select) {
+            select.innerHTML = '<option value="">-- Chọn nhóm rác --</option>';
+            wasteGroups.forEach(g => {
+                select.innerHTML += `<option value="${g.id}">${g.name_vi}</option>`;
+            });
+        }
+        const qSelect = document.getElementById('question-group');
+        if (qSelect) {
+            qSelect.innerHTML = '<option value="">-- Chọn nhóm phân loại đúng --</option>';
+            wasteGroups.forEach(g => {
+                qSelect.innerHTML += `<option value="${g.id}">${g.name_vi}</option>`;
+            });
+        }
+        const qFilter = document.getElementById('filter-q-group');
+        if (qFilter) {
+            qFilter.innerHTML = '<option value="">Tất cả Nhóm rác</option>';
+            wasteGroups.forEach(g => {
+                qFilter.innerHTML += `<option value="${g.id}">${g.name_vi}</option>`;
+            });
+        }
     } catch (e) {
         console.error('Lỗi tải nhóm rác:', e);
     }
@@ -343,6 +359,7 @@ window.switchTab = (tab) => {
     if (tab === 'privileged_actions') window.fetchPrivilegedActions(1);
     if (tab === 'settings') window.fetchSystemSettings();
     if (tab === 'collection_points') window.fetchCollectionPoints(1);
+    if (tab === 'game_questions') window.fetchGameQuestions(1);
 };
 
 // -------------------------------------------------------------
@@ -1304,6 +1321,330 @@ window.approveCPFromModal = async (id) => {
 window.rejectCPFromModal = async (id) => {
     await window.rejectCPDirect(id);
     closeCPDetailModal();
+};
+
+// -------------------------------------------------------------
+// TAB 6: GAME QUESTIONS MANAGEMENT
+// -------------------------------------------------------------
+let qPage = 1;
+const Q_LIMIT = 12;
+let allGameQuestions = [];
+
+function updateQPagination(total) {
+    const btnPrev = document.getElementById('btn-q-prev');
+    const btnNext = document.getElementById('btn-q-next');
+    const info = document.getElementById('q-page-info');
+
+    const start = (qPage - 1) * Q_LIMIT + 1;
+    const end = Math.min(qPage * Q_LIMIT, total);
+
+    if (total === 0) {
+        if (info) info.innerText = 'Không có dữ liệu';
+        if (btnPrev) btnPrev.disabled = true;
+        if (btnNext) btnNext.disabled = true;
+    } else {
+        if (info) info.innerText = `Hiển thị ${start}-${end} trên ${total}`;
+        if (btnPrev) btnPrev.disabled = qPage === 1;
+        if (btnNext) btnNext.disabled = end >= total;
+    }
+}
+
+window.changeQPage = (delta) => {
+    window.fetchGameQuestions(qPage + delta);
+};
+
+window.fetchGameQuestions = async (page = 1) => {
+    qPage = page;
+    const grid = document.getElementById('grid-game-questions');
+    const loader = document.getElementById('loader-game-questions');
+    const statusFilter = document.getElementById('filter-q-status')?.value;
+
+    if (!grid) return;
+    grid.innerHTML = '';
+    if (loader) loader.classList.remove('hidden');
+
+    const fromIndex = (qPage - 1) * Q_LIMIT;
+    const toIndex = fromIndex + Q_LIMIT - 1;
+
+    try {
+        const { data, count } = await api.apiFetchGameQuestions(
+            fromIndex,
+            toIndex,
+            statusFilter === '' ? null : statusFilter
+        );
+        if (loader) loader.classList.add('hidden');
+        allGameQuestions = data || [];
+
+        renderGameQuestions(allGameQuestions);
+        updateQPagination(count || 0);
+    } catch (e) {
+        if (loader) loader.classList.add('hidden');
+        console.error('Lỗi tải câu hỏi game:', e);
+        grid.innerHTML = `<div class="col-span-full py-16 text-center text-rose-500 font-bold">Lỗi tải danh sách: ${escapeHTML(e.message)}</div>`;
+        updateQPagination(0);
+    }
+};
+
+function renderGameQuestions(questions) {
+    const grid = document.getElementById('grid-game-questions');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    if (!questions || questions.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold">Chưa có câu hỏi nào trong hệ thống</div>`;
+        return;
+    }
+
+    questions.forEach(q => {
+        const dict = q.waste_dictionary || {};
+        const group = dict.waste_groups || {};
+        const name = dict.name_vi || 'Chưa đặt tên';
+        const groupName = group.name_vi || 'Chưa phân loại';
+        const imageUrl = dict.image_url || q.payload?.image_url || '';
+        const funFact = dict.fun_fact || q.payload?.fun_fact || '';
+        const isActive = q.is_active;
+        const dictId = q.waste_dictionary_id || dict.id || '';
+
+        const card = document.createElement('div');
+        card.className = 'glass-panel rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col hover:border-emerald-500/50 transition-all duration-300 shadow-sm';
+
+        card.innerHTML = `
+            <!-- Card Image -->
+            <div class="h-44 bg-slate-100 dark:bg-slate-950 relative group overflow-hidden border-b border-slate-200 dark:border-slate-800 flex items-center justify-center">
+                ${imageUrl ? `
+                    <img src="${escapeHTML(imageUrl)}" alt="${escapeHTML(name)}"
+                        class="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+                        onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'flex flex-col items-center justify-center h-full text-slate-400 p-4 text-center\\'><svg class=\\'w-10 h-10 mb-2 opacity-50\\' fill=\\'none\\' stroke=\\'currentColor\\' viewBox=\\'0 0 24 24\\'><path stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' stroke-width=\\'1.5\\' d=\\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\\'/></svg><span class=\\'text-xs font-semibold\\'>Link ảnh lỗi / Đã gỡ</span></div>';">
+                ` : `
+                    <div class="flex flex-col items-center justify-center h-full text-slate-400 p-4 text-center">
+                        <svg class="w-10 h-10 mb-2 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <span class="text-xs font-semibold">Chưa có ảnh</span>
+                    </div>
+                `}
+
+                <!-- Waste Group Badge -->
+                <div class="absolute top-3 left-3">
+                    <span class="px-2.5 py-1 text-[11px] font-black rounded-lg bg-slate-900/80 backdrop-blur-sm text-emerald-400 border border-emerald-500/30">
+                        ${escapeHTML(groupName)}
+                    </span>
+                </div>
+
+                <!-- Status Badge -->
+                <div class="absolute top-3 right-3">
+                    ${isActive
+                        ? '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-emerald-500 text-white shadow-sm">Đang bật</span>'
+                        : '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-slate-700 text-slate-200 shadow-sm">Đã tắt</span>'
+                    }
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white line-clamp-1 font-heading mb-1.5" title="${escapeHTML(name)}">
+                        ${escapeHTML(name)}
+                    </h3>
+                    <div class="min-h-[48px] bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/60 mb-4">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Kiến thức / Fun Fact:</span>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 italic line-clamp-2">
+                            ${funFact ? escapeHTML(funFact) : '<span class="text-slate-400">Không có mẹo kiến thức đi kèm.</span>'}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card Actions -->
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                    <!-- Quick Active Toggle -->
+                    <button onclick="window.toggleQuestionActive('${escapeHTML(q.id)}', ${isActive})"
+                        class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${isActive
+                            ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
+                            : 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'}">
+                        <span>${isActive ? '⏸ Tạm tắt' : '▶ Kích hoạt'}</span>
+                    </button>
+
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="window.openEditQuestionModal('${escapeHTML(q.id)}')"
+                            class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-bold transition"
+                            title="Chỉnh sửa câu hỏi">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </button>
+                        <button onclick="window.deleteGameQuestion('${escapeHTML(q.id)}', '${escapeHTML(dictId)}')"
+                            class="p-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-lg text-xs font-bold transition"
+                            title="Xóa câu hỏi">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+window.filterQuestionsClient = () => {
+    const search = (document.getElementById('filter-q-search')?.value || '').toLowerCase().trim();
+    const group = document.getElementById('filter-q-group')?.value;
+
+    const filtered = allGameQuestions.filter(q => {
+        const dict = q.waste_dictionary || {};
+        const name = (dict.name_vi || '').toLowerCase();
+        const groupId = dict.waste_group_id || '';
+
+        const matchSearch = !search || name.includes(search);
+        const matchGroup = !group || groupId === group;
+        return matchSearch && matchGroup;
+    });
+
+    renderGameQuestions(filtered);
+};
+
+window.updateQuestionImagePreview = (url) => {
+    const box = document.getElementById('question-preview-box');
+    if (!box) return;
+    if (!url || !url.trim()) {
+        box.innerHTML = '<span class="text-slate-400 text-xs font-medium">Xem trước ảnh sẽ hiển thị ở đây</span>';
+        return;
+    }
+    box.innerHTML = `
+        <img src="${escapeHTML(url.trim())}" alt="Xem trước" class="h-full w-full object-contain p-2"
+            onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\\'text-rose-500 text-xs font-semibold\\'>⚠️ URL ảnh không tải được hoặc link không hợp lệ</span>';">
+    `;
+};
+
+window.openCreateQuestionModal = () => {
+    document.getElementById('question-modal-title').innerText = 'Thêm câu hỏi vào Game';
+    document.getElementById('question-id').value = '';
+    document.getElementById('question-dict-id').value = '';
+    document.getElementById('question-name').value = '';
+    document.getElementById('question-group').value = '';
+    document.getElementById('question-image-url').value = '';
+    document.getElementById('question-funfact').value = '';
+    document.getElementById('question-is-active').checked = true;
+    document.getElementById('btn-save-question').innerText = 'LƯU CÂU HỎI VÀO CSDL';
+
+    window.updateQuestionImagePreview('');
+
+    const modal = document.getElementById('question-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+};
+
+window.openEditQuestionModal = (id) => {
+    const q = allGameQuestions.find(item => item.id === id);
+    if (!q) return;
+
+    const dict = q.waste_dictionary || {};
+
+    document.getElementById('question-modal-title').innerText = 'Chỉnh sửa câu hỏi Game';
+    document.getElementById('question-id').value = q.id;
+    document.getElementById('question-dict-id').value = q.waste_dictionary_id || dict.id || '';
+    document.getElementById('question-name').value = dict.name_vi || '';
+    document.getElementById('question-group').value = dict.waste_group_id || '';
+    const imgUrl = dict.image_url || q.payload?.image_url || '';
+    document.getElementById('question-image-url').value = imgUrl;
+    document.getElementById('question-funfact').value = dict.fun_fact || q.payload?.fun_fact || '';
+    document.getElementById('question-is-active').checked = !!q.is_active;
+    document.getElementById('btn-save-question').innerText = 'CẬP NHẬT CÂU HỎI';
+
+    window.updateQuestionImagePreview(imgUrl);
+
+    const modal = document.getElementById('question-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+};
+
+window.closeQuestionModal = () => {
+    const modal = document.getElementById('question-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+};
+
+window.submitQuestionForm = async () => {
+    const btn = document.getElementById('btn-save-question');
+    const qId = document.getElementById('question-id').value;
+    const dictId = document.getElementById('question-dict-id').value;
+    const nameVi = document.getElementById('question-name').value.trim();
+    const groupId = document.getElementById('question-group').value;
+    const imageUrl = document.getElementById('question-image-url').value.trim();
+    const funFact = document.getElementById('question-funfact').value.trim();
+    const isActive = document.getElementById('question-is-active').checked;
+
+    if (!nameVi || !groupId || !imageUrl) {
+        return alert('Vui lòng nhập tên vật phẩm, chọn nhóm phân loại và dán URL hình ảnh!');
+    }
+
+    btn.disabled = true;
+    const originalText = btn.innerText;
+    btn.innerText = 'ĐANG XỬ LÝ...';
+
+    try {
+        if (qId) {
+            // Update
+            await api.apiUpdateGameQuestion({
+                questionId: qId,
+                dictId,
+                nameVi,
+                groupId,
+                imageUrl,
+                funFact,
+                isActive
+            });
+            alert('Cập nhật câu hỏi thành công!');
+        } else {
+            // Insert new
+            let slug = slugify(nameVi);
+            slug += '-' + generateSecureRandomString(4);
+
+            const { data: { session } } = await db.auth.getSession();
+            const userId = session?.user?.id;
+
+            await api.apiInsertGameQuestion({
+                slug,
+                nameVi,
+                groupId,
+                imageUrl,
+                funFact,
+                isActive,
+                userId
+            });
+            alert('Thêm câu hỏi mới vào Game thành công!');
+        }
+
+        window.closeQuestionModal();
+        window.fetchGameQuestions(qPage);
+    } catch (e) {
+        console.error(e);
+        alert('Lỗi lưu câu hỏi: ' + (e.message || 'Không xác định'));
+    } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+    }
+};
+
+window.toggleQuestionActive = async (id, currentActive) => {
+    try {
+        await api.apiToggleGameQuestionActive(id, !currentActive);
+        window.fetchGameQuestions(qPage);
+    } catch (e) {
+        alert('Lỗi đổi trạng thái: ' + (e.message || 'Không xác định'));
+    }
+};
+
+window.deleteGameQuestion = async (id, dictId) => {
+    if (!confirm('Bạn có chắc muốn xóa câu hỏi này khỏi Game? Thao tác này không thể hoàn tác.')) return;
+    try {
+        await api.apiDeleteGameQuestion(id, dictId);
+        alert('Đã xóa câu hỏi thành công!');
+        window.fetchGameQuestions(qPage);
+    } catch (e) {
+        alert('Lỗi xóa câu hỏi: ' + (e.message || 'Không xác định'));
+    }
 };
 
 // -------------------------------------------------------------

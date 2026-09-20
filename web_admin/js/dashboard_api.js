@@ -267,3 +267,148 @@ export async function apiRejectCollectionPoint(id) {
         .eq('id', id);
     if (error) throw error;
 }
+
+// -------------------------------------------------------------
+// GAME QUESTIONS API
+// -------------------------------------------------------------
+
+/**
+ * Fetch game questions with dictionary items and waste groups.
+ */
+export async function apiFetchGameQuestions(fromIndex, toIndex, isActive) {
+    let query = db.from('game_questions')
+        .select(`
+            id,
+            waste_dictionary_id,
+            game_types,
+            payload,
+            is_active,
+            created_at,
+            waste_dictionary (
+                id,
+                name_vi,
+                image_url,
+                fun_fact,
+                waste_group_id,
+                waste_groups (
+                    id,
+                    code,
+                    name_vi
+                )
+            )
+        `, { count: 'exact' });
+
+    if (isActive !== null && isActive !== undefined && isActive !== '') {
+        query = query.eq('is_active', isActive === 'true' || isActive === true);
+    }
+
+    const { data, count, error } = await query
+        .order('created_at', { ascending: false })
+        .range(fromIndex, toIndex);
+
+    if (error) throw error;
+    return { data: data || [], count };
+}
+
+/**
+ * Insert a new question by first creating a waste_dictionary entry, then game_questions.
+ */
+export async function apiInsertGameQuestion({ slug, nameVi, groupId, imageUrl, funFact, isActive, userId }) {
+    // 1. Insert into waste_dictionary
+    const { data: dict, error: dictErr } = await db.from('waste_dictionary')
+        .insert({
+            slug,
+            name_vi: nameVi,
+            waste_group_id: groupId,
+            image_url: imageUrl,
+            fun_fact: funFact,
+            created_by: userId,
+            is_active: true
+        })
+        .select('id')
+        .single();
+
+    if (dictErr) throw dictErr;
+
+    // 2. Insert into game_questions
+    const { error: qErr } = await db.from('game_questions')
+        .insert({
+            waste_dictionary_id: dict.id,
+            game_types: ['quiz'],
+            payload: {
+                image_url: imageUrl,
+                fun_fact: funFact
+            },
+            is_active: isActive
+        });
+
+    if (qErr) throw qErr;
+}
+
+/**
+ * Update an existing question and its related waste_dictionary item.
+ */
+export async function apiUpdateGameQuestion({ questionId, dictId, nameVi, groupId, imageUrl, funFact, isActive }) {
+    // 1. Update waste_dictionary
+    if (dictId) {
+        const { error: dictErr } = await db.from('waste_dictionary')
+            .update({
+                name_vi: nameVi,
+                waste_group_id: groupId,
+                image_url: imageUrl,
+                fun_fact: funFact,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', dictId);
+
+        if (dictErr) throw dictErr;
+    }
+
+    // 2. Update game_questions
+    const { error: qErr } = await db.from('game_questions')
+        .update({
+            is_active: isActive,
+            payload: {
+                image_url: imageUrl,
+                fun_fact: funFact
+            },
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', questionId);
+
+    if (qErr) throw qErr;
+}
+
+/**
+ * Toggle is_active status of a game question.
+ */
+export async function apiToggleGameQuestionActive(questionId, isActive) {
+    const { error } = await db.from('game_questions')
+        .update({
+            is_active: isActive,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', questionId);
+
+    if (error) throw error;
+}
+
+/**
+ * Delete a game question and optionally its waste_dictionary entry.
+ */
+export async function apiDeleteGameQuestion(questionId, dictId) {
+    const { error: qErr } = await db.from('game_questions')
+        .delete()
+        .eq('id', questionId);
+
+    if (qErr) throw qErr;
+
+    if (dictId) {
+        // Try deleting dictionary item if not referenced elsewhere
+        await db.from('waste_dictionary')
+            .delete()
+            .eq('id', dictId)
+            .catch(() => {});
+    }
+}
+
