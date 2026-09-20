@@ -308,6 +308,7 @@ window.switchTab = (tab) => {
     if (tab === 'users') window.fetchUsers(1);
     if (tab === 'privileged_actions') window.fetchPrivilegedActions(1);
     if (tab === 'settings') window.fetchSystemSettings();
+    if (tab === 'collection_points') window.fetchCollectionPoints(1);
 };
 
 // -------------------------------------------------------------
@@ -1030,6 +1031,237 @@ window.saveSystemSettings = async () => {
         btn.disabled = false;
         btn.innerText = 'LƯU CẤU HÌNH HỆ THỐNG';
     }
+};
+
+// -------------------------------------------------------------
+// TAB 5: COLLECTION POINTS MANAGEMENT
+// -------------------------------------------------------------
+let cpPage = 1;
+const CP_LIMIT = 12;
+let allCollectionPoints = [];
+
+const POINT_TYPE_MAP = {
+    'recycle': { label: 'Tái chế', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
+    'organic': { label: 'Hữu cơ', color: 'bg-lime-500/10 text-lime-400 border-lime-500/30' },
+    'hazardous': { label: 'Nguy hại', color: 'bg-red-500/10 text-red-400 border-red-500/30' },
+    'general': { label: 'Rác chung', color: 'bg-slate-500/10 text-slate-400 border-slate-600/30' },
+    'ewaste': { label: 'Rác điện tử', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
+};
+
+function getCPTypeBadge(type) {
+    const info = POINT_TYPE_MAP[type] || POINT_TYPE_MAP['general'];
+    return `<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg border ${info.color}">${info.label}</span>`;
+}
+
+function updateCPPagination(total) {
+    const btnPrev = document.getElementById('btn-cp-prev');
+    const btnNext = document.getElementById('btn-cp-next');
+    const info = document.getElementById('cp-page-info');
+
+    const start = (cpPage - 1) * CP_LIMIT + 1;
+    const end = Math.min(cpPage * CP_LIMIT, total);
+
+    if (total === 0) {
+        info.innerText = 'Không có dữ liệu';
+        btnPrev.disabled = true;
+        btnNext.disabled = true;
+    } else {
+        info.innerText = `Hiển thị ${start}-${end} trên ${total}`;
+        btnPrev.disabled = cpPage === 1;
+        btnNext.disabled = end >= total;
+    }
+}
+
+window.fetchCollectionPoints = async (page = 1) => {
+    cpPage = page;
+    const grid = document.getElementById('grid-collection-points');
+    const loader = document.getElementById('loader-collection-points');
+    const verifiedFilter = document.getElementById('filter-cp-verified').value;
+
+    grid.innerHTML = '';
+    loader.classList.remove('hidden');
+
+    const fromIndex = (cpPage - 1) * CP_LIMIT;
+    const toIndex = fromIndex + CP_LIMIT - 1;
+
+    try {
+        const { data, count } = await api.apiFetchCollectionPoints(
+            verifiedFilter === '' ? null : verifiedFilter,
+            fromIndex,
+            toIndex
+        );
+        loader.classList.add('hidden');
+        allCollectionPoints = data;
+
+        if (data.length === 0) {
+            grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold">Không có điểm thu gom nào</div>`;
+            updateCPPagination(0);
+            return;
+        }
+
+        data.forEach(point => {
+            const card = document.createElement('div');
+            card.className = 'glass-panel glass-panel-hover rounded-[2rem] border border-slate-800 overflow-hidden flex flex-col';
+
+            const verifiedBadge = point.is_verified
+                ? '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Đã duyệt</span>'
+                : '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 animate-pulse">Chờ duyệt</span>';
+
+            const contributorName = point.profiles?.display_name || 'Ẩn danh';
+            const createdDate = point.created_at ? new Date(point.created_at).toLocaleDateString('vi-VN') : 'N/A';
+
+            card.innerHTML = `
+                <div class="h-44 bg-slate-950 relative group border-b border-slate-800">
+                    ${point.image_url
+                        ? `<img src="${escapeHTML(point.image_url)}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-slate-600\'><svg class=\'w-12 h-12\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z\'></path><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M15 11a3 3 0 11-6 0 3 3 0 016 0z\'></path></svg></div>'">`
+                        : '<div class="w-full h-full flex items-center justify-center text-slate-600"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>'
+                    }
+                    <div class="absolute top-3 right-3">${verifiedBadge}</div>
+                </div>
+                <div class="p-6 flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-black text-white text-lg truncate font-heading">${escapeHTML(point.name || 'Điểm chưa đặt tên')}</h3>
+                        <p class="text-xs text-slate-400 mt-1 line-clamp-2">${escapeHTML(point.address || 'Chưa có địa chỉ')}</p>
+                        <div class="flex items-center gap-2 mt-3">
+                            ${getCPTypeBadge(point.point_type)}
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-800/60">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Đóng góp bởi</span>
+                            <span class="text-xs font-bold text-teal-400">${escapeHTML(contributorName)}</span>
+                        </div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ngày gửi</span>
+                            <span class="text-xs font-bold text-slate-300">${createdDate}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="showCPDetail('${escapeHTML(point.id)}')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl text-xs font-black transition">CHI TIẾT</button>
+                            ${!point.is_verified ? `
+                                <button onclick="approveCPDirect('${escapeHTML(point.id)}')" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-4 rounded-xl font-bold text-xs transition" title="Duyệt nhanh">✓</button>
+                                <button onclick="rejectCPDirect('${escapeHTML(point.id)}')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-4 rounded-xl font-bold text-xs transition" title="Từ chối">✕</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        updateCPPagination(count || data.length);
+    } catch (e) {
+        loader.classList.add('hidden');
+        grid.innerHTML = `<div class="col-span-full p-8 bg-red-950/20 border border-red-900/40 text-red-400 rounded-2xl text-sm font-bold">Lỗi: ${escapeHTML(e.message || 'Không xác định')}</div>`;
+    }
+};
+
+window.changeCPPage = (delta) => {
+    window.fetchCollectionPoints(cpPage + delta);
+};
+
+window.showCPDetail = (id) => {
+    const point = allCollectionPoints.find(p => p.id === id);
+    if (!point) return;
+
+    const content = document.getElementById('cp-detail-content');
+    const contributorName = point.profiles?.display_name || 'Ẩn danh';
+    const createdDate = point.created_at ? new Date(point.created_at).toLocaleString('vi-VN') : 'N/A';
+
+    content.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center min-h-[200px]">
+                ${point.image_url
+                    ? `<img src="${escapeHTML(point.image_url)}" class="w-full h-full object-contain">`
+                    : '<div class="p-10 text-center"><svg class="w-16 h-16 text-slate-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><p class="text-slate-600 font-bold text-xs">KHÔNG CÓ ẢNH</p></div>'
+                }
+            </div>
+            <div class="space-y-4">
+                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tên điểm thu gom</span>
+                    <p class="text-xl font-black text-white mt-1 font-heading">${escapeHTML(point.name || 'Chưa đặt tên')}</p>
+                </div>
+                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loại điểm</span>
+                    <div class="mt-2">${getCPTypeBadge(point.point_type)}</div>
+                </div>
+                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trạng thái</span>
+                    <div class="mt-2">
+                        ${point.is_verified
+                            ? '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Đã duyệt</span>'
+                            : '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 animate-pulse">Chờ duyệt</span>'
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Địa chỉ</span>
+            <p class="text-slate-300 text-sm mt-2 leading-relaxed">${escapeHTML(point.address || 'Chưa có địa chỉ')}</p>
+        </div>
+        ${point.description ? `
+        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mô tả</span>
+            <p class="text-slate-300 text-sm mt-2 leading-relaxed">${escapeHTML(point.description)}</p>
+        </div>
+        ` : ''}
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Người đóng góp</span>
+                <p class="text-teal-400 font-bold mt-1">${escapeHTML(contributorName)}</p>
+            </div>
+            <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ngày gửi</span>
+                <p class="text-slate-300 font-bold mt-1">${createdDate}</p>
+            </div>
+        </div>
+        ${!point.is_verified ? `
+        <div class="pt-6 border-t border-slate-800 flex gap-4">
+            <button onclick="approveCPFromModal('${escapeHTML(point.id)}')" class="flex-[2] bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white py-4 rounded-2xl font-black text-sm transition shadow-lg shadow-emerald-500/25">DUYỆT ĐIỂM THU GOM</button>
+            <button onclick="rejectCPFromModal('${escapeHTML(point.id)}')" class="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 py-4 rounded-2xl font-bold text-sm transition">TỪ CHỐI</button>
+        </div>
+        ` : ''}
+    `;
+
+    document.getElementById('cp-detail-modal').classList.remove('hidden');
+    document.getElementById('cp-detail-modal').classList.add('flex');
+};
+
+window.closeCPDetailModal = () => {
+    document.getElementById('cp-detail-modal').classList.add('hidden');
+    document.getElementById('cp-detail-modal').classList.remove('flex');
+};
+
+window.approveCPDirect = async (id) => {
+    if (!confirm('Duyệt điểm thu gom này? Sau khi duyệt, điểm sẽ hiển thị trên bản đồ cho tất cả người dùng.')) return;
+    try {
+        await api.apiApproveCollectionPoint(id);
+        alert('Đã duyệt thành công! Điểm thu gom sẽ hiển thị trên bản đồ.');
+        window.fetchCollectionPoints(cpPage);
+    } catch (e) {
+        alert('Lỗi duyệt: ' + (e.message || 'Không xác định'));
+    }
+};
+
+window.rejectCPDirect = async (id) => {
+    if (!confirm('Từ chối và xóa điểm thu gom này? Hành động không thể hoàn tác.')) return;
+    try {
+        await api.apiRejectCollectionPoint(id);
+        alert('Đã từ chối và xóa điểm thu gom.');
+        window.fetchCollectionPoints(cpPage);
+    } catch (e) {
+        alert('Lỗi: ' + (e.message || 'Không xác định'));
+    }
+};
+
+window.approveCPFromModal = async (id) => {
+    await window.approveCPDirect(id);
+    closeCPDetailModal();
+};
+
+window.rejectCPFromModal = async (id) => {
+    await window.rejectCPDirect(id);
+    closeCPDetailModal();
 };
 
 // -------------------------------------------------------------

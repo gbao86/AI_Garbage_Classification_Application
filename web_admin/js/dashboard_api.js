@@ -228,3 +228,42 @@ export async function apiSaveSystemSettings({ maintenanceVal, pointsVal, geminiV
         throw new Error('Lỗi cập nhật cấu hình: ' + (err1?.message || err2?.message || err3?.message));
     }
 }
+
+/**
+ * Fetch collection points with optional verified filter and pagination.
+ */
+export async function apiFetchCollectionPoints(isVerified, fromIndex, toIndex) {
+    let query = db.from('collection_points')
+        .select('*, profiles!collection_points_created_by_fkey(display_name)', { count: 'exact' });
+
+    if (isVerified !== null && isVerified !== undefined && isVerified !== '') {
+        query = query.eq('is_verified', isVerified === 'true' || isVerified === true);
+    }
+
+    const { data, count, error } = await query
+        .order('created_at', { ascending: false })
+        .range(fromIndex, toIndex);
+
+    if (error) throw error;
+    return { data: data || [], count };
+}
+
+/**
+ * Approve a collection point (set is_verified to true).
+ */
+export async function apiApproveCollectionPoint(id) {
+    const { error } = await db.from('collection_points')
+        .update({ is_verified: true })
+        .eq('id', id);
+    if (error) throw error;
+}
+
+/**
+ * Reject (delete) a collection point.
+ */
+export async function apiRejectCollectionPoint(id) {
+    const { error } = await db.from('collection_points')
+        .delete()
+        .eq('id', id);
+    if (error) throw error;
+}

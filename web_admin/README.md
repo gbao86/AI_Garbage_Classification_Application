@@ -4,7 +4,7 @@
 
 ### *Hệ thống Quản trị & Điều hành Nội bộ Thế hệ mới cho EcoSort by Bao*
 
-[![Version](https://img.shields.io/badge/version-0.1.2-00ff88?style=for-the-badge&logo=vite&logoColor=white&labelColor=0c1419)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.3-00ff88?style=for-the-badge&logo=vite&logoColor=white&labelColor=0c1419)](./CHANGELOG.md)
 [![Vite](https://img.shields.io/badge/Vite-v8.2.2-646CFF?style=for-the-badge&logo=vite&logoColor=white&labelColor=0c1419)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white&labelColor=0c1419)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-v2.101.1-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white&labelColor=0c1419)](https://supabase.com)
@@ -39,6 +39,7 @@
 
 Dự án vận hành trên nền tảng **Vite** kết nối trực tiếp với **Supabase Cloud BaaS** nhằm:
 - 📥 **Duyệt báo cáo rác:** Thẩm định dữ liệu hình ảnh & nhãn AI từ người dùng ứng dụng di động, tự động slug hóa và đẩy dữ liệu chuẩn vào Từ điển rác (`waste_dictionary`).
+- 📍 **Duyệt điểm thu gom cộng đồng:** Thẩm định, xác thực hoặc gỡ bỏ các điểm rác do người dân đóng góp trên bản đồ, giúp dữ liệu hiển thị tức thì trên ứng dụng di động.
 - 👥 **Quản trị người dùng:** Tra cứu, phân trang, khóa tài khoản (Ban 100 năm), mở khóa, đặt lại mật khẩu và kiểm soát quyền hạn người dùng tức thì.
 - 🛡️ **Phê duyệt 2 bước (Double-Approval):** Cơ chế bảo mật đa chữ ký cho các hành động đặc quyền (Nâng/Hạ quyền Admin, Xóa dữ liệu nhạy cảm, Bật/Tắt Kill Switch khẩn cấp).
 - ⚙️ **Cấu hình hệ thống:** Điều chỉnh thời gian bảo trì, điểm số thưởng trò chơi và mô hình AI Gemini toàn hệ thống.
@@ -123,6 +124,12 @@ Hệ thống bảo mật **Role-Based Access Control (RBAC)** 3 tầng vững ch
 - Bật/Tắt công tắc Ngắt khẩn cấp (`kill_switch`) vô hiệu hóa tính năng ghi API khi có sự cố.
 - Cấu hình hệ số điểm thưởng Gamification & Mô hình AI Gemini toàn hệ thống.
 
+### 📍 5. Quản lý & Thẩm định Điểm thu gom Cộng đồng (Community Collection Points)
+- Tiếp nhận danh sách các điểm bỏ rác do người dùng đóng góp từ bản đồ di động (`is_verified = false`).
+- Thẩm định trực quan qua ảnh chụp thực tế, tên, địa chỉ, loại rác thu gom, ngày gửi và ghi chú của người dân.
+- Hỗ trợ thao tác **Duyệt nhanh** và **Từ chối nhanh** ngay trên từng Card hoặc thẩm định chi tiết qua Modal.
+- Điểm sau khi được duyệt (`is_verified = true`) sẽ tự động xuất hiện công khai trên bản đồ EcoSort Flutter của tất cả người dùng.
+
 ---
 
 ## 🛡️ Bảo mật & An toàn Hệ thống (Zero Vulnerabilities)
@@ -164,6 +171,6 @@ Xem nhật ký lịch sử cập nhật chi tiết theo từng phiên bản tạ
 <div align="center">
 
 Được thiết kế & phát triển với ❤️ bởi **Bao**  
-*EcoSort by Bao Admin v0.1.2 · GPL v3 License*
+*EcoSort by Bao Admin v0.1.3 · GPL v3 License*
 
 </div>

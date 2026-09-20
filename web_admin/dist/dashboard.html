@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoSort Admin - Control Center</title>
+    <title>EcoSort Admin - Control Center</title>
     <script>
         if (localStorage.getItem('ecosort_theme') === 'light') {
             document.documentElement.classList.remove('dark');
@@ -18,9 +18,9 @@
             display: none !important;
         }
     </style>
-  <script type="module" crossorigin src="/assets/dashboard-BfXPq_fZ.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/auth-DSS1MaZ-.js">
-  <link rel="stylesheet" crossorigin href="/assets/auth-BuqWSz0b.css">
+  <script type="module" crossorigin src="/assets/dashboard-BU1UZxYH.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/auth-44BPmAxy.js">
+  <link rel="stylesheet" crossorigin href="/assets/auth-Cxn_3UkE.css">
 </head>
 
 <body class="bg-slate-50 dark:bg-[#070a12] text-slate-800 dark:text-slate-100 font-sans min-h-screen relative overflow-x-hidden transition-colors duration-300">
@@ -77,6 +77,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                     </svg>
                     Cài đặt hệ thống
+                </button>
+                <button onclick="switchTab('collection_points')" id="btn-collection_points"
+                    class="w-full text-left px-4 py-3.5 rounded-xl text-slate-400 font-bold text-sm transition-all duration-200 flex items-center gap-3 hover:bg-slate-800/60 hover:text-slate-200">
+                    <svg class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Điểm thu gom
                 </button>
             </nav>
 
@@ -352,6 +360,48 @@
                     </div>
                 </div>
             </section>
+
+            <!-- TAB COLLECTION POINTS -->
+            <section id="tab-collection_points" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black text-white font-heading">Điểm thu gom Cộng đồng</h2>
+                        <p class="text-slate-400 text-sm font-medium mt-1">Duyệt và quản lý các điểm rác do người dùng đóng góp trên bản đồ</p>
+                    </div>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex justify-between items-center mb-6">
+                    <div class="flex gap-2">
+                        <select id="filter-cp-verified" onchange="fetchCollectionPoints(1)"
+                            class="bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-3 text-sm font-bold text-slate-200 outline-none focus:border-emerald-500">
+                            <option value="">Tất cả Trạng thái</option>
+                            <option value="false" selected>Chờ duyệt</option>
+                            <option value="true">Đã duyệt</option>
+                        </select>
+                    </div>
+                    <button onclick="fetchCollectionPoints(1)"
+                        class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition">Làm mới</button>
+                </div>
+
+                <div id="grid-collection-points" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
+
+                <div id="loader-collection-points" class="text-center py-20 hidden">
+                    <div class="animate-spin inline-block w-8 h-8 border-4 border-slate-800 border-t-emerald-400 rounded-full mb-4"></div>
+                    <p class="text-slate-400 font-bold">Đang tải danh sách điểm thu gom...</p>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-6 glass-panel rounded-2xl border border-slate-800 p-4 flex justify-between items-center">
+                    <span id="cp-page-info" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Đang tải...</span>
+                    <div class="flex gap-3">
+                        <button onclick="changeCPPage(-1)" id="btn-cp-prev" disabled
+                            class="px-5 py-2.5 bg-slate-800 border border-slate-700/80 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Trước</button>
+                        <button onclick="changeCPPage(1)" id="btn-cp-next" disabled
+                            class="px-5 py-2.5 bg-slate-800 border border-slate-700/80 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Sau</button>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -529,6 +579,21 @@
         </div>
     </div>
 
+    <!-- COLLECTION POINT DETAIL MODAL -->
+    <div id="cp-detail-modal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md items-center justify-center p-4 z-[60] hidden flex">
+        <div class="glass-modal rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-white font-heading">Chi tiết Điểm thu gom</h3>
+                <button onclick="closeCPDetailModal()"
+                    class="text-slate-400 hover:text-red-400 bg-slate-800 hover:bg-red-500/20 p-2.5 rounded-xl transition">Đóng</button>
+            </div>
+            <div id="cp-detail-content" class="space-y-6">
+                <!-- Load JS -->
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

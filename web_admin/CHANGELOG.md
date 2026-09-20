@@ -4,6 +4,23 @@ Tất cả các thay đổi đáng chú ý của module **Web Admin** sẽ đư�
 
 Định dạng theo chuẩn [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.1.3] - 2026-09-21
+
+### 📍 Quản lý & Thẩm định Điểm thu gom Cộng đồng (Community Collection Points Approval)
+- **Tab Quản trị mới trên Sidebar**: Bổ sung tab **Điểm thu gom** (`collection_points`) với giao diện Glassmorphism hiện đại, đồng bộ hoàn toàn với ngôn ngữ thiết kế tổng thể của EcoSort Admin.
+- **Duyệt điểm rác đóng góp từ cộng đồng**:
+  - Giải quyết triệt để vấn đề các điểm rác do người dùng gửi từ bản đồ ứng dụng di động (`is_verified = false`) bị tồn đọng chưa có nơi thẩm định.
+  - Lưới hiển thị Card dạng Grid tương thích responsive (1/2/3 cột) hiển thị hình ảnh thực tế, loại rác thu gom, người đóng góp và ngày gửi.
+  - **Duyệt nhanh / Từ chối nhanh**: Các nút thao tác một chạm trực tiếp trên thẻ Card cho các điểm chờ duyệt.
+  - **Modal Chi tiết**: Hỗ trợ xem hình ảnh phóng to, bản đồ địa chỉ, mô tả của người dân và thông tin tài khoản người đóng góp (`profiles.display_name`).
+- **Bộ lọc & Phân trang**:
+  - Hỗ trợ lọc theo trạng thái: *Chờ duyệt*, *Đã duyệt*, *Tất cả*.
+  - Phân trang 12 điểm/trang giúp tải nhanh, tiết kiệm băng thông và tối ưu hiệu năng.
+- **Tầng kết nối API (`dashboard_api.js`)**:
+  - Thêm `apiFetchCollectionPoints`: Truy vấn bảng `collection_points` liên kết `profiles` qua foreign key `collection_points_created_by_fkey`.
+  - Thêm `apiApproveCollectionPoint`: Cập nhật `is_verified: true` giúp điểm thu gom lập tức hiển thị công khai trên bản đồ Flutter cho cộng đồng.
+  - Thêm `apiRejectCollectionPoint`: Loại bỏ điểm thu gom vi phạm hoặc không chính xác khỏi hệ thống.
+
 ---
 
 ## [0.1.2] - 2026-08-29
