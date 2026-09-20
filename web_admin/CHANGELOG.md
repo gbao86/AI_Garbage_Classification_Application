@@ -33,6 +33,9 @@ Tất cả các thay đổi đáng chú ý của module **Web Admin** sẽ đư�
   - Loại bỏ các bóng mờ phát sáng lòe loẹt, góc bo cong quá khổ (`rounded-[2.5rem]`), thay bằng tiêu chuẩn thiết kế phẳng hiện đại, tinh tế (`rounded-xl`, `rounded-2xl`).
   - Tối ưu biểu mẫu nhập liệu, các nút bấm thao tác và bảng dữ liệu chuyên nghiệp.
 
+### 🧠 Cấu hình Trí tuệ Nhân tạo (Gemini AI Model Upgrade)
+- **Nâng cấp Model Gemini 3.8 Flash**: Đồng bộ cấu hình mặc định toàn hệ thống sang `gemini-3.8-flash` (giảm 50% chi phí token API và gia tăng độ chính xác nhận diện phân loại rác).
+
 ---
 
 ## [0.1.2] - 2026-08-29
