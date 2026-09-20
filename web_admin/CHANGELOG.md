@@ -64,6 +64,12 @@ Tất cả các thay đổi đáng chú ý của module **Web Admin** sẽ đư�
   - Loại bỏ các bóng mờ phát sáng lòe loẹt, góc bo cong quá khổ (`rounded-[2.5rem]`), thay bằng tiêu chuẩn thiết kế phẳng hiện đại, tinh tế (`rounded-xl`, `rounded-2xl`).
   - Tối ưu biểu mẫu nhập liệu, các nút bấm thao tác và bảng dữ liệu chuyên nghiệp.
 
+### 🛡️ Nâng cấp Bảo mật & Vá Lỗ hổng Dependency (Dependabot Vulnerability Fixes)
+- 🔒 **Browserslist (`GHSA-73wf-gq98-2v4g` & `GHSA-c83g-rgw3-j3cx`)**: Nâng cấp `browserslist` từ `4.28.2` lên `4.29.0` (vượt ngưỡng yêu cầu `>= 4.28.7`). Khắc phục triệt để lỗ hổng DoS crash tiến trình build và nguy cơ Prototype Pollution qua file cấu hình tùy biến `browserslist-stats.json`.
+- 🔒 **Baseline Browser Mapping (`GHSA-w5vr-8v7q-w6rv`)**: Nâng cấp lên `2.11.25` vá lỗ hổng DoS terminate tiến trình.
+- 🔒 **PostCSS Selector Parser (`GHSA-w9m9-85wc-3x92`)**: Nâng cấp lên `6.1.4` vá lỗi uncontrolled AST recursion.
+- 🔒 **Cập nhật Overrides**: Khóa phiên bản `"browserslist": "^4.29.0"` trong `package.json` đảm bảo dependency luôn an toàn.
+
 ### 🧠 Cấu hình Trí tuệ Nhân tạo (Gemini AI Model Upgrade)
 - **Nâng cấp Model Gemini 3.8 Flash**: Đồng bộ cấu hình mặc định toàn hệ thống sang `gemini-3.8-flash` (giảm 50% chi phí token API và gia tăng độ chính xác nhận diện phân loại rác).
 

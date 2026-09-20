@@ -20,6 +20,7 @@
     "preview": "vite preview"
   },
   "overrides": {
+    "browserslist": "^4.29.0",
     "esbuild": "$esbuild",
     "postcss": "$postcss",
     "vite": "$vite"
