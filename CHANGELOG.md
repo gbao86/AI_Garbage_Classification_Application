@@ -2,6 +2,39 @@
 
 Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
+## [0.5.9] - 2026-09-21
+
+### 🎮 Đại tu Toàn diện Giao diện & Trải nghiệm Kéo thả Game Quiz (Game UI/UX Overhaul & Non-Blocking Flow)
+- 🔴 **Vấn đề trước đây**:
+  - Hộp thoại AlertDialog bật lên chặn màn hình sau mỗi câu kéo đúng/sai, bắt người dùng phải bấm "Tiếp tục" gây đứt gãy nhịp độ chơi (flow break).
+  - Thẻ rác Hero Card bị ép quá nhỏ (~160px) ở trung tâm, hình ảnh bé tí khiến người dùng khó quan sát chất liệu vật phẩm.
+  - 4 nhóm rác đặt ở 4 góc màn hình (trong đó 2 góc trên cùng nằm ngoài tầm với ngón tay cái khi dùng điện thoại 1 tay).
+  - Hiệu ứng kéo thả đơn điệu, thiếu phản hồi xúc giác và thị giác.
+  - Fun Fact bị nhét thô thiển vào popup làm người chơi ức chế muốn bỏ qua.
+- 🛠️ **Giải pháp nâng cấp**:
+  - ⚡ **Luồng chơi mượt mà không ngắt quãng (Non-Blocking Gameplay Flow)**:
+    - Loại bỏ hoàn toàn hộp thoại modal `showDialog` sau mỗi câu trả lời.
+    - Phản hồi tức thì bằng hiệu ứng rung xúc giác chuẩn xác (`HapticFeedback.lightImpact` / `mediumImpact` / `heavyImpact`).
+    - Hiệu ứng điểm số bay nổi mượt mà (`Floating XP Indicator`: `+10 XP` hoặc `🔥 COMBO x3 +15 XP`) bay lên và mờ dần trong 900ms.
+    - Thẻ tiếp theo tự động trượt vào (Slide + Scale in) với độ trễ chuyển cảnh chỉ 360ms.
+  - 🖼️ **Hero Card Kích thước Lớn — Tôn vinh Chủ thể Chính**:
+    - Chiều rộng chiếm ~88% màn hình, chiều cao 220-290px, viền bo tròn 24px sang trọng.
+    - Khung ảnh `CachedNetworkImage` độ nét cao chiếm 70% diện tích thẻ, giúp người chơi soi rõ từng chi tiết nhãn chai, nắp nhựa, bao bì.
+    - Typography rõ nét, hướng dẫn trực quan bằng icon mũi tên trỏ xuống.
+  - 📱 **Vị trí 4 Nhóm Rác Thuận Tay Một Chạm (2x2 Thumb-Friendly Dock)**:
+    - Chuyển toàn bộ 4 nhóm rác xuống nửa dưới màn hình ngay trong vùng ngón tay cái (Thumb Zone).
+    - Bố cục lưới 2 hàng x 2 cột: Hàng 1 (♻️ Tái chế, 🍃 Hữu cơ), Hàng 2 (☠️ Nguy hại, 🗑️ Rác khác).
+    - Kèm nhãn phụ giải thích ngắn gọn các loại rác thường gặp giúp người chơi ra quyết định nhanh.
+  - ✨ **Hiệu ứng Kéo thả Sống động (Dynamic Drag & Drop Feedback)**:
+    - Khi nhấc thẻ: Phóng to 1.04x, xoay nghiêng nhẹ, đổ bóng 3D sâu (`elevation 28`).
+    - Khi rê vào ô rác (`isHovered`): Ô rác phóng to 1.08x với animation nảy `Curves.easeOutBack`, viền sáng phát quang (glow) theo màu đặc trưng của nhóm, rung tick nhẹ `HapticFeedback.selectionClick()`.
+  - 💡 **Tiếp cận Fun Fact Chuyên nghiệp 3 Tầng**:
+    - **Tầng 1 (In-Game Micro Capsule)**: Dải capsule mỏng hiển thị tóm tắt kiến thức của món rác vừa giải ở cạnh dưới, không che khuất và không cản trở tay chơi tiếp.
+    - **Tầng 2 (Nút Gợi ý trên Thẻ)**: Nút `💡 Gợi ý` góc thẻ rác cho phép người chơi xem mẹo nhận diện nếu đang phân vân.
+    - **Tầng 3 (Sổ tay Kiến thức Xanh sau Vòng Đấu - Round Summary Sheet)**: Mỗi hiệp gồm 10 câu. Kết thúc vòng sẽ mở một Bottom Sheet tổng kết đẹp mắt: thống kê điểm, streak, kèm danh sách 10 món rác vừa làm với ảnh, huy hiệu phân loại và **Fun Fact đầy đủ** để người chơi thư giãn đọc học tập.
+
+---
+
 ## [0.5.8] - 2026-08-31
 
 ### 🛠️ Tối ưu hóa Tương thích Đa Thiết bị & Khắc phục Lỗi Văng App trên OS 32-bit (Multi-Device Adaptive Architecture & 32-bit OS Crash Fix)
