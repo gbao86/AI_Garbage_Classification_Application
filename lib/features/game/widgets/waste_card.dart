@@ -133,10 +133,10 @@ class WasteCard extends StatelessWidget {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.touch_app_rounded, color: Colors.white, size: 13),
+                          Icon(Icons.ads_click_rounded, color: Colors.white, size: 13),
                           SizedBox(width: 4),
                           Text(
-                            'KÉO ĐỂ PHÂN LOẠI',
+                            'BẤM CHỌN NHÓM ĐÚNG',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 10,
@@ -282,13 +282,13 @@ class WasteCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.arrow_downward_rounded, size: 14, color: subtextColor),
+                      Icon(Icons.touch_app_rounded, size: 14, color: subtextColor),
                       const SizedBox(width: 4),
                       Text(
-                        'Kéo thả vào thùng rác đúng bên dưới',
+                        'Bấm chọn 1 trong 4 nhóm bên dưới 👇',
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                           color: subtextColor,
                         ),
                       ),

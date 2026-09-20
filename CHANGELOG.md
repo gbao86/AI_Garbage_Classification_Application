@@ -25,9 +25,11 @@ Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
     - Chuyển toàn bộ 4 nhóm rác xuống nửa dưới màn hình ngay trong vùng ngón tay cái (Thumb Zone).
     - Bố cục lưới 2 hàng x 2 cột: Hàng 1 (♻️ Tái chế, 🍃 Hữu cơ), Hàng 2 (☠️ Nguy hại, 🗑️ Rác khác).
     - Kèm nhãn phụ giải thích ngắn gọn các loại rác thường gặp giúp người chơi ra quyết định nhanh.
-  - ✨ **Hiệu ứng Kéo thả Sống động (Dynamic Drag & Drop Feedback)**:
-    - Khi nhấc thẻ: Phóng to 1.04x, xoay nghiêng nhẹ, đổ bóng 3D sâu (`elevation 28`).
-    - Khi rê vào ô rác (`isHovered`): Ô rác phóng to 1.08x với animation nảy `Curves.easeOutBack`, viền sáng phát quang (glow) theo màu đặc trưng của nhóm, rung tick nhẹ `HapticFeedback.selectionClick()`.
+  - 👆 **Cơ chế Chạm Bấm Trực Tiếp 1 Chạm (Instant Tap-to-Choose)**:
+    - Loại bỏ hoàn toàn thao tác kéo thả gây che khuất màn hình và khó thao tác.
+    - Người chơi quan sát trọn vẹn thẻ rác to nét ở trên, ngón cái chạm nhẹ trực tiếp vào 1 trong 4 nhóm rác bên dưới để trả lời tức thì.
+    - Hiệu ứng phản hồi thị giác thông minh: Nút được chọn phát sáng xanh/đỏ (`✓` / `❌`), nút đúng tự động gợi ý màu xanh nếu chọn sai, giúp người dùng học hỏi ngay tại chỗ.
+    - Thẻ tự động trượt sang câu tiếp theo siêu tốc (320ms khi đúng, 550ms khi sai), giữ trọn vẹn nhịp độ game.
   - 💡 **Tiếp cận Fun Fact Chuyên nghiệp 3 Tầng**:
     - **Tầng 1 (In-Game Micro Capsule)**: Dải capsule mỏng hiển thị tóm tắt kiến thức của món rác vừa giải ở cạnh dưới, không che khuất và không cản trở tay chơi tiếp.
     - **Tầng 2 (Nút Gợi ý trên Thẻ)**: Nút `💡 Gợi ý` góc thẻ rác cho phép người chơi xem mẹo nhận diện nếu đang phân vân.

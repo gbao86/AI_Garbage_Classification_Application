@@ -38,6 +38,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   static const int _questionTimeLimit = 15;
   final List<QuestionAttemptResult> _roundAttempts = [];
 
+  // Tapped feedback state
+  WasteCategory? _selectedCategory;
+  bool? _isLastSelectionCorrect;
+
   // In-Game Non-blocking Feedback State
   String? _floatingScoreText;
   Color _floatingScoreColor = Colors.green;
@@ -53,8 +57,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   late AnimationController _cardAnimController;
   late Animation<double> _cardScaleAnimation;
   late Animation<double> _cardFadeAnimation;
-
-  WasteCategory? _hoveredCategory;
 
   @override
   void initState() {
@@ -75,7 +77,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 320),
     );
-    _cardScaleAnimation = Tween<double>(begin: 0.88, end: 1.0).animate(
+    _cardScaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(
       CurvedAnimation(parent: _cardAnimController, curve: Curves.easeOutBack),
     );
     _cardFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -216,7 +218,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       isError: true,
     );
 
-    _advanceToNextQuestion();
+    _advanceToNextQuestion(isCorrect: false);
   }
 
   String _labelForCategory(WasteCategory category) {
@@ -232,18 +234,23 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
   }
 
-  void _checkAnswer(WasteCategory selected, GameProvider provider) {
+  void _selectCategory(WasteCategory category, GameProvider provider) {
     if (_isAnswerLocked || _questions.isEmpty) return;
     _isAnswerLocked = true;
     _timer?.cancel();
 
     final currentQ = _questions[_currentIndex];
-    final isCorrect = selected == currentQ.correctCategory;
+    final isCorrect = category == currentQ.correctCategory;
+
+    setState(() {
+      _selectedCategory = category;
+      _isLastSelectionCorrect = isCorrect;
+    });
 
     _roundAttempts.add(QuestionAttemptResult(
       question: currentQ,
       isCorrect: isCorrect,
-      selectedCategory: selected,
+      selectedCategory: category,
     ));
 
     if (isCorrect) {
@@ -257,10 +264,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       _roundScore += gained;
       provider.addScore(gained);
 
-      // Trigger floating score particle
       _triggerFloatingScore(gained, _streak);
 
-      // Trigger bottom fun fact insight capsule
       if (currentQ.funFact.isNotEmpty) {
         setState(() {
           _currentFunFact = currentQ.funFact;
@@ -280,7 +285,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       );
     }
 
-    _advanceToNextQuestion();
+    _advanceToNextQuestion(isCorrect: isCorrect);
   }
 
   void _triggerFloatingScore(int gained, int streak) {
@@ -305,11 +310,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     });
   }
 
-  void _advanceToNextQuestion() {
-    Timer(const Duration(milliseconds: 360), () {
+  void _advanceToNextQuestion({required bool isCorrect}) {
+    // Shorter delay for correct answers (320ms), slightly longer for wrong answers (550ms) to see the correct group
+    final delayMs = isCorrect ? 320 : 550;
+
+    Timer(Duration(milliseconds: delayMs), () {
       if (!mounted) return;
 
-      // Check if round completed (10 questions reached)
       if (_roundAttempts.length >= _questionsPerRound ||
           _currentIndex >= _questions.length - 1) {
         _showRoundSummary();
@@ -320,6 +327,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         _currentIndex = (_currentIndex + 1) % _questions.length;
         _isAnswerLocked = false;
         _showHint = false;
+        _selectedCategory = null;
+        _isLastSelectionCorrect = null;
       });
 
       _cardAnimController.reset();
@@ -355,6 +364,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             _isAnswerLocked = false;
             _showHint = false;
             _currentFunFact = null;
+            _selectedCategory = null;
+            _isLastSelectionCorrect = null;
             _currentIndex = (_currentIndex + 1) % _questions.length;
           });
           _cardAnimController.reset();
@@ -392,7 +403,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 20),
               Text(
-                'Đang chuẩn bị câu hỏi phân loại...',
+                'Đang nạp bộ câu hỏi phân loại...',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -505,9 +516,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             final availableWidth = constraints.maxWidth;
             final availableHeight = constraints.maxHeight;
 
-            // Dimensions calibrated for thumb zone & large hero card
-            final heroCardWidth = (availableWidth * 0.88).clamp(280.0, 420.0);
-            final heroCardHeight = (availableHeight * 0.44).clamp(210.0, 290.0);
+            // Hero Card dimensions calibrated for full visibility
+            final heroCardWidth = (availableWidth * 0.90).clamp(280.0, 440.0);
+            final heroCardHeight = (availableHeight * 0.46).clamp(220.0, 310.0);
 
             return Column(
               children: [
@@ -516,20 +527,18 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   roundProgress: roundProgress,
                   timerRatio: timerRatio,
                   isDark: isDark,
-                  availableWidth: availableWidth,
                 ),
 
                 // In-Game Floating Feedback Banner (Non-blocking)
                 _buildNotificationPill(isDark),
 
-                // Center: Big Hero Card Area (The primary visual subject)
+                // Center: Big Hero Card Area (The primary visual subject, completely unobscured)
                 Expanded(
                   child: Center(
                     child: Stack(
                       alignment: Alignment.center,
                       clipBehavior: Clip.none,
                       children: [
-                        // Main Draggable Hero Card
                         ScaleTransition(
                           scale: _cardScaleAnimation,
                           child: FadeTransition(
@@ -537,59 +546,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             child: SizedBox(
                               width: heroCardWidth,
                               height: heroCardHeight,
-                              child: Draggable<GameQuestion>(
-                                data: currentQ,
-                                maxSimultaneousDrags: _isAnswerLocked ? 0 : 1,
-                                onDragStarted: () {
-                                  HapticFeedback.selectionClick();
+                              child: WasteCard(
+                                question: currentQ,
+                                showHint: _showHint,
+                                onToggleHint: () {
+                                  setState(() => _showHint = !_showHint);
                                 },
-                                onDragEnd: (details) {
-                                  setState(() => _hoveredCategory = null);
-                                },
-                                feedback: Material(
-                                  color: Colors.transparent,
-                                  child: Transform.rotate(
-                                    angle: 0.04,
-                                    child: Transform.scale(
-                                      scale: 1.04,
-                                      child: SizedBox(
-                                        width: heroCardWidth,
-                                        height: heroCardHeight,
-                                        child: WasteCard(
-                                          question: currentQ,
-                                          isDragging: true,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                childWhenDragging: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(
-                                      color: isDark ? Colors.white12 : Colors.grey.shade300,
-                                      width: 2,
-                                      strokeAlign: BorderSide.strokeAlignInside,
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Đang kéo phân loại...',
-                                      style: TextStyle(
-                                        color: isDark ? Colors.white38 : Colors.grey.shade500,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                child: WasteCard(
-                                  question: currentQ,
-                                  showHint: _showHint,
-                                  onToggleHint: () {
-                                    setState(() => _showHint = !_showHint);
-                                  },
-                                ),
                               ),
                             ),
                           ),
@@ -598,7 +560,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         // Floating XP Indicator Animation
                         if (_floatingScoreText != null)
                           Positioned(
-                            top: -20,
+                            top: -24,
                             child: SlideTransition(
                               position: _scoreSlideAnimation,
                               child: FadeTransition(
@@ -667,12 +629,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     ),
                   ),
 
-                // Bottom: 2x2 Thumb-Friendly Drop Target Dock
+                // Bottom: 2x2 Thumb-Friendly Tap-to-Choose Dock (No dragging, just tap!)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
-                  child: _buildThumbFriendly2x2Dock(
+                  child: _buildThumbFriendlyTapDock(
                     gameProvider: gameProvider,
                     isDark: isDark,
+                    correctCategory: currentQ.correctCategory,
                   ),
                 ),
               ],
@@ -687,7 +650,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     required double roundProgress,
     required double timerRatio,
     required bool isDark,
-    required double availableWidth,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -853,9 +815,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildThumbFriendly2x2Dock({
+  Widget _buildThumbFriendlyTapDock({
     required GameProvider gameProvider,
     required bool isDark,
+    required WasteCategory correctCategory,
   }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -863,26 +826,28 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         Row(
           children: [
             Expanded(
-              child: _buildCategoryBin(
+              child: _buildTapButton(
                 category: WasteCategory.recyclable,
                 emoji: '♻️',
                 title: 'Tái chế',
-                subtitle: 'Chai lọ, giấy, nhôm...',
+                subtitle: 'Chai lọ, giấy, kim loại...',
                 themeColor: const Color(0xFF0284C7),
                 isDark: isDark,
                 gameProvider: gameProvider,
+                correctCategory: correctCategory,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: _buildCategoryBin(
+              child: _buildTapButton(
                 category: WasteCategory.organic,
                 emoji: '🍃',
                 title: 'Hữu cơ',
-                subtitle: 'Thức ăn, vỏ hoa quả...',
+                subtitle: 'Thức ăn, vỏ rau củ quả...',
                 themeColor: const Color(0xFF16A34A),
                 isDark: isDark,
                 gameProvider: gameProvider,
+                correctCategory: correctCategory,
               ),
             ),
           ],
@@ -891,7 +856,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         Row(
           children: [
             Expanded(
-              child: _buildCategoryBin(
+              child: _buildTapButton(
                 category: WasteCategory.hazardous,
                 emoji: '☠️',
                 title: 'Nguy hại',
@@ -899,11 +864,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 themeColor: const Color(0xFFE11D48),
                 isDark: isDark,
                 gameProvider: gameProvider,
+                correctCategory: correctCategory,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: _buildCategoryBin(
+              child: _buildTapButton(
                 category: WasteCategory.trash,
                 emoji: '🗑️',
                 title: 'Rác khác',
@@ -911,6 +877,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 themeColor: const Color(0xFFD97706),
                 isDark: isDark,
                 gameProvider: gameProvider,
+                correctCategory: correctCategory,
               ),
             ),
           ],
@@ -919,7 +886,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildCategoryBin({
+  Widget _buildTapButton({
     required WasteCategory category,
     required String emoji,
     required String title,
@@ -927,70 +894,85 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     required Color themeColor,
     required bool isDark,
     required GameProvider gameProvider,
+    required WasteCategory correctCategory,
   }) {
-    return DragTarget<GameQuestion>(
-      onWillAcceptWithDetails: (details) {
-        if (_isAnswerLocked) return false;
-        setState(() => _hoveredCategory = category);
-        HapticFeedback.selectionClick();
-        return true;
-      },
-      onLeave: (data) {
-        if (_hoveredCategory == category) {
-          setState(() => _hoveredCategory = null);
-        }
-      },
-      onAcceptWithDetails: (details) {
-        setState(() => _hoveredCategory = null);
-        _checkAnswer(category, gameProvider);
-      },
-      builder: (context, candidateData, rejectedData) {
-        final isHovered = candidateData.isNotEmpty || _hoveredCategory == category;
+    // Check if this button is currently selected or being highlighted
+    final isSelected = _selectedCategory == category;
+    final isCorrectTarget = _selectedCategory != null && category == correctCategory;
+    final isWrongSelection = isSelected && _isLastSelectionCorrect == false;
 
-        return AnimatedContainer(
+    Color buttonBg;
+    Color buttonBorder;
+    Color textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+
+    if (isSelected && _isLastSelectionCorrect == true) {
+      buttonBg = const Color(0xFF10B981).withValues(alpha: 0.25);
+      buttonBorder = const Color(0xFF10B981);
+      textColor = const Color(0xFF10B981);
+    } else if (isWrongSelection) {
+      buttonBg = const Color(0xFFEF4444).withValues(alpha: 0.25);
+      buttonBorder = const Color(0xFFEF4444);
+      textColor = const Color(0xFFEF4444);
+    } else if (isCorrectTarget) {
+      // Highlight correct button when user picked the wrong one
+      buttonBg = const Color(0xFF10B981).withValues(alpha: 0.2);
+      buttonBorder = const Color(0xFF10B981);
+    } else {
+      buttonBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+      buttonBorder = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _isAnswerLocked ? null : () => _selectCategory(category, gameProvider),
+        borderRadius: BorderRadius.circular(18),
+        splashColor: themeColor.withValues(alpha: 0.2),
+        highlightColor: themeColor.withValues(alpha: 0.1),
+        child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutBack,
-          transform: isHovered ? Matrix4.diagonal3Values(1.04, 1.04, 1.0) : Matrix4.identity(),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           decoration: BoxDecoration(
-            color: isHovered
-                ? themeColor.withValues(alpha: isDark ? 0.35 : 0.18)
-                : (isDark ? const Color(0xFF1E293B) : Colors.white),
+            color: buttonBg,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: isHovered ? themeColor : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-              width: isHovered ? 2.5 : 1.2,
+              color: buttonBorder,
+              width: (isSelected || isCorrectTarget) ? 2.5 : 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: isHovered
-                    ? themeColor.withValues(alpha: 0.38)
+                color: (isSelected || isCorrectTarget)
+                    ? buttonBorder.withValues(alpha: 0.35)
                     : (isDark ? Colors.black26 : const Color(0x06000000)),
-                blurRadius: isHovered ? 14 : 4,
+                blurRadius: (isSelected || isCorrectTarget) ? 12 : 4,
                 offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Row(
             children: [
-              // Category Emoji & Icon Container
+              // Emoji / Icon
               Container(
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: themeColor.withValues(alpha: isHovered ? 0.25 : 0.12),
+                  color: (isSelected || isCorrectTarget)
+                      ? buttonBorder.withValues(alpha: 0.2)
+                      : themeColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
                   child: Text(
-                    emoji,
-                    style: const TextStyle(fontSize: 20),
+                    isWrongSelection
+                        ? '❌'
+                        : (isSelected || isCorrectTarget ? '✅' : emoji),
+                    style: const TextStyle(fontSize: 18),
                   ),
                 ),
               ),
               const SizedBox(width: 10),
 
-              // Titles
+              // Title and subtitle
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1003,9 +985,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: isHovered
-                            ? (isDark ? Colors.white : themeColor)
-                            : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                        color: textColor,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -1024,8 +1004,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               ),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
