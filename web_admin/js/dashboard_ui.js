@@ -1114,21 +1114,34 @@ window.fetchCollectionPoints = async (page = 1) => {
     const toIndex = fromIndex + CP_LIMIT - 1;
 
     try {
-        const { data, count } = await api.apiFetchCollectionPoints(
-            verifiedFilter === '' ? null : verifiedFilter,
-            fromIndex,
-            toIndex
-        );
-        loader.classList.add('hidden');
-        allCollectionPoints = data;
+        const [pointsRes, profiles] = await Promise.all([
+            api.apiFetchCollectionPoints(
+                verifiedFilter === '' ? null : verifiedFilter,
+                fromIndex,
+                toIndex
+            ),
+            api.apiFetchAllProfiles().catch(() => [])
+        ]);
 
-        if (data.length === 0) {
+        const profilesMap = {};
+        if (Array.isArray(profiles)) {
+            profiles.forEach(p => profilesMap[p.id] = p.display_name || p.id);
+        }
+
+        const { data, count } = pointsRes;
+        loader.classList.add('hidden');
+        allCollectionPoints = (data || []).map(pt => ({
+            ...pt,
+            contributor_name: pt.created_by ? (profilesMap[pt.created_by] || 'Cộng đồng') : 'Hệ thống'
+        }));
+
+        if (allCollectionPoints.length === 0) {
             grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-500 dark:text-slate-400 font-semibold text-sm">Không có điểm thu gom nào</div>`;
             updateCPPagination(0);
             return;
         }
 
-        data.forEach(point => {
+        allCollectionPoints.forEach(point => {
             const card = document.createElement('div');
             card.className = 'glass-panel glass-panel-hover rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col shadow-sm';
 
@@ -1136,7 +1149,7 @@ window.fetchCollectionPoints = async (page = 1) => {
                 ? '<span class="px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30">Đã duyệt</span>'
                 : '<span class="px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded-md bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30">Chờ duyệt</span>';
 
-            const contributorName = point.profiles?.display_name || 'Ẩn danh';
+            const contributorName = point.contributor_name;
             const createdDate = point.created_at ? new Date(point.created_at).toLocaleDateString('vi-VN') : 'N/A';
 
             card.innerHTML = `
@@ -1177,7 +1190,7 @@ window.fetchCollectionPoints = async (page = 1) => {
             grid.appendChild(card);
         });
 
-        updateCPPagination(count || data.length);
+        updateCPPagination(count || allCollectionPoints.length);
     } catch (e) {
         loader.classList.add('hidden');
         grid.innerHTML = `<div class="col-span-full p-6 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 rounded-xl text-sm font-semibold">Lỗi: ${escapeHTML(e.message || 'Không xác định')}</div>`;
@@ -1193,7 +1206,7 @@ window.showCPDetail = (id) => {
     if (!point) return;
 
     const content = document.getElementById('cp-detail-content');
-    const contributorName = point.profiles?.display_name || 'Ẩn danh';
+    const contributorName = point.contributor_name || (point.created_by ? 'Cộng đồng' : 'Hệ thống');
     const createdDate = point.created_at ? new Date(point.created_at).toLocaleString('vi-VN') : 'N/A';
 
     content.innerHTML = `

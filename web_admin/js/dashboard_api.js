@@ -234,7 +234,7 @@ export async function apiSaveSystemSettings({ maintenanceVal, pointsVal, geminiV
  */
 export async function apiFetchCollectionPoints(isVerified, fromIndex, toIndex) {
     let query = db.from('collection_points')
-        .select('*, profiles!collection_points_created_by_fkey(display_name)', { count: 'exact' });
+        .select('*', { count: 'exact' });
 
     if (isVerified !== null && isVerified !== undefined && isVerified !== '') {
         query = query.eq('is_verified', isVerified === 'true' || isVerified === true);
