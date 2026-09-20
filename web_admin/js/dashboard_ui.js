@@ -5,6 +5,22 @@ import * as api from './dashboard_api.js';
 window.db = db;
 window.handleLogout = handleLogout;
 
+// Mobile Sidebar Drawer Controller
+window.toggleMobileSidebar = (forceState) => {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (!sidebar) return;
+    const isClosed = sidebar.classList.contains('-translate-x-full');
+    const shouldOpen = typeof forceState === 'boolean' ? forceState : isClosed;
+    if (shouldOpen) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop?.classList.remove('hidden');
+    } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop?.classList.add('hidden');
+    }
+};
+
 window.toggleTheme = () => {
     const isDark = document.documentElement.classList.contains('dark');
     if (isDark) {
@@ -20,18 +36,32 @@ window.toggleTheme = () => {
 function updateThemeToggleUI() {
     const isDark = document.documentElement.classList.contains('dark');
     const btn = document.getElementById('theme-toggle-btn');
-    if (!btn) return;
-    btn.innerHTML = isDark ? `
-        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-        </svg>
-        <span>Chế độ Sáng</span>
-    ` : `
-        <svg class="w-4 h-4 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-        </svg>
-        <span>Chế độ Tối</span>
-    `;
+    if (btn) {
+        btn.innerHTML = isDark ? `
+            <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+            <span>Chế độ Sáng</span>
+        ` : `
+            <svg class="w-4 h-4 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+            <span>Chế độ Tối</span>
+        `;
+    }
+
+    const mobileBtns = document.querySelectorAll('.mobile-theme-btn');
+    mobileBtns.forEach(mBtn => {
+        mBtn.innerHTML = isDark ? `
+            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+        ` : `
+            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+        `;
+    });
 }
 
 // Init theme UI on load
@@ -57,12 +87,12 @@ const ACTION_TYPE_MAP = {
 };
 
 const STATE_BADGE_MAP = {
-    'draft': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-slate-800 text-slate-400 border border-slate-700">Bản thảo</span>',
-    'awaiting_second_approval': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 animate-pulse">Chờ duyệt lần 2</span>',
-    'approved': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Đã duyệt (Chờ thực thi)</span>',
-    'rejected': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-red-500/10 text-red-400 border border-red-500/30">Đã từ chối</span>',
-    'executed': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">Đã thực thi</span>',
-    'expired': '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-gray-800 text-gray-400 border border-gray-700">Đã hết hạn</span>'
+    'draft': '<span class="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-lg bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">Bản thảo</span>',
+    'awaiting_second_approval': '<span class="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-lg bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30">Chờ duyệt lần 2</span>',
+    'approved': '<span class="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30">Đã duyệt (Chờ thực thi)</span>',
+    'rejected': '<span class="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-lg bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/30">Đã từ chối</span>',
+    'executed': '<span class="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-lg bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/30">Đã thực thi</span>',
+    'expired': '<span class="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-lg bg-slate-100 text-slate-500 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">Đã hết hạn</span>'
 };
 
 // UI Helper functions
@@ -114,27 +144,27 @@ window.fetchSubmissions = async () => {
         loader.classList.add('hidden');
 
         if (allSubmissions.length === 0) {
-            grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold">Không có báo cáo nào ở trạng thái ${escapeHTML(status)}</div>`;
+            grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-500 dark:text-slate-400 font-semibold text-sm">Không có báo cáo nào ở trạng thái ${escapeHTML(status)}</div>`;
             return;
         }
 
         allSubmissions.forEach(item => {
             const card = document.createElement('div');
-            card.className = 'glass-panel glass-panel-hover rounded-[2rem] border border-slate-800 overflow-hidden flex flex-col justify-between';
+            card.className = 'glass-panel glass-panel-hover rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col justify-between shadow-sm';
             card.innerHTML = `
-                <div class="h-48 bg-slate-950 relative group border-b border-slate-800">
-                    ${item.scan_image_path ? `<img src="${escapeHTML(item.scan_image_path)}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-slate-600 text-[10px] font-bold tracking-widest">NO IMAGE</div>'}
+                <div class="h-44 bg-slate-100 dark:bg-slate-950 relative group border-b border-slate-200 dark:border-slate-800">
+                    ${item.scan_image_path ? `<img src="${escapeHTML(item.scan_image_path)}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-600 text-xs font-semibold uppercase tracking-wider">Không có ảnh</div>'}
                 </div>
-                <div class="p-6 flex-1 flex flex-col justify-between">
+                <div class="p-5 flex-1 flex flex-col justify-between">
                     <div>
-                        <h3 class="font-black text-white text-lg truncate font-heading">${escapeHTML(item.suggested_name_vi || 'Yêu cầu mới')}</h3>
-                        <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-1 mb-6 italic">${escapeHTML(item.tflite_top_label || 'AI chưa phân loại')}</p>
+                        <h3 class="font-bold text-slate-900 dark:text-white text-base truncate font-heading">${escapeHTML(item.suggested_name_vi || 'Yêu cầu mới')}</h3>
+                        <p class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold uppercase tracking-wider mt-1 mb-5">${escapeHTML(item.tflite_top_label || 'AI chưa phân loại')}</p>
                     </div>
 
-                    <div class="flex gap-2">
-                        <button onclick="showDetail('${escapeHTML(item.id)}')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl text-xs font-black transition">CHI TIẾT</button>
+                    <div class="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/60">
+                        <button onclick="showDetail('${escapeHTML(item.id)}')" class="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 py-2.5 rounded-xl text-xs font-bold transition">CHI TIẾT</button>
                         ${status === 'pending_review' ? `
-                            <button onclick="updateStatus('${escapeHTML(item.id)}', 'rejected')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-4 rounded-xl font-bold text-xs transition">HỦY</button>
+                            <button onclick="updateStatus('${escapeHTML(item.id)}', 'rejected')" class="bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 px-3.5 rounded-xl font-bold text-xs transition">HỦY</button>
                         ` : ''}
                     </div>
                 </div>
@@ -145,7 +175,7 @@ window.fetchSubmissions = async () => {
         loader.classList.add('hidden');
         grid.innerHTML = '';
         const errorDiv = document.createElement('div');
-        errorDiv.className = 'col-span-full p-8 bg-red-950/20 border border-red-900/40 text-red-400 rounded-2xl text-sm font-bold';
+        errorDiv.className = 'col-span-full p-6 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 rounded-xl text-sm font-semibold';
         errorDiv.textContent = `Lỗi: ${e && e.message ? e.message : 'Không xác định'}`;
         grid.appendChild(errorDiv);
     }
@@ -157,37 +187,37 @@ window.showDetail = (id) => {
 
     const content = document.getElementById('detail-content');
     content.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
-                ${item.scan_image_path ? `<img src="${escapeHTML(item.scan_image_path)}" class="w-full h-full object-contain">` : '<p class="p-20 text-center text-slate-600 font-bold">KHÔNG CÓ ẢNH</p>'}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="bg-slate-100 dark:bg-slate-950 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 flex items-center justify-center min-h-[180px]">
+                ${item.scan_image_path ? `<img src="${escapeHTML(item.scan_image_path)}" class="w-full h-full object-contain">` : '<p class="p-10 text-center text-slate-400 dark:text-slate-600 font-semibold text-xs uppercase tracking-wider">KHÔNG CÓ ẢNH</p>'}
             </div>
-            <div class="space-y-4">
-                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tên đề xuất</span>
-                    <p class="text-xl font-black text-white mt-1 font-heading">${escapeHTML(item.suggested_name_vi || 'N/A')}</p>
+            <div class="space-y-3">
+                <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tên đề xuất</span>
+                    <p class="text-lg font-bold text-slate-900 dark:text-white mt-1 font-heading">${escapeHTML(item.suggested_name_vi || 'N/A')}</p>
                 </div>
-                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nhãn AI (TFLite)</span>
-                    <p class="font-bold text-emerald-400 mt-1">${escapeHTML(item.tflite_top_label || 'N/A')} (${(item.tflite_confidence * 100).toFixed(1)}%)</p>
+                <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nhãn AI (TFLite)</span>
+                    <p class="font-bold text-emerald-600 dark:text-emerald-400 mt-1">${escapeHTML(item.tflite_top_label || 'N/A')} (${(item.tflite_confidence * 100).toFixed(1)}%)</p>
                 </div>
-                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trạng thái</span>
-                    <p class="font-bold text-emerald-400 uppercase mt-1">${escapeHTML(item.status)}</p>
+                <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Trạng thái</span>
+                    <p class="font-bold text-emerald-600 dark:text-emerald-400 uppercase mt-1 text-sm">${escapeHTML(item.status)}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phân tích Gemini</span>
-            <p class="text-slate-300 text-sm mt-2 leading-relaxed">${escapeHTML(item.gemini_payload?.result_text || 'Chưa có phân tích')}</p>
+        <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Phân tích Gemini</span>
+            <p class="text-slate-700 dark:text-slate-300 text-sm mt-1.5 leading-relaxed">${escapeHTML(item.gemini_payload?.result_text || 'Chưa có phân tích')}</p>
         </div>
-        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kiến thức bổ sung (Fun Fact)</span>
-            <p class="text-slate-300 text-sm mt-2">${escapeHTML(item.suggested_fun_fact || 'N/A')}</p>
+        <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Kiến thức bổ sung (Fun Fact)</span>
+            <p class="text-slate-700 dark:text-slate-300 text-sm mt-1.5">${escapeHTML(item.suggested_fun_fact || 'N/A')}</p>
         </div>
         ${item.status === 'pending_review' ? `
-            <div class="pt-6 border-t border-slate-800 flex gap-4">
-                <button onclick="approveWithData('${escapeHTML(item.id)}')" class="flex-[2] bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white py-4 rounded-2xl font-black text-sm transition shadow-lg shadow-emerald-500/25">DUYỆT VÀO HỆ THỐNG</button>
-                <button onclick="updateStatus('${escapeHTML(item.id)}', 'rejected')" class="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 py-4 rounded-2xl font-bold text-sm transition">TỪ CHỐI</button>
+            <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex gap-3">
+                <button onclick="approveWithData('${escapeHTML(item.id)}')" class="flex-[2] bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm transition shadow-sm">DUYỆT VÀO HỆ THỐNG</button>
+                <button onclick="updateStatus('${escapeHTML(item.id)}', 'rejected')" class="flex-1 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 py-3 rounded-xl font-bold text-sm transition">TỪ CHỐI</button>
             </div>
         ` : ''}
     `;
@@ -246,7 +276,6 @@ window.submitApproveData = async () => {
     if (!nameVi || !groupId) return alert('Vui lòng nhập tên và chọn nhóm rác!');
 
     let slug = slugify(nameVi);
-    // Append secure random string to prevent duplication
     slug += '-' + generateSecureRandomString(4);
 
     btn.disabled = true;
@@ -256,7 +285,6 @@ window.submitApproveData = async () => {
         const { data: { session } } = await db.auth.getSession();
         const userId = session?.user?.id;
 
-        // 1. Thêm vào waste_dictionary và cập nhật trạng thái báo cáo
         await api.apiInsertWasteDictionary({
             slug,
             nameVi,
@@ -293,16 +321,22 @@ window.updateStatus = async (id, newStatus) => {
 
 window.switchTab = (tab) => {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('nav button').forEach(el => el.classList.remove('sidebar-active', 'hover:bg-slate-50'));
-    document.getElementById('tab-' + tab).classList.remove('hidden');
-    document.getElementById('btn-' + tab).classList.add('sidebar-active');
+    document.querySelectorAll('nav button').forEach(el => el.classList.remove('sidebar-active', 'hover:bg-slate-100', 'dark:hover:bg-slate-800'));
     
-    // Đảm bảo các button khác có hover
+    const targetTab = document.getElementById('tab-' + tab);
+    const targetBtn = document.getElementById('btn-' + tab);
+    if (targetTab) targetTab.classList.remove('hidden');
+    if (targetBtn) targetBtn.classList.add('sidebar-active');
+
+    // Add back hover class to inactive buttons
     document.querySelectorAll('nav button').forEach(btn => {
         if (!btn.classList.contains('sidebar-active')) {
-            btn.classList.add('hover:bg-slate-50');
+            btn.classList.add('hover:bg-slate-100', 'dark:hover:bg-slate-800');
         }
     });
+
+    // Close mobile drawer when tab selected
+    window.toggleMobileSidebar(false);
 
     if (tab === 'submissions') window.fetchSubmissions();
     if (tab === 'users') window.fetchUsers(1);
@@ -349,7 +383,6 @@ window.fetchUsers = async (page = 1) => {
         const data = await api.apiFetchUsers(userPage, USER_LIMIT, search);
         loader.classList.add('hidden');
 
-        // Client-side filtering cho role và status
         let filteredData = data || [];
         if (roleFilter) filteredData = filteredData.filter(u => u.role === roleFilter);
         if (statusFilter) {
@@ -358,7 +391,7 @@ window.fetchUsers = async (page = 1) => {
         }
 
         if (filteredData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 font-bold">Không tìm thấy người dùng nào</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 dark:text-slate-500 font-semibold text-sm">Không tìm thấy người dùng nào</td></tr>`;
             updateUserPagination(0);
             return;
         }
@@ -367,37 +400,37 @@ window.fetchUsers = async (page = 1) => {
 
         filteredData.forEach(u => {
             const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/50 last:border-none';
+            tr.className = 'hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition border-b border-slate-200 dark:border-slate-800/60 last:border-none';
 
-            const roleColor = u.role === 'super_admin' ? 'bg-purple-500/10 border border-purple-500/30 text-purple-400' :
-                u.role === 'admin' ? 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400' : 'bg-slate-800 border border-slate-700 text-slate-400';
+            const roleColor = u.role === 'super_admin' ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:border-purple-500/30 dark:text-purple-400' :
+                u.role === 'admin' ? 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-cyan-500/10 dark:border-cyan-500/30 dark:text-cyan-400' : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400';
 
             const statusHtml = u.is_locked
-                ? '<span class="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 w-max mx-auto"><div class="w-1.5 h-1.5 rounded-full bg-red-400"></div> Bị khóa</span>'
-                : '<span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 w-max mx-auto"><div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div> Hoạt động</span>';
+                ? '<span class="px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 w-max mx-auto"><div class="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Bị khóa</span>'
+                : '<span class="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 w-max mx-auto"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Hoạt động</span>';
 
             const isProtected = u.role === 'super_admin' && currentUserRole !== 'super_admin';
 
             tr.innerHTML = `
-                <td class="p-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center font-black text-emerald-400 font-heading">
+                <td class="p-3.5 sm:p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-center font-bold text-emerald-600 dark:text-emerald-400 font-heading text-xs shrink-0">
                             ${(u.display_name || u.email || '?').charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                            <p class="font-bold text-white text-sm font-heading">${escapeHTML(u.display_name || 'Chưa cập nhật')}</p>
-                            <p class="text-xs text-slate-400 font-medium">${escapeHTML(u.email || 'Ẩn email (Cần RPC)')}</p>
+                        <div class="min-w-0">
+                            <p class="font-semibold text-slate-900 dark:text-white text-sm truncate font-heading">${escapeHTML(u.display_name || 'Chưa cập nhật')}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-normal truncate">${escapeHTML(u.email || 'Ẩn email')}</p>
                         </div>
                     </div>
                 </td>
-                <td class="p-4 text-center">
-                    <span class="px-3 py-1 rounded-lg ${roleColor} font-black text-[10px] uppercase tracking-widest">${u.role}</span>
+                <td class="p-3.5 sm:p-4 text-center">
+                    <span class="px-2.5 py-1 rounded-lg ${roleColor} border font-bold text-[11px] uppercase tracking-wider">${u.role}</span>
                 </td>
-                <td class="p-4 text-center">${statusHtml}</td>
-                <td class="p-4 text-xs text-slate-400 font-bold">${u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : 'Chưa có data'}</td>
-                <td class="p-4 text-right">
+                <td class="p-3.5 sm:p-4 text-center">${statusHtml}</td>
+                <td class="p-3.5 sm:p-4 text-xs text-slate-500 dark:text-slate-400 font-medium">${u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : 'Chưa có data'}</td>
+                <td class="p-3.5 sm:p-4 text-right">
                     <button onclick="openUserActionModal('${u.id}', '${u.email}', '${u.role}', ${u.is_locked})" 
-                        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-bold transition ${isProtected ? 'opacity-50 cursor-not-allowed' : ''}"
+                        class="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold shadow-sm transition ${isProtected ? 'opacity-40 cursor-not-allowed' : ''}"
                         ${isProtected ? 'disabled title="Không có quyền thao tác lên Super Admin"' : ''}>
                         QUẢN LÝ
                     </button>
@@ -409,7 +442,7 @@ window.fetchUsers = async (page = 1) => {
         updateUserPagination(totalCount);
     } catch (e) {
         loader.classList.add('hidden');
-        tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center bg-red-50 text-red-500 font-bold rounded-2xl">Lỗi: ${escapeHTML(e.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-rose-500 font-semibold text-sm">Lỗi: ${escapeHTML(e.message)}</td></tr>`;
     }
 };
 
@@ -433,11 +466,11 @@ window.openUserActionModal = (id, email, role, isLocked) => {
 
     if (isLocked) {
         btnBan.innerText = 'MỞ KHÓA TÀI KHOẢN (UNBAN)';
-        btnBan.className = 'w-full bg-green-600 text-white py-4 rounded-xl font-black shadow-lg shadow-green-200 hover:bg-green-700 transition';
+        btnBan.className = 'w-full bg-emerald-600 text-white py-2.5 rounded-lg font-bold text-xs shadow-sm hover:bg-emerald-500 transition';
         inputReason.classList.add('hidden');
     } else {
         btnBan.innerText = 'KHÓA TÀI KHOẢN (BAN)';
-        btnBan.className = 'w-full bg-red-600 text-white py-4 rounded-xl font-black shadow-lg shadow-red-200 hover:bg-red-700 transition';
+        btnBan.className = 'w-full bg-rose-600 text-white py-2.5 rounded-lg font-bold text-xs shadow-sm hover:bg-rose-500 transition';
         inputReason.classList.remove('hidden');
         inputReason.value = '';
     }
@@ -608,30 +641,30 @@ window.fetchPrivilegedActions = async (page = 1) => {
         privilegedActions = data || [];
 
         if (privilegedActions.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-400 font-bold">Không có yêu cầu đặc quyền nào</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400 dark:text-slate-500 font-semibold text-sm">Không có yêu cầu đặc quyền nào</td></tr>';
             updatePAPagination(0);
             return;
         }
 
         privilegedActions.forEach(item => {
             const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/50 last:border-none';
+            tr.className = 'hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition border-b border-slate-200 dark:border-slate-800/60 last:border-none';
 
             const actionName = ACTION_TYPE_MAP[item.action_type] || item.action_type;
             const stateHtml = STATE_BADGE_MAP[item.state] || item.state;
             const requesterName = profilesMap[item.requester_id] || 'N/A';
 
             tr.innerHTML = `
-                <td class="p-6">
-                    <p class="font-bold text-white text-sm font-heading">${actionName}</p>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">ID: ${item.id}</p>
+                <td class="p-3.5 sm:p-4">
+                    <p class="font-bold text-slate-900 dark:text-white text-sm font-heading">${actionName}</p>
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">ID: ${item.id}</p>
                 </td>
-                <td class="p-6 text-center text-sm font-semibold text-slate-300">${requesterName}</td>
-                <td class="p-6 text-center">${stateHtml}</td>
-                <td class="p-6 text-xs text-slate-400 font-semibold">${new Date(item.created_at).toLocaleString()}</td>
-                <td class="p-6 text-right">
+                <td class="p-3.5 sm:p-4 text-center text-sm font-medium text-slate-700 dark:text-slate-300">${requesterName}</td>
+                <td class="p-3.5 sm:p-4 text-center">${stateHtml}</td>
+                <td class="p-3.5 sm:p-4 text-xs text-slate-500 dark:text-slate-400 font-medium">${new Date(item.created_at).toLocaleString()}</td>
+                <td class="p-3.5 sm:p-4 text-right">
                     <button onclick="showPADetail('${item.id}')"
-                        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-bold transition">
+                        class="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold shadow-sm transition">
                         CHI TIẾT
                     </button>
                 </td>
@@ -642,7 +675,7 @@ window.fetchPrivilegedActions = async (page = 1) => {
         updatePAPagination(count || 0);
     } catch (e) {
         loader.classList.add('hidden');
-        tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center bg-red-50 text-red-500 font-bold rounded-2xl">Lỗi: ${escapeHTML(e.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-rose-500 font-semibold text-sm">Lỗi: ${escapeHTML(e.message)}</td></tr>`;
     }
 };
 
@@ -656,7 +689,7 @@ window.showPADetail = async (id) => {
 
     const modal = document.getElementById('pa-detail-modal');
     const content = document.getElementById('pa-detail-content');
-    content.innerHTML = '<p class="text-slate-400 font-bold text-center">Đang tải chi tiết phê duyệt...</p>';
+    content.innerHTML = '<p class="text-slate-500 dark:text-slate-400 font-medium text-center text-sm">Đang tải chi tiết phê duyệt...</p>';
     modal.classList.remove('hidden');
 
     try {
@@ -678,12 +711,12 @@ window.showPADetail = async (id) => {
         let approvalsHtml = '';
         if (approvals && approvals.length > 0) {
             approvalsHtml = approvals.map(a => `
-                <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
                     <div>
-                        <p class="font-bold text-white text-sm font-heading">${profilesMap[a.approver_id] || a.approver_id}</p>
-                        <p class="text-xs text-slate-300 mt-0.5">${a.comment || 'Không có bình luận'}</p>
+                        <p class="font-bold text-slate-900 dark:text-white text-sm font-heading">${profilesMap[a.approver_id] || a.approver_id}</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">${a.comment || 'Không có bình luận'}</p>
                     </div>
-                    <span class="text-[10px] text-slate-400 font-bold">${new Date(a.created_at).toLocaleString()}</span>
+                    <span class="text-[10px] text-slate-400 font-semibold">${new Date(a.created_at).toLocaleString()}</span>
                 </div>
             `).join('');
         } else {
@@ -693,72 +726,72 @@ window.showPADetail = async (id) => {
         const payloadStr = JSON.stringify(item.payload, null, 2);
 
         content.innerHTML = `
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loại hành động</span>
-                        <p class="text-lg font-black text-white mt-1 font-heading">${actionName}</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="space-y-3">
+                    <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Loại hành động</span>
+                        <p class="text-base font-bold text-slate-900 dark:text-white mt-1 font-heading">${actionName}</p>
                     </div>
-                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Người yêu cầu</span>
-                        <p class="font-bold text-emerald-400 mt-1">${requesterName}</p>
+                    <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Người yêu cầu</span>
+                        <p class="font-bold text-emerald-600 dark:text-emerald-400 mt-1">${requesterName}</p>
                     </div>
-                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trạng thái</span>
-                        <div class="mt-2">${stateHtml}</div>
+                    <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Trạng thái</span>
+                        <div class="mt-1.5">${stateHtml}</div>
                     </div>
                 </div>
-                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 flex flex-col">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Dữ liệu Payload (JSON)</span>
-                    <pre class="bg-slate-950 text-emerald-400 p-4 rounded-xl text-xs font-mono overflow-auto flex-1 max-h-[160px] border border-slate-800/80">${payloadStr}</pre>
+                <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col">
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Dữ liệu Payload (JSON)</span>
+                    <pre class="bg-white dark:bg-slate-950 text-slate-800 dark:text-emerald-400 p-3 rounded-lg text-xs font-mono overflow-auto flex-1 max-h-[160px] border border-slate-200 dark:border-slate-800">${payloadStr}</pre>
                 </div>
             </div>
 
-            <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lý do tạo yêu cầu</span>
-                <p class="text-slate-300 text-sm mt-2 leading-relaxed">${item.execution_note || 'N/A'}</p>
+            <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lý do tạo yêu cầu</span>
+                <p class="text-slate-700 dark:text-slate-300 text-sm mt-1 leading-relaxed">${item.execution_note || 'N/A'}</p>
             </div>
 
-            <div class="space-y-3">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Danh sách phê duyệt (${approvals ? approvals.length : 0}/2)</span>
-                <div class="space-y-2 max-h-[180px] overflow-y-auto">
+            <div class="space-y-2.5">
+                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Danh sách phê duyệt (${approvals ? approvals.length : 0}/2)</span>
+                <div class="space-y-2 max-h-[160px] overflow-y-auto">
                     ${approvalsHtml}
                 </div>
             </div>
 
-            <div class="pt-6 border-t border-slate-800 flex flex-wrap gap-4">
+            <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-wrap gap-3">
                 ${(item.state === 'draft' || item.state === 'awaiting_second_approval') ? `
                     ${isRequester ? `
-                        <div class="w-full p-4 bg-amber-500/10 text-amber-300 border border-amber-500/20 rounded-xl text-xs font-semibold text-center">
-                            ⚠️ Bạn là người tạo yêu cầu này. Hãy nhờ Admin khác phê duyệt để đảm bảo quy trình.
+                        <div class="w-full p-3 bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 rounded-xl text-xs font-semibold text-center">
+                            ⚠️ Bạn là người tạo yêu cầu này. Cần Admin khác phê duyệt để đảm bảo quy trình khách quan.
                         </div>
                     ` : `
                         ${hasApproved ? `
-                            <div class="w-full p-4 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-xl text-xs font-semibold text-center">
+                            <div class="w-full p-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-xs font-semibold text-center">
                                 ✓ Bạn đã phê duyệt yêu cầu này rồi.
                             </div>
                         ` : `
-                            <button onclick="approvePARequest('${item.id}')" class="flex-[2] bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white py-4 rounded-2xl font-black text-sm transition shadow-lg shadow-emerald-500/25">PHÊ DUYỆT</button>
-                            <button onclick="rejectPARequest('${item.id}')" class="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 py-4 rounded-2xl font-bold text-sm transition">TỪ CHỐI</button>
+                            <button onclick="approvePARequest('${item.id}')" class="flex-[2] bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm transition shadow-sm">PHÊ DUYỆT</button>
+                            <button onclick="rejectPARequest('${item.id}')" class="flex-1 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 py-3 rounded-xl font-bold text-sm transition">TỪ CHỐI</button>
                         `}
                     `}
                 ` : ''}
 
                 ${item.state === 'approved' ? `
-                    <button onclick="executePARequest('${item.id}')" class="w-full bg-gradient-to-r from-cyan-600 to-blue-500 hover:from-cyan-500 hover:to-blue-400 text-white py-4 rounded-2xl font-black text-sm transition shadow-lg shadow-cyan-500/25">THỰC THI HÀNH ĐỘNG</button>
+                    <button onclick="executePARequest('${item.id}')" class="w-full bg-sky-600 hover:bg-sky-500 text-white py-3 rounded-xl font-bold text-sm transition shadow-sm">THỰC THI HÀNH ĐỘNG</button>
                 ` : ''}
 
                 ${item.state === 'executed' ? `
-                    <div class="w-full p-5 bg-cyan-950/30 text-cyan-300 border border-cyan-800/40 rounded-2xl text-xs">
+                    <div class="w-full p-3.5 bg-sky-50 dark:bg-sky-950/30 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800/40 rounded-xl text-xs">
                         <p class="font-bold">✓ Đã thực thi thành công</p>
-                        <p class="mt-1 font-semibold text-cyan-400">Ghi chú: ${item.execution_note || 'N/A'}</p>
-                        <p class="text-[10px] text-slate-400 mt-1 font-bold">Lúc: ${new Date(item.executed_at).toLocaleString()}</p>
+                        <p class="mt-1 font-semibold text-sky-700 dark:text-sky-400">Ghi chú: ${item.execution_note || 'N/A'}</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Lúc: ${new Date(item.executed_at).toLocaleString()}</p>
                     </div>
                 ` : ''}
             </div>
         `;
     } catch (e) {
-        content.innerHTML = `<div class="p-10 bg-red-50 text-red-500 rounded-3xl text-sm font-bold text-center">Lỗi tải chi tiết: ${escapeHTML(e.message)}</div>`;
+        content.innerHTML = `<div class="p-8 text-rose-500 font-semibold text-sm text-center">Lỗi tải chi tiết: ${escapeHTML(e.message)}</div>`;
     }
 };
 
@@ -768,7 +801,7 @@ window.closePADetailModal = () => {
 
 window.approvePARequest = async (id) => {
     const comment = prompt('Nhập ý kiến phê duyệt (Không bắt buộc):');
-    if (comment === null) return; // Cancel
+    if (comment === null) return;
 
     try {
         const data = await api.apiApprovePrivilegedAction(id, comment);
@@ -809,10 +842,8 @@ window.executePARequest = async (id) => {
         const { data: { session } } = await db.auth.getSession();
         const executorEmail = session?.user?.email || 'Admin';
 
-        // 1. Thực thi nghiệp vụ trên cơ sở dữ liệu
         await api.apiExecuteAction(item.action_type, item.payload);
 
-        // 2. Đánh dấu trạng thái yêu cầu là đã thực thi
         const executionNote = `Thực thi thành công bởi ${executorEmail}`;
         await api.apiMarkActionExecuted(id, executionNote);
 
@@ -837,7 +868,7 @@ window.closeCreatePAModal = () => {
 window.handlePATypeChange = async () => {
     const type = document.getElementById('create-pa-type').value;
     const container = document.getElementById('create-pa-payload-inputs');
-    container.innerHTML = '<p class="text-xs text-slate-400 font-bold">Đang tải dữ liệu cấu hình...</p>';
+    container.innerHTML = '<p class="text-xs text-slate-400 font-medium">Đang tải dữ liệu cấu hình...</p>';
 
     try {
         if (type === 'promote_user_admin' || type === 'demote_admin') {
@@ -846,15 +877,15 @@ window.handlePATypeChange = async () => {
             const targets = users.filter(u => u.role === targetRole);
 
             if (!targets || targets.length === 0) {
-                container.innerHTML = `<p class="text-xs text-red-500 font-bold">Không tìm thấy ${targetRole} nào để thao tác.</p>`;
+                container.innerHTML = `<p class="text-xs text-rose-500 font-medium">Không tìm thấy ${targetRole} nào để thao tác.</p>`;
                 return;
             }
 
             let options = targets.map(u => `<option value="${u.id}">${u.display_name || u.email || u.id}</option>`).join('');
             container.innerHTML = `
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Chọn Người dùng</label>
-                    <select id="pa-input-user" required class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none text-slate-800">
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Chọn Người dùng</label>
+                    <select id="pa-input-user" required class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none text-slate-900 dark:text-slate-100 text-sm">
                         ${options}
                     </select>
                 </div>
@@ -862,9 +893,9 @@ window.handlePATypeChange = async () => {
         } else if (type === 'toggle_kill_switch') {
             container.innerHTML = `
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Trạng thái Kill Switch (Ngắt khẩn cấp)</label>
-                    <select id="pa-input-killswitch" required class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none text-slate-800">
-                        <option value="true">BẬT (Chỉ cho phép Super Admin thao tác, chặn hoàn toàn API User)</option>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Trạng thái Kill Switch (Ngắt khẩn cấp)</label>
+                    <select id="pa-input-killswitch" required class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none text-slate-900 dark:text-slate-100 text-sm">
+                        <option value="true">BẬT (Chặn hoàn toàn API ghi của Người dùng)</option>
                         <option value="false">TẮT (Hoạt động bình thường)</option>
                     </select>
                 </div>
@@ -872,14 +903,14 @@ window.handlePATypeChange = async () => {
         } else if (type === 'delete_collection_point') {
             const { data: points } = await db.from('collection_points').select('id, name');
             if (!points || points.length === 0) {
-                container.innerHTML = '<p class="text-xs text-red-500 font-bold">Không tìm thấy điểm bỏ rác nào.</p>';
+                container.innerHTML = '<p class="text-xs text-rose-500 font-medium">Không tìm thấy điểm bỏ rác nào.</p>';
                 return;
             }
             let options = points.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
             container.innerHTML = `
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Chọn Điểm bỏ rác muốn xóa</label>
-                    <select id="pa-input-point" required class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none text-slate-800">
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Chọn Điểm bỏ rác muốn xóa</label>
+                    <select id="pa-input-point" required class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none text-slate-900 dark:text-slate-100 text-sm">
                         ${options}
                     </select>
                 </div>
@@ -888,7 +919,7 @@ window.handlePATypeChange = async () => {
             container.innerHTML = '';
         }
     } catch (e) {
-        container.innerHTML = `<p class="text-xs text-red-500 font-bold">Lỗi tải dữ liệu: ${escapeHTML(e.message)}</p>`;
+        container.innerHTML = `<p class="text-xs text-rose-500 font-medium">Lỗi tải dữ liệu: ${escapeHTML(e.message)}</p>`;
     }
 };
 
@@ -955,10 +986,9 @@ window.fetchSystemSettings = async () => {
         loader.classList.add('hidden');
         container.classList.remove('hidden');
 
-        // Map config values
         const maintenance = data.find(s => s.key === 'maintenance')?.value || { enabled: false, kill_switch: false, message: "" };
         const points = data.find(s => s.key === 'points')?.value || { scan_base: 10, game_correct: 5, streak_bonus_per: 1 };
-        const gemini = data.find(s => s.key === 'gemini')?.value || { model: "gemini-flash-latest" };
+        const gemini = data.find(s => s.key === 'gemini')?.value || { model: "gemini-3.8-flash" };
 
         document.getElementById('setting-maint-enabled').checked = !!maintenance.enabled;
         document.getElementById('setting-maint-killswitch').checked = !!maintenance.kill_switch;
@@ -968,7 +998,7 @@ window.fetchSystemSettings = async () => {
         document.getElementById('setting-points-correct').value = points.game_correct || 5;
         document.getElementById('setting-points-streak').value = points.streak_bonus_per || 1;
 
-        document.getElementById('setting-gemini-model').value = gemini.model || 'gemini-flash-latest';
+        document.getElementById('setting-gemini-model').value = gemini.model || 'gemini-3.8-flash';
 
         const inputs = [
             'setting-maint-enabled', 'setting-maint-killswitch', 'setting-maint-message',
@@ -979,11 +1009,11 @@ window.fetchSystemSettings = async () => {
         if (currentUserRole !== 'super_admin') {
             inputs.forEach(id => document.getElementById(id).disabled = true);
             document.getElementById('settings-save-container').classList.add('hidden');
-            statusBadge.innerHTML = '<span class="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-xs uppercase tracking-widest">Chế độ Chỉ Xem (Chỉ Super Admin được sửa)</span>';
+            statusBadge.innerHTML = '<span class="px-3.5 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-400 font-bold text-xs uppercase tracking-wider">Chế độ Chỉ Xem (Chỉ Super Admin được sửa)</span>';
         } else {
             inputs.forEach(id => document.getElementById(id).disabled = false);
             document.getElementById('settings-save-container').classList.remove('hidden');
-            statusBadge.innerHTML = '<span class="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs uppercase tracking-widest">Quyền chỉnh sửa Super Admin</span>';
+            statusBadge.innerHTML = '<span class="px-3.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/30 dark:text-emerald-400 font-bold text-xs uppercase tracking-wider">Quyền chỉnh sửa Super Admin</span>';
         }
     } catch (e) {
         loader.classList.add('hidden');
@@ -1013,7 +1043,7 @@ window.saveSystemSettings = async () => {
         };
 
         const geminiVal = {
-            model: document.getElementById('setting-gemini-model').value.trim() || 'gemini-flash-latest'
+            model: document.getElementById('setting-gemini-model').value.trim() || 'gemini-3.8-flash'
         };
 
         await api.apiSaveSystemSettings({
@@ -1023,10 +1053,9 @@ window.saveSystemSettings = async () => {
             userId
         });
 
-        alert('Đã cập nhật cấu hình hệ thống thành công!');
-        window.fetchSystemSettings();
+        alert('Lưu cấu hình hệ thống thành công!');
     } catch (e) {
-        alert('Lỗi lưu cấu hình: ' + e.message);
+        alert('Lỗi: ' + e.message);
     } finally {
         btn.disabled = false;
         btn.innerText = 'LƯU CẤU HÌNH HỆ THỐNG';
@@ -1041,16 +1070,16 @@ const CP_LIMIT = 12;
 let allCollectionPoints = [];
 
 const POINT_TYPE_MAP = {
-    'recycle': { label: 'Tái chế', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
-    'organic': { label: 'Hữu cơ', color: 'bg-lime-500/10 text-lime-400 border-lime-500/30' },
-    'hazardous': { label: 'Nguy hại', color: 'bg-red-500/10 text-red-400 border-red-500/30' },
-    'general': { label: 'Rác chung', color: 'bg-slate-500/10 text-slate-400 border-slate-600/30' },
-    'ewaste': { label: 'Rác điện tử', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
+    'recycle': { label: 'Tái chế', color: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30' },
+    'organic': { label: 'Hữu cơ', color: 'bg-lime-50 text-lime-700 border-lime-200 dark:bg-lime-500/10 dark:text-lime-400 dark:border-lime-500/30' },
+    'hazardous': { label: 'Nguy hại', color: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/30' },
+    'general': { label: 'Rác chung', color: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700' },
+    'ewaste': { label: 'Rác điện tử', color: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30' },
 };
 
 function getCPTypeBadge(type) {
     const info = POINT_TYPE_MAP[type] || POINT_TYPE_MAP['general'];
-    return `<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg border ${info.color}">${info.label}</span>`;
+    return `<span class="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded-md border ${info.color}">${info.label}</span>`;
 }
 
 function updateCPPagination(total) {
@@ -1094,52 +1123,52 @@ window.fetchCollectionPoints = async (page = 1) => {
         allCollectionPoints = data;
 
         if (data.length === 0) {
-            grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold">Không có điểm thu gom nào</div>`;
+            grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-500 dark:text-slate-400 font-semibold text-sm">Không có điểm thu gom nào</div>`;
             updateCPPagination(0);
             return;
         }
 
         data.forEach(point => {
             const card = document.createElement('div');
-            card.className = 'glass-panel glass-panel-hover rounded-[2rem] border border-slate-800 overflow-hidden flex flex-col';
+            card.className = 'glass-panel glass-panel-hover rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col shadow-sm';
 
             const verifiedBadge = point.is_verified
-                ? '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Đã duyệt</span>'
-                : '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 animate-pulse">Chờ duyệt</span>';
+                ? '<span class="px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30">Đã duyệt</span>'
+                : '<span class="px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded-md bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30">Chờ duyệt</span>';
 
             const contributorName = point.profiles?.display_name || 'Ẩn danh';
             const createdDate = point.created_at ? new Date(point.created_at).toLocaleDateString('vi-VN') : 'N/A';
 
             card.innerHTML = `
-                <div class="h-44 bg-slate-950 relative group border-b border-slate-800">
+                <div class="h-44 bg-slate-100 dark:bg-slate-950 relative group border-b border-slate-200 dark:border-slate-800">
                     ${point.image_url
-                        ? `<img src="${escapeHTML(point.image_url)}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-slate-600\'><svg class=\'w-12 h-12\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z\'></path><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M15 11a3 3 0 11-6 0 3 3 0 016 0z\'></path></svg></div>'">`
-                        : '<div class="w-full h-full flex items-center justify-center text-slate-600"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>'
+                        ? `<img src="${escapeHTML(point.image_url)}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-600\\'><svg class=\\'w-10 h-10\\' fill=\\'none\\' stroke=\\'currentColor\\' viewBox=\\'0 0 24 24\\'><path stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' stroke-width=\\'1.5\\' d=\\'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z\\'></path><path stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' stroke-width=\\'1.5\\' d=\\'M15 11a3 3 0 11-6 0 3 3 0 016 0z\\'></path></svg></div>'">`
+                        : '<div class="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-600"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>'
                     }
                     <div class="absolute top-3 right-3">${verifiedBadge}</div>
                 </div>
-                <div class="p-6 flex-1 flex flex-col justify-between">
+                <div class="p-5 flex-1 flex flex-col justify-between">
                     <div>
-                        <h3 class="font-black text-white text-lg truncate font-heading">${escapeHTML(point.name || 'Điểm chưa đặt tên')}</h3>
-                        <p class="text-xs text-slate-400 mt-1 line-clamp-2">${escapeHTML(point.address || 'Chưa có địa chỉ')}</p>
-                        <div class="flex items-center gap-2 mt-3">
+                        <h3 class="font-bold text-slate-900 dark:text-white text-base truncate font-heading">${escapeHTML(point.name || 'Điểm chưa đặt tên')}</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">${escapeHTML(point.address || 'Chưa có địa chỉ')}</p>
+                        <div class="mt-2.5">
                             ${getCPTypeBadge(point.point_type)}
                         </div>
                     </div>
-                    <div class="mt-4 pt-4 border-t border-slate-800/60">
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Đóng góp bởi</span>
-                            <span class="text-xs font-bold text-teal-400">${escapeHTML(contributorName)}</span>
+                    <div class="mt-4 pt-3.5 border-t border-slate-100 dark:border-slate-800/60">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Đóng góp bởi</span>
+                            <span class="text-xs font-semibold text-emerald-700 dark:text-emerald-400 truncate max-w-[130px]">${escapeHTML(contributorName)}</span>
                         </div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ngày gửi</span>
-                            <span class="text-xs font-bold text-slate-300">${createdDate}</span>
+                        <div class="flex items-center justify-between mb-3.5">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ngày gửi</span>
+                            <span class="text-xs font-medium text-slate-600 dark:text-slate-300">${createdDate}</span>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="showCPDetail('${escapeHTML(point.id)}')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl text-xs font-black transition">CHI TIẾT</button>
+                            <button onclick="showCPDetail('${escapeHTML(point.id)}')" class="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 py-2.5 rounded-xl text-xs font-bold transition">CHI TIẾT</button>
                             ${!point.is_verified ? `
-                                <button onclick="approveCPDirect('${escapeHTML(point.id)}')" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-4 rounded-xl font-bold text-xs transition" title="Duyệt nhanh">✓</button>
-                                <button onclick="rejectCPDirect('${escapeHTML(point.id)}')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-4 rounded-xl font-bold text-xs transition" title="Từ chối">✕</button>
+                                <button onclick="approveCPDirect('${escapeHTML(point.id)}')" class="bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 px-3.5 rounded-xl font-bold text-xs transition" title="Duyệt nhanh">✓</button>
+                                <button onclick="rejectCPDirect('${escapeHTML(point.id)}')" class="bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 px-3.5 rounded-xl font-bold text-xs transition" title="Từ chối">✕</button>
                             ` : ''}
                         </div>
                     </div>
@@ -1151,7 +1180,7 @@ window.fetchCollectionPoints = async (page = 1) => {
         updateCPPagination(count || data.length);
     } catch (e) {
         loader.classList.add('hidden');
-        grid.innerHTML = `<div class="col-span-full p-8 bg-red-950/20 border border-red-900/40 text-red-400 rounded-2xl text-sm font-bold">Lỗi: ${escapeHTML(e.message || 'Không xác định')}</div>`;
+        grid.innerHTML = `<div class="col-span-full p-6 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 rounded-xl text-sm font-semibold">Lỗi: ${escapeHTML(e.message || 'Không xác định')}</div>`;
     }
 };
 
@@ -1168,57 +1197,57 @@ window.showCPDetail = (id) => {
     const createdDate = point.created_at ? new Date(point.created_at).toLocaleString('vi-VN') : 'N/A';
 
     content.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center min-h-[200px]">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="bg-slate-100 dark:bg-slate-950 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 flex items-center justify-center min-h-[180px]">
                 ${point.image_url
                     ? `<img src="${escapeHTML(point.image_url)}" class="w-full h-full object-contain">`
-                    : '<div class="p-10 text-center"><svg class="w-16 h-16 text-slate-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><p class="text-slate-600 font-bold text-xs">KHÔNG CÓ ẢNH</p></div>'
+                    : '<div class="p-8 text-center text-slate-400 dark:text-slate-600"><svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><p class="font-bold text-xs uppercase tracking-wider">KHÔNG CÓ ẢNH</p></div>'
                 }
             </div>
-            <div class="space-y-4">
-                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tên điểm thu gom</span>
-                    <p class="text-xl font-black text-white mt-1 font-heading">${escapeHTML(point.name || 'Chưa đặt tên')}</p>
+            <div class="space-y-3">
+                <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tên điểm thu gom</span>
+                    <p class="text-lg font-bold text-slate-900 dark:text-white mt-1 font-heading">${escapeHTML(point.name || 'Chưa đặt tên')}</p>
                 </div>
-                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loại điểm</span>
-                    <div class="mt-2">${getCPTypeBadge(point.point_type)}</div>
+                <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Loại điểm</span>
+                    <div class="mt-1.5">${getCPTypeBadge(point.point_type)}</div>
                 </div>
-                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trạng thái</span>
-                    <div class="mt-2">
+                <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Trạng thái</span>
+                    <div class="mt-1.5">
                         ${point.is_verified
-                            ? '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Đã duyệt</span>'
-                            : '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 animate-pulse">Chờ duyệt</span>'
+                            ? '<span class="px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30">Đã duyệt</span>'
+                            : '<span class="px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded-md bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30">Chờ duyệt</span>'
                         }
                     </div>
                 </div>
             </div>
         </div>
-        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Địa chỉ</span>
-            <p class="text-slate-300 text-sm mt-2 leading-relaxed">${escapeHTML(point.address || 'Chưa có địa chỉ')}</p>
+        <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Địa chỉ</span>
+            <p class="text-slate-700 dark:text-slate-300 text-sm mt-1 leading-relaxed">${escapeHTML(point.address || 'Chưa có địa chỉ')}</p>
         </div>
         ${point.description ? `
-        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mô tả</span>
-            <p class="text-slate-300 text-sm mt-2 leading-relaxed">${escapeHTML(point.description)}</p>
+        <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mô tả</span>
+            <p class="text-slate-700 dark:text-slate-300 text-sm mt-1 leading-relaxed">${escapeHTML(point.description)}</p>
         </div>
         ` : ''}
-        <div class="grid grid-cols-2 gap-4">
-            <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Người đóng góp</span>
-                <p class="text-teal-400 font-bold mt-1">${escapeHTML(contributorName)}</p>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-slate-50 dark:bg-slate-900/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Người đóng góp</span>
+                <p class="text-emerald-700 dark:text-emerald-400 font-bold text-xs sm:text-sm mt-0.5 truncate">${escapeHTML(contributorName)}</p>
             </div>
-            <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ngày gửi</span>
-                <p class="text-slate-300 font-bold mt-1">${createdDate}</p>
+            <div class="bg-slate-50 dark:bg-slate-900/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ngày gửi</span>
+                <p class="text-slate-700 dark:text-slate-300 font-medium text-xs sm:text-sm mt-0.5">${createdDate}</p>
             </div>
         </div>
         ${!point.is_verified ? `
-        <div class="pt-6 border-t border-slate-800 flex gap-4">
-            <button onclick="approveCPFromModal('${escapeHTML(point.id)}')" class="flex-[2] bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white py-4 rounded-2xl font-black text-sm transition shadow-lg shadow-emerald-500/25">DUYỆT ĐIỂM THU GOM</button>
-            <button onclick="rejectCPFromModal('${escapeHTML(point.id)}')" class="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 py-4 rounded-2xl font-bold text-sm transition">TỪ CHỐI</button>
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex gap-3">
+            <button onclick="approveCPFromModal('${escapeHTML(point.id)}')" class="flex-[2] bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm transition shadow-sm">DUYỆT ĐIỂM THU GOM</button>
+            <button onclick="rejectCPFromModal('${escapeHTML(point.id)}')" class="flex-1 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 py-3 rounded-xl font-bold text-sm transition">TỪ CHỐI</button>
         </div>
         ` : ''}
     `;
@@ -1273,7 +1302,8 @@ window.rejectCPFromModal = async (id) => {
         if (!session) return window.location.replace('index.html');
 
         const user = await checkAdminPermissions(session.user);
-        document.getElementById('admin-email').innerText = user.email;
+        const emailEl = document.getElementById('admin-email');
+        if (emailEl) emailEl.innerText = user.email;
         currentUserRole = user.role || 'admin';
         document.getElementById('auth-loader').classList.add('hidden');
 

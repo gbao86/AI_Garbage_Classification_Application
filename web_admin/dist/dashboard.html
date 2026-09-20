@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoSort Admin - Control Center</title>
+    <title>EcoSort Admin - Control Center</title>
     <script>
         if (localStorage.getItem('ecosort_theme') === 'light') {
             document.documentElement.classList.remove('dark');
@@ -18,214 +18,252 @@
             display: none !important;
         }
     </style>
-  <script type="module" crossorigin src="/assets/dashboard-BU1UZxYH.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/auth-44BPmAxy.js">
-  <link rel="stylesheet" crossorigin href="/assets/auth-Cxn_3UkE.css">
+  <script type="module" crossorigin src="/assets/dashboard-BEV0_m3F.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/auth-w6x5re1r.js">
+  <link rel="stylesheet" crossorigin href="/assets/auth-Ddv393V6.css">
 </head>
 
-<body class="bg-slate-50 dark:bg-[#070a12] text-slate-800 dark:text-slate-100 font-sans min-h-screen relative overflow-x-hidden transition-colors duration-300">
-    <!-- Ambient Background Glows -->
-    <div class="fixed top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none"></div>
-    <div class="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[150px] pointer-events-none"></div>
-
+<body class="bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 font-sans min-h-screen relative overflow-x-hidden transition-colors duration-200">
     <!-- Auth Loader Overlay -->
-    <div id="auth-loader" class="fixed inset-0 bg-[#070a12] z-[9999] flex flex-col items-center justify-center">
-        <div class="w-12 h-12 border-4 border-slate-800 border-t-emerald-400 rounded-full animate-spin mb-4 glow-emerald"></div>
-        <p class="text-slate-400 font-bold text-xs tracking-widest uppercase font-heading">Đang xác thực hệ thống EcoSort Admin...</p>
+    <div id="auth-loader" class="fixed inset-0 bg-white dark:bg-[#0b0f19] z-[9999] flex flex-col items-center justify-center">
+        <div class="w-10 h-10 border-3 border-slate-200 dark:border-slate-800 border-t-emerald-600 rounded-full animate-spin mb-3"></div>
+        <p class="text-slate-500 dark:text-slate-400 font-semibold text-xs tracking-wider uppercase font-heading">Đang xác thực hệ thống EcoSort Admin...</p>
     </div>
 
-    <div class="flex min-h-screen relative z-10">
+    <!-- Mobile Backdrop Overlay -->
+    <div id="sidebar-backdrop" onclick="window.toggleMobileSidebar(false)"
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-20 lg:hidden hidden transition-opacity duration-200"></div>
+
+    <!-- Responsive Layout Shell -->
+    <div class="min-h-screen flex flex-col lg:flex-row">
+        <!-- MOBILE TOP BAR -->
+        <header class="lg:hidden sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-3">
+                <button onclick="window.toggleMobileSidebar(true)" aria-label="Mở menu điều hướng"
+                    class="p-2 -ml-1 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-black text-sm shadow-sm">E</div>
+                    <span class="font-bold text-slate-900 dark:text-white text-base tracking-tight font-heading">EcoSort <span class="text-emerald-600 dark:text-emerald-400 text-xs font-semibold">Admin</span></span>
+                </div>
+            </div>
+            <button onclick="toggleTheme()" class="mobile-theme-btn p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                <!-- Icon will update dynamically -->
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+            </button>
+        </header>
+
         <!-- SIDEBAR -->
-        <aside class="w-64 bg-slate-900/80 backdrop-blur-xl border-r border-slate-800/80 p-6 flex flex-col fixed h-full z-20">
-            <!-- Brand Logo -->
-            <div class="flex items-center gap-3 mb-10 px-2">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-lg shadow-emerald-500/20">
-                    <div class="w-full h-full bg-slate-950 rounded-[0.6rem] flex items-center justify-center text-emerald-400 font-black italic text-lg font-heading">E</div>
+        <aside id="sidebar"
+            class="fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-5 flex flex-col h-full transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out shadow-lg lg:shadow-none">
+            <!-- Brand Logo & Header -->
+            <div class="flex items-center justify-between mb-6 px-2">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-black text-base shadow-sm">
+                        E
+                    </div>
+                    <div>
+                        <h1 class="text-base font-bold text-slate-900 dark:text-white tracking-tight font-heading leading-tight">EcoSort Admin</h1>
+                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold uppercase tracking-wider">Control Center</span>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-lg font-black text-white tracking-tight font-heading leading-none">EcoSort Admin</h1>
-                    <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Control Center</span>
-                </div>
+                <!-- Close Button (Mobile Only) -->
+                <button onclick="window.toggleMobileSidebar(false)" class="lg:hidden p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
             </div>
 
             <!-- Navigation Buttons -->
-            <nav class="flex-1 space-y-2">
+            <nav class="flex-1 space-y-1.5 overflow-y-auto pr-1">
                 <button onclick="switchTab('submissions')" id="btn-submissions"
-                    class="w-full text-left px-4 py-3.5 rounded-xl text-slate-400 font-bold text-sm transition-all duration-200 flex items-center gap-3 sidebar-active">
-                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-full text-left px-3.5 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 font-semibold text-sm transition flex items-center gap-3 sidebar-active">
+                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                     </svg>
-                    Báo cáo rác
+                    <span>Báo cáo rác</span>
                 </button>
+
                 <button onclick="switchTab('users')" id="btn-users"
-                    class="w-full text-left px-4 py-3.5 rounded-xl text-slate-400 font-bold text-sm transition-all duration-200 flex items-center gap-3 hover:bg-slate-800/60 hover:text-slate-200">
-                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-full text-left px-3.5 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 font-semibold text-sm transition flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100">
+                    <svg class="w-4 h-4 text-sky-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
-                    Người dùng
+                    <span>Người dùng</span>
                 </button>
+
                 <button onclick="switchTab('privileged_actions')" id="btn-privileged_actions"
-                    class="w-full text-left px-4 py-3.5 rounded-xl text-slate-400 font-bold text-sm transition-all duration-200 flex items-center gap-3 hover:bg-slate-800/60 hover:text-slate-200">
-                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-full text-left px-3.5 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 font-semibold text-sm transition flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100">
+                    <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04m17.236 0a11.955 11.955 0 01-11 11.21 11.955 11.955 0 01-11-11.21M3 7l9 6 9-6"></path>
                     </svg>
-                    Hành động đặc quyền
+                    <span>Hành động đặc quyền</span>
                 </button>
+
                 <button onclick="switchTab('settings')" id="btn-settings"
-                    class="w-full text-left px-4 py-3.5 rounded-xl text-slate-400 font-bold text-sm transition-all duration-200 flex items-center gap-3 hover:bg-slate-800/60 hover:text-slate-200">
-                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-full text-left px-3.5 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 font-semibold text-sm transition flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100">
+                    <svg class="w-4 h-4 text-purple-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                     </svg>
-                    Cài đặt hệ thống
+                    <span>Cài đặt hệ thống</span>
                 </button>
+
                 <button onclick="switchTab('collection_points')" id="btn-collection_points"
-                    class="w-full text-left px-4 py-3.5 rounded-xl text-slate-400 font-bold text-sm transition-all duration-200 flex items-center gap-3 hover:bg-slate-800/60 hover:text-slate-200">
-                    <svg class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-full text-left px-3.5 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 font-semibold text-sm transition flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100">
+                    <svg class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
-                    Điểm thu gom
+                    <span>Điểm thu gom</span>
                 </button>
             </nav>
 
-            <!-- Bottom User Card -->
-            <div class="mt-auto pt-6 border-t border-slate-800/80">
+            <!-- Bottom User & Controls -->
+            <div class="mt-auto pt-4 border-t border-slate-200 dark:border-slate-800">
                 <button onclick="toggleTheme()" id="theme-toggle-btn"
-                    class="w-full mb-3 bg-slate-800/80 hover:bg-slate-700 text-slate-200 py-3 rounded-xl font-bold text-xs border border-slate-700/50 transition flex items-center justify-center gap-2">
+                    class="w-full mb-3 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 py-2.5 rounded-xl font-semibold text-xs border border-slate-200 dark:border-slate-700/60 transition flex items-center justify-center gap-2">
                     <!-- Dynamic Theme Icon & Label -->
                 </button>
-                <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800 mb-3">
-                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Đăng nhập bởi</p>
-                    <p id="admin-email" class="text-xs text-emerald-400 font-bold truncate mt-0.5"></p>
+
+                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 mb-2.5">
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Đăng nhập bởi</p>
+                    <p id="admin-email" class="text-xs text-slate-800 dark:text-emerald-400 font-semibold truncate mt-0.5"></p>
                 </div>
+
                 <button onclick="handleLogout()"
-                    class="w-full bg-slate-800/80 text-slate-300 py-3 rounded-xl font-bold text-xs hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 border border-slate-700/50 transition">
+                    class="w-full bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 py-2.5 rounded-xl font-semibold text-xs hover:bg-rose-50 dark:hover:bg-rose-500/20 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700/60 transition">
                     Đăng xuất
                 </button>
             </div>
         </aside>
 
         <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 ml-64 p-10 min-h-screen">
-            <!-- TAB SUBMISSIONS -->
+        <main class="flex-1 min-w-0 lg:ml-64 p-4 sm:p-6 lg:p-8 min-h-screen">
+            <!-- TAB 1: SUBMISSIONS -->
             <section id="tab-submissions" class="tab-content">
-                <div class="flex justify-between items-center mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
-                        <h2 class="text-3xl font-black text-white font-heading">Duyệt rác</h2>
-                        <p class="text-slate-400 text-sm font-medium mt-1">Thẩm định dữ liệu phân loại rác từ AI & Người dùng</p>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white font-heading">Duyệt rác</h2>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">Thẩm định dữ liệu phân loại rác từ AI & Người dùng</p>
                     </div>
-                    <div class="flex gap-3">
+                    <div class="flex items-center gap-2.5">
                         <select id="filter-status" onchange="fetchSubmissions()"
-                            class="bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-200 outline-none focus:border-emerald-500 transition">
+                            class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-800 dark:text-slate-200 outline-none focus:border-emerald-500 shadow-sm transition">
                             <option value="pending_review">Chờ duyệt</option>
                             <option value="approved">Đã duyệt</option>
                             <option value="rejected">Đã từ chối</option>
                         </select>
                         <button onclick="fetchSubmissions()"
-                            class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-lg shadow-emerald-600/20">
+                            class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold text-sm transition shadow-sm">
                             Làm mới
                         </button>
                     </div>
                 </div>
 
                 <div id="loader-submissions" class="text-center py-20 hidden">
-                    <div class="animate-spin inline-block w-8 h-8 border-4 border-slate-800 border-t-emerald-400 rounded-full mb-4"></div>
-                    <p class="text-slate-400 font-bold">Đang nạp dữ liệu báo cáo rác...</p>
+                    <div class="animate-spin inline-block w-8 h-8 border-3 border-slate-200 dark:border-slate-800 border-t-emerald-600 rounded-full mb-3"></div>
+                    <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">Đang nạp dữ liệu báo cáo rác...</p>
                 </div>
-                <div id="grid-submissions" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
+                <div id="grid-submissions" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6"></div>
             </section>
 
-            <!-- TAB USERS -->
+            <!-- TAB 2: USERS -->
             <section id="tab-users" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-8">
+                <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h2 class="text-3xl font-black text-white font-heading">Quản lý Người dùng</h2>
-                        <p class="text-slate-400 text-sm font-medium mt-1">Hệ thống phân quyền & kiểm soát truy cập</p>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white font-heading">Quản lý Người dùng</h2>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">Hệ thống phân quyền & kiểm soát truy cập</p>
                     </div>
                 </div>
 
                 <!-- Toolbar -->
-                <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex flex-wrap gap-4 justify-between items-center mb-6">
-                    <div class="flex gap-2 flex-1 min-w-[300px]">
+                <div class="glass-panel p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row gap-3 justify-between items-stretch md:items-center mb-6">
+                    <div class="flex-1 min-w-[240px]">
                         <input type="text" id="filter-user-search" placeholder="Tìm theo Email, Tên hiển thị..."
-                            class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-sm font-medium text-white placeholder-slate-500 outline-none focus:border-emerald-500 transition">
+                            class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-emerald-500 transition">
                     </div>
-                    <div class="flex gap-3">
+                    <div class="flex flex-wrap sm:flex-nowrap gap-2.5">
                         <select id="filter-user-role"
-                            class="bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-3 text-sm font-bold text-slate-200 outline-none focus:border-emerald-500">
+                            class="flex-1 sm:flex-initial bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 outline-none focus:border-emerald-500">
                             <option value="">Tất cả Vai trò</option>
                             <option value="user">User</option>
                             <option value="admin">Admin</option>
                             <option value="super_admin">Super Admin</option>
                         </select>
                         <select id="filter-user-status"
-                            class="bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-3 text-sm font-bold text-slate-200 outline-none focus:border-emerald-500">
+                            class="flex-1 sm:flex-initial bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 outline-none focus:border-emerald-500">
                             <option value="">Tất cả Trạng thái</option>
                             <option value="active">Đang hoạt động</option>
                             <option value="locked">Bị khóa (Banned)</option>
                         </select>
                         <button onclick="fetchUsers(1)"
-                            class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold text-sm transition shadow-lg shadow-emerald-600/20 flex items-center gap-2">
+                            class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
-                            Lọc
+                            <span>Lọc</span>
                         </button>
                     </div>
                 </div>
 
-                <div class="glass-panel rounded-[2rem] border border-slate-800 overflow-hidden shadow-xl">
+                <div class="glass-panel rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[800px]">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
                             <thead>
-                                <tr class="bg-slate-900/90 text-[10px] uppercase tracking-widest text-slate-400 border-b border-slate-800">
-                                    <th class="p-6 font-bold">Người dùng</th>
-                                    <th class="p-6 font-bold text-center">Vai trò</th>
-                                    <th class="p-6 font-bold text-center">Trạng thái</th>
-                                    <th class="p-6 font-bold">Đăng nhập lần cuối</th>
-                                    <th class="p-6 font-bold text-right">Thao tác</th>
+                                <tr class="bg-slate-50 dark:bg-slate-800/60 text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                                    <th class="p-4 font-bold">Người dùng</th>
+                                    <th class="p-4 font-bold text-center">Vai trò</th>
+                                    <th class="p-4 font-bold text-center">Trạng thái</th>
+                                    <th class="p-4 font-bold">Đăng nhập lần cuối</th>
+                                    <th class="p-4 font-bold text-right">Thao tác</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-users" class="divide-y divide-slate-800/60">
-                                <!-- Dữ liệu sẽ được load qua JS -->
+                            <tbody id="table-users" class="divide-y divide-slate-200 dark:divide-slate-800/60">
+                                <!-- Loaded via JS -->
                             </tbody>
                         </table>
-                        <div id="loader-users" class="text-center py-20 hidden">
-                            <div class="animate-spin inline-block w-8 h-8 border-4 border-slate-800 border-t-emerald-400 rounded-full mb-4"></div>
-                            <p class="text-slate-400 font-bold">Đang tải danh sách người dùng...</p>
+                        <div id="loader-users" class="text-center py-16 hidden">
+                            <div class="animate-spin inline-block w-8 h-8 border-3 border-slate-200 dark:border-slate-800 border-t-emerald-600 rounded-full mb-3"></div>
+                            <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">Đang tải danh sách người dùng...</p>
                         </div>
                     </div>
                     <!-- Pagination -->
-                    <div class="p-6 bg-slate-900/60 border-t border-slate-800 flex justify-between items-center">
-                        <span id="user-page-info" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Đang tải...</span>
-                        <div class="flex gap-3">
+                    <div class="p-4 bg-slate-50/50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                        <span id="user-page-info" class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Đang tải...</span>
+                        <div class="flex gap-2">
                             <button onclick="changeUserPage(-1)" id="btn-user-prev" disabled
-                                class="px-5 py-2.5 bg-slate-800 border border-slate-700/80 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Trước</button>
+                                class="px-3.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Trước</button>
                             <button onclick="changeUserPage(1)" id="btn-user-next" disabled
-                                class="px-5 py-2.5 bg-slate-800 border border-slate-700/80 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Sau</button>
+                                class="px-3.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Sau</button>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- TAB PRIVILEGED ACTIONS -->
+            <!-- TAB 3: PRIVILEGED ACTIONS -->
             <section id="tab-privileged_actions" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
-                        <h2 class="text-3xl font-black text-white font-heading">Hành động Đặc quyền</h2>
-                        <p class="text-slate-400 text-sm font-medium mt-1">Cơ chế phê duyệt hai bước cho các tác vụ nhạy cảm</p>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white font-heading">Hành động Đặc quyền</h2>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">Cơ chế phê duyệt hai bước cho các tác vụ nhạy cảm</p>
                     </div>
                     <button onclick="openCreatePAModal()"
-                        class="bg-gradient-to-r from-emerald-600 to-teal-500 text-white px-6 py-3.5 rounded-2xl font-black text-sm hover:from-emerald-500 hover:to-teal-400 transition shadow-lg shadow-emerald-500/25 flex items-center gap-2">
-                        + Tạo yêu cầu mới
+                        class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
+                        <span>+ Tạo yêu cầu mới</span>
                     </button>
                 </div>
 
                 <!-- Toolbar -->
-                <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex justify-between items-center mb-6">
+                <div class="glass-panel p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center mb-6">
                     <div class="flex gap-2">
                         <select id="filter-pa-state" onchange="fetchPrivilegedActions(1)"
-                            class="bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-3 text-sm font-bold text-slate-200 outline-none focus:border-emerald-500">
+                            class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-800 dark:text-slate-200 outline-none focus:border-emerald-500">
                             <option value="">Tất cả Trạng thái</option>
                             <option value="draft">Bản thảo</option>
                             <option value="awaiting_second_approval">Chờ duyệt lần 2</option>
@@ -235,170 +273,167 @@
                         </select>
                     </div>
                     <button onclick="fetchPrivilegedActions(1)"
-                        class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition">Làm mới</button>
+                        class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white px-4 py-2 rounded-xl font-bold text-sm transition">Làm mới</button>
                 </div>
 
-                <div class="glass-panel rounded-[2rem] border border-slate-800 overflow-hidden shadow-xl">
+                <div class="glass-panel rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[800px]">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
                             <thead>
-                                <tr class="bg-slate-900/90 text-[10px] uppercase tracking-widest text-slate-400 border-b border-slate-800">
-                                    <th class="p-6 font-bold">Hành động</th>
-                                    <th class="p-6 font-bold text-center">Người yêu cầu</th>
-                                    <th class="p-6 font-bold text-center">Trạng thái</th>
-                                    <th class="p-6 font-bold">Ngày tạo</th>
-                                    <th class="p-6 font-bold text-right">Thao tác</th>
+                                <tr class="bg-slate-50 dark:bg-slate-800/60 text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                                    <th class="p-4 font-bold">Hành động</th>
+                                    <th class="p-4 font-bold text-center">Người yêu cầu</th>
+                                    <th class="p-4 font-bold text-center">Trạng thái</th>
+                                    <th class="p-4 font-bold">Ngày tạo</th>
+                                    <th class="p-4 font-bold text-right">Thao tác</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-privileged-actions" class="divide-y divide-slate-800/60">
-                                <!-- Load JS -->
+                            <tbody id="table-privileged-actions" class="divide-y divide-slate-200 dark:divide-slate-800/60">
+                                <!-- Loaded via JS -->
                             </tbody>
                         </table>
-                        <div id="loader-privileged-actions" class="text-center py-20 hidden">
-                            <div class="animate-spin inline-block w-8 h-8 border-4 border-slate-800 border-t-emerald-400 rounded-full mb-4"></div>
-                            <p class="text-slate-400 font-bold">Đang tải danh sách yêu cầu...</p>
+                        <div id="loader-privileged-actions" class="text-center py-16 hidden">
+                            <div class="animate-spin inline-block w-8 h-8 border-3 border-slate-200 dark:border-slate-800 border-t-emerald-600 rounded-full mb-3"></div>
+                            <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">Đang tải danh sách yêu cầu...</p>
                         </div>
                     </div>
                     <!-- Pagination -->
-                    <div class="p-6 bg-slate-900/60 border-t border-slate-800 flex justify-between items-center">
-                        <span id="pa-page-info" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Đang tải...</span>
-                        <div class="flex gap-3">
+                    <div class="p-4 bg-slate-50/50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                        <span id="pa-page-info" class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Đang tải...</span>
+                        <div class="flex gap-2">
                             <button onclick="changePAPage(-1)" id="btn-pa-prev" disabled
-                                class="px-5 py-2.5 bg-slate-800 border border-slate-700/80 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Trước</button>
+                                class="px-3.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Trước</button>
                             <button onclick="changePAPage(1)" id="btn-pa-next" disabled
-                                class="px-5 py-2.5 bg-slate-800 border border-slate-700/80 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Sau</button>
+                                class="px-3.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Sau</button>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- TAB SYSTEM SETTINGS -->
+            <!-- TAB 4: SYSTEM SETTINGS -->
             <section id="tab-settings" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
-                        <h2 class="text-3xl font-black text-white font-heading">Cấu hình Hệ thống</h2>
-                        <p class="text-slate-400 text-sm font-medium mt-1">Quản lý trạng thái vận hành và các tham số tính năng</p>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white font-heading">Cấu hình Hệ thống</h2>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">Quản lý trạng thái vận hành và các tham số tính năng</p>
                     </div>
                     <div id="settings-status-badge">
-                        <!-- Hiển thị phân quyền Admin vs Super Admin -->
+                        <!-- Role Badge (Admin vs Super Admin) -->
                     </div>
                 </div>
 
                 <div id="loader-settings" class="text-center py-20 hidden">
-                    <div class="animate-spin inline-block w-8 h-8 border-4 border-slate-800 border-t-emerald-400 rounded-full mb-4"></div>
-                    <p class="text-slate-400 font-bold">Đang tải cấu hình...</p>
+                    <div class="animate-spin inline-block w-8 h-8 border-3 border-slate-200 dark:border-slate-800 border-t-emerald-600 rounded-full mb-3"></div>
+                    <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">Đang tải cấu hình...</p>
                 </div>
 
-                <div id="settings-form-container" class="space-y-8 hidden">
+                <div id="settings-form-container" class="space-y-6 hidden">
                     <!-- Section 1: Maintenance & Kill Switch -->
-                    <div class="glass-panel p-8 rounded-[2rem] border border-slate-800">
-                        <h3 class="text-lg font-black text-white mb-6 flex items-center gap-2 font-heading">
-                            <span class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">🛠️</span> Trạng thái vận hành (Maintenance & Kill Switch)
+                    <div class="glass-panel p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2 font-heading">
+                            <span>🛠️</span> Trạng thái vận hành (Maintenance & Kill Switch)
                         </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <label class="flex items-start gap-4 p-5 bg-slate-900/60 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-                                <input type="checkbox" id="setting-maint-enabled" class="w-5 h-5 mt-1 text-emerald-500 rounded bg-slate-950 border-slate-700 focus:ring-emerald-500">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <label class="flex items-start gap-3.5 p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer hover:border-slate-300 dark:hover:border-slate-700 transition">
+                                <input type="checkbox" id="setting-maint-enabled" class="w-4 h-4 mt-0.5 text-emerald-600 rounded border-slate-300 dark:border-slate-700 focus:ring-emerald-500">
                                 <div>
-                                    <p class="font-bold text-slate-200 text-sm">Bật chế độ bảo trì (Maintenance Mode)</p>
-                                    <p class="text-xs text-slate-400 mt-1">Khi bật, người dùng thông thường sẽ không truy cập được app, chỉ Admin mới truy cập được.</p>
+                                    <p class="font-bold text-slate-900 dark:text-slate-200 text-sm">Chế độ bảo trì (Maintenance Mode)</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Khi bật, chỉ tài khoản Admin mới có thể đăng nhập và sử dụng hệ thống.</p>
                                 </div>
                             </label>
-                            <label class="flex items-start gap-4 p-5 bg-red-950/20 rounded-2xl border border-red-900/40 cursor-pointer hover:border-red-800/60 transition">
-                                <input type="checkbox" id="setting-maint-killswitch" class="w-5 h-5 mt-1 text-red-500 rounded bg-slate-950 border-red-800 focus:ring-red-500">
+
+                            <label class="flex items-start gap-3.5 p-4 bg-rose-50/50 dark:bg-rose-950/20 rounded-xl border border-rose-200 dark:border-rose-900/40 cursor-pointer hover:border-rose-300 dark:hover:border-rose-800/60 transition">
+                                <input type="checkbox" id="setting-maint-killswitch" class="w-4 h-4 mt-0.5 text-rose-600 rounded border-rose-300 dark:border-rose-800 focus:ring-rose-500">
                                 <div>
-                                    <p class="font-bold text-red-400 text-sm">Kích hoạt ngắt khẩn cấp (Kill Switch)</p>
-                                    <p class="text-xs text-red-400/80 mt-1 uppercase font-bold">Cực kỳ nhạy cảm! Vô hiệu hóa toàn bộ API ghi của ứng dụng đối với mọi người dùng.</p>
+                                    <p class="font-bold text-rose-700 dark:text-rose-400 text-sm">Ngắt khẩn cấp (Kill Switch)</p>
+                                    <p class="text-xs text-rose-600/80 dark:text-rose-400/80 mt-1 font-semibold uppercase">Vô hiệu hóa toàn bộ API ghi của ứng dụng đối với người dùng thông thường.</p>
                                 </div>
                             </label>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Thông báo bảo trì hệ thống</label>
-                            <textarea id="setting-maint-message" rows="3" placeholder="Nhập thông báo hiển thị cho người dùng khi bảo trì..."
-                                class="w-full p-4 bg-slate-900/90 border border-slate-700/80 rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium text-slate-100 resize-none"></textarea>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Thông báo hiển thị khi bảo trì</label>
+                            <textarea id="setting-maint-message" rows="2" placeholder="Nhập thông báo hiển thị cho người dùng khi hệ thống bảo trì..."
+                                class="w-full p-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium text-slate-900 dark:text-slate-100 resize-none"></textarea>
                         </div>
                     </div>
 
                     <!-- Section 2: Points configuration -->
-                    <div class="glass-panel p-8 rounded-[2rem] border border-slate-800">
-                        <h3 class="text-lg font-black text-white mb-6 flex items-center gap-2 font-heading">
-                            <span class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">🏆</span> Cơ cấu điểm thưởng (Gamification Points)
+                    <div class="glass-panel p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2 font-heading">
+                            <span>🏆</span> Cơ cấu điểm thưởng (Gamification Points)
                         </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Điểm quét rác cơ bản</label>
-                                <input type="number" id="setting-points-base" class="w-full p-4 bg-slate-900/90 border border-slate-700/80 rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium text-white">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Điểm quét rác cơ bản</label>
+                                <input type="number" id="setting-points-base" class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium text-slate-900 dark:text-white">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Điểm trả lời Quiz đúng</label>
-                                <input type="number" id="setting-points-correct" class="w-full p-4 bg-slate-900/90 border border-slate-700/80 rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium text-white">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Điểm trả lời Quiz đúng</label>
+                                <input type="number" id="setting-points-correct" class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium text-slate-900 dark:text-white">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Hệ số streak bonus (mỗi ngày)</label>
-                                <input type="number" id="setting-points-streak" class="w-full p-4 bg-slate-900/90 border border-slate-700/80 rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium text-white">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Hệ số streak bonus (mỗi ngày)</label>
+                                <input type="number" id="setting-points-streak" class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium text-slate-900 dark:text-white">
                             </div>
                         </div>
                     </div>
 
                     <!-- Section 3: Gemini model configuration -->
-                    <div class="glass-panel p-8 rounded-[2rem] border border-slate-800">
-                        <h3 class="text-lg font-black text-white mb-6 flex items-center gap-2 font-heading">
-                            <span class="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">🧠</span> Cấu hình Trí tuệ nhân tạo (AI Gemini Model)
+                    <div class="glass-panel p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2 font-heading">
+                            <span>🧠</span> Cấu hình Trí tuệ nhân tạo (AI Gemini Model)
                         </h3>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tên Model Gemini sử dụng</label>
-                            <input type="text" id="setting-gemini-model" placeholder="Ví dụ: gemini-3.5-flash hoặc gemini-2.5-flash"
-                                class="w-full p-4 bg-slate-900/90 border border-slate-700/80 rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium text-white">
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Tên Model Gemini sử dụng</label>
+                            <input type="text" id="setting-gemini-model" placeholder="Ví dụ: gemini-3.8-flash hoặc gemini-2.5-flash"
+                                class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium text-slate-900 dark:text-white">
                         </div>
                     </div>
 
                     <!-- Save action -->
-                    <div class="flex justify-end pt-4" id="settings-save-container">
+                    <div class="flex justify-end pt-2" id="settings-save-container">
                         <button onclick="saveSystemSettings()" id="btn-save-settings"
-                            class="bg-gradient-to-r from-emerald-600 to-teal-500 text-white px-10 py-4 rounded-2xl font-black text-sm tracking-wider shadow-lg shadow-emerald-500/25 hover:from-emerald-500 hover:to-teal-400 transition active:scale-95">
+                            class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm tracking-wide shadow-sm transition active:scale-95">
                             LƯU CẤU HÌNH HỆ THỐNG
                         </button>
                     </div>
                 </div>
             </section>
 
-            <!-- TAB COLLECTION POINTS -->
+            <!-- TAB 5: COLLECTION POINTS -->
             <section id="tab-collection_points" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
-                        <h2 class="text-3xl font-black text-white font-heading">Điểm thu gom Cộng đồng</h2>
-                        <p class="text-slate-400 text-sm font-medium mt-1">Duyệt và quản lý các điểm rác do người dùng đóng góp trên bản đồ</p>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white font-heading">Điểm thu gom Cộng đồng</h2>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">Duyệt và quản lý các điểm rác do người dùng đóng góp trên bản đồ</p>
                     </div>
-                </div>
-
-                <!-- Toolbar -->
-                <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex justify-between items-center mb-6">
-                    <div class="flex gap-2">
+                    <div class="flex items-center gap-2.5">
                         <select id="filter-cp-verified" onchange="fetchCollectionPoints(1)"
-                            class="bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-3 text-sm font-bold text-slate-200 outline-none focus:border-emerald-500">
+                            class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-800 dark:text-slate-200 outline-none focus:border-emerald-500">
                             <option value="">Tất cả Trạng thái</option>
                             <option value="false" selected>Chờ duyệt</option>
                             <option value="true">Đã duyệt</option>
                         </select>
+                        <button onclick="fetchCollectionPoints(1)"
+                            class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold text-sm transition shadow-sm">Làm mới</button>
                     </div>
-                    <button onclick="fetchCollectionPoints(1)"
-                        class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition">Làm mới</button>
                 </div>
-
-                <div id="grid-collection-points" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
 
                 <div id="loader-collection-points" class="text-center py-20 hidden">
-                    <div class="animate-spin inline-block w-8 h-8 border-4 border-slate-800 border-t-emerald-400 rounded-full mb-4"></div>
-                    <p class="text-slate-400 font-bold">Đang tải danh sách điểm thu gom...</p>
+                    <div class="animate-spin inline-block w-8 h-8 border-3 border-slate-200 dark:border-slate-800 border-t-emerald-600 rounded-full mb-3"></div>
+                    <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">Đang tải danh sách điểm thu gom...</p>
                 </div>
 
+                <div id="grid-collection-points" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6"></div>
+
                 <!-- Pagination -->
-                <div class="mt-6 glass-panel rounded-2xl border border-slate-800 p-4 flex justify-between items-center">
-                    <span id="cp-page-info" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Đang tải...</span>
-                    <div class="flex gap-3">
+                <div class="mt-6 glass-panel rounded-xl border border-slate-200 dark:border-slate-800 p-4 flex justify-between items-center shadow-sm">
+                    <span id="cp-page-info" class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Đang tải...</span>
+                    <div class="flex gap-2">
                         <button onclick="changeCPPage(-1)" id="btn-cp-prev" disabled
-                            class="px-5 py-2.5 bg-slate-800 border border-slate-700/80 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Trước</button>
+                            class="px-3.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Trước</button>
                         <button onclick="changeCPPage(1)" id="btn-cp-next" disabled
-                            class="px-5 py-2.5 bg-slate-800 border border-slate-700/80 rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Sau</button>
+                            class="px-3.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">Sau</button>
                     </div>
                 </div>
             </section>
@@ -407,55 +442,59 @@
 
     <!-- DETAIL MODAL -->
     <div id="detail-modal"
-        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md items-center justify-center p-4 z-50 hidden flex">
-        <div class="glass-modal rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-black text-white font-heading">Chi tiết báo cáo</h3>
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-50 hidden flex">
+        <div class="glass-modal rounded-2xl p-6 sm:p-7 w-full max-w-2xl shadow-xl animate-modal overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-200 dark:border-slate-800">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-heading">Chi tiết báo cáo</h3>
                 <button onclick="closeDetailModal()"
-                    class="text-slate-400 hover:text-red-400 bg-slate-800 hover:bg-red-500/20 p-2.5 rounded-xl transition">Đóng</button>
+                    class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            <div id="detail-content" class="space-y-6">
-                <!-- Nội dung sẽ được nạp qua JS -->
+            <div id="detail-content" class="space-y-5">
+                <!-- Loaded via JS -->
             </div>
         </div>
     </div>
 
     <!-- APPROVE MODAL -->
     <div id="approve-modal"
-        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md items-center justify-center p-4 z-[60] hidden flex">
-        <div class="glass-modal rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-black text-white font-heading">Duyệt vào từ điển</h3>
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-[60] hidden flex">
+        <div class="glass-modal rounded-2xl p-6 sm:p-7 w-full max-w-lg shadow-xl animate-modal overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-200 dark:border-slate-800">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-heading">Duyệt vào từ điển</h3>
                 <button onclick="closeApproveModal()"
-                    class="text-slate-400 hover:text-red-400 bg-slate-800 hover:bg-red-500/20 p-2.5 rounded-xl transition">Đóng</button>
+                    class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
             <form id="approve-form" class="space-y-4" onsubmit="event.preventDefault(); window.submitApproveData();">
                 <input type="hidden" id="approve-id">
                 <input type="hidden" id="approve-image-url">
 
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tên loại rác (Tiếng Việt)</label>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Tên loại rác (Tiếng Việt)</label>
                     <input type="text" id="approve-name" required
-                        class="w-full p-4 bg-slate-900/90 border border-slate-700/80 rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium text-white">
+                        class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium text-slate-900 dark:text-white">
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Nhóm rác</label>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Nhóm rác</label>
                     <select id="approve-group" required
-                        class="w-full p-4 bg-slate-900 border border-slate-700/80 rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium text-slate-200">
+                        class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium text-slate-900 dark:text-slate-100">
                         <option value="">-- Chọn nhóm rác --</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Fun Fact (Kiến thức bổ sung)</label>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Kiến thức bổ sung (Fun Fact)</label>
                     <textarea id="approve-funfact" rows="3"
-                        class="w-full p-4 bg-slate-900/90 border border-slate-700/80 rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium text-white resize-none"></textarea>
+                        class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium text-slate-900 dark:text-white resize-none"></textarea>
                 </div>
 
-                <div class="pt-4">
+                <div class="pt-2">
                     <button type="submit" id="btn-submit-approve"
-                        class="w-full bg-gradient-to-r from-emerald-600 to-teal-500 text-white py-4 rounded-2xl font-black text-sm tracking-wider shadow-lg shadow-emerald-500/25 hover:from-emerald-500 hover:to-teal-400 transition">
+                        class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm tracking-wide shadow-sm transition">
                         XÁC NHẬN LƯU VÀO TỪ ĐIỂN
                     </button>
                 </div>
@@ -465,55 +504,56 @@
 
     <!-- USER ACTION MODAL -->
     <div id="user-action-modal"
-        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md items-center justify-center p-4 z-[70] hidden flex">
-        <div class="glass-modal rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl animate-modal overflow-hidden relative border border-slate-800">
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-[70] hidden flex">
+        <div class="glass-modal rounded-2xl p-6 sm:p-7 w-full max-w-lg shadow-xl animate-modal overflow-hidden relative">
             <button onclick="closeUserActionModal()"
-                class="absolute top-6 right-6 text-slate-400 hover:text-red-400 bg-slate-800 hover:bg-red-500/20 p-2.5 rounded-xl transition">Đóng</button>
-            <h3 class="text-2xl font-black text-white font-heading mb-1">Quản lý User</h3>
-            <p id="user-action-email" class="text-emerald-400 text-sm font-bold mb-6"></p>
+                class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white font-heading mb-1">Quản lý Người dùng</h3>
+            <p id="user-action-email" class="text-emerald-600 dark:text-emerald-400 text-xs font-semibold mb-5"></p>
 
             <input type="hidden" id="action-user-id">
             <input type="hidden" id="action-user-locked">
 
             <div class="space-y-4">
-                <div class="p-5 bg-slate-900/60 rounded-2xl border border-slate-800">
-                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Tác vụ Bảo mật</h4>
+                <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <h4 class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2.5">Tác vụ Bảo mật</h4>
                     <button onclick="resetUserPassword()"
-                        class="w-full flex items-center justify-between p-4 bg-slate-950/80 rounded-xl border border-slate-800 hover:border-cyan-500/50 hover:shadow-md transition text-slate-200 font-bold text-sm mb-3">
-                        <span>Gửi link Reset Password (Email)</span>
-                        <span class="text-cyan-400">→</span>
+                        class="w-full flex items-center justify-between p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-sky-500 transition text-slate-800 dark:text-slate-200 font-semibold text-xs mb-2 shadow-sm">
+                        <span>Gửi link Đặt lại mật khẩu (Email)</span>
+                        <span class="text-sky-500 font-bold">→</span>
                     </button>
                     <button onclick="viewUserAuditLogs()"
-                        class="w-full flex items-center justify-between p-4 bg-slate-950/80 rounded-xl border border-slate-800 hover:border-slate-700 hover:shadow-md transition text-slate-200 font-bold text-sm">
+                        class="w-full flex items-center justify-between p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 transition text-slate-800 dark:text-slate-200 font-semibold text-xs shadow-sm">
                         <span>Xem Lịch sử Hoạt động (Audit Logs)</span>
-                        <span class="text-slate-400">→</span>
+                        <span class="text-slate-400 font-bold">→</span>
                     </button>
                 </div>
 
-                <div class="p-5 bg-red-950/20 rounded-2xl border border-red-900/40">
-                    <h4 class="text-[10px] font-black text-red-400 uppercase tracking-widest mb-3">Tác vụ Kiểm soát</h4>
-
-                    <div id="ban-section" class="mb-4">
-                        <input type="text" id="ban-reason" placeholder="Nhập lý do khóa (Bắt buộc nếu Ban)..."
-                            class="w-full p-4 bg-slate-900/90 border border-red-800/60 rounded-xl outline-none focus:border-red-500 mb-3 text-sm font-medium text-white">
+                <div class="p-4 bg-rose-50/50 dark:bg-rose-950/20 rounded-xl border border-rose-200 dark:border-rose-900/40">
+                    <h4 class="text-[10px] font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider mb-2.5">Tác vụ Kiểm soát</h4>
+                    <div id="ban-section" class="space-y-2.5">
+                        <input type="text" id="ban-reason" placeholder="Nhập lý do khóa tài khoản (Bắt buộc)..."
+                            class="w-full p-2.5 bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-800 rounded-lg outline-none focus:border-rose-500 text-xs font-medium text-slate-900 dark:text-white">
                         <button onclick="toggleBanUser()" id="btn-toggle-ban"
-                            class="w-full bg-red-600 text-white py-4 rounded-xl font-black shadow-lg shadow-red-600/25 hover:bg-red-500 transition">
+                            class="w-full bg-rose-600 hover:bg-rose-500 text-white py-2.5 rounded-lg font-bold text-xs shadow-sm transition">
                             KHÓA TÀI KHOẢN (BAN)
                         </button>
                     </div>
                 </div>
 
-                <div class="p-5 bg-slate-900/60 rounded-2xl border border-slate-800" id="user-role-actions-section">
-                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Vai trò & Quyền hạn (Cần Duyệt 2 Bước)</h4>
+                <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800" id="user-role-actions-section">
+                    <h4 class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2.5">Vai trò & Quyền hạn (Cần Duyệt 2 Bước)</h4>
                     <button onclick="requestRolePromotion()" id="btn-request-promote"
-                        class="w-full flex items-center justify-between p-4 bg-slate-950/80 rounded-xl border border-slate-800 hover:border-emerald-500/50 hover:shadow-md transition text-slate-200 font-bold text-sm mb-3">
+                        class="w-full flex items-center justify-between p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-emerald-500 transition text-slate-800 dark:text-slate-200 font-semibold text-xs mb-2 shadow-sm">
                         <span>Đề xuất Nâng cấp lên Admin</span>
-                        <span class="text-emerald-400">↑</span>
+                        <span class="text-emerald-600 dark:text-emerald-400 font-bold">↑</span>
                     </button>
                     <button onclick="requestRoleDemotion()" id="btn-request-demote"
-                        class="w-full flex items-center justify-between p-4 bg-slate-950/80 rounded-xl border border-slate-800 hover:border-red-500/50 hover:shadow-md transition text-slate-200 font-bold text-sm">
+                        class="w-full flex items-center justify-between p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-rose-500 transition text-slate-800 dark:text-slate-200 font-semibold text-xs shadow-sm">
                         <span>Đề xuất Hạ cấp xuống User</span>
-                        <span class="text-red-400">↓</span>
+                        <span class="text-rose-600 dark:text-rose-400 font-bold">↓</span>
                     </button>
                 </div>
             </div>
@@ -522,18 +562,20 @@
 
     <!-- CREATE PRIVILEGED ACTION MODAL -->
     <div id="create-pa-modal"
-        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md items-center justify-center p-4 z-[75] hidden flex">
-        <div class="glass-modal rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-black text-white font-heading">Tạo yêu cầu Đặc quyền</h3>
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-[75] hidden flex">
+        <div class="glass-modal rounded-2xl p-6 sm:p-7 w-full max-w-lg shadow-xl animate-modal overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-200 dark:border-slate-800">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-heading">Tạo yêu cầu Đặc quyền</h3>
                 <button onclick="closeCreatePAModal()"
-                    class="text-slate-400 hover:text-red-400 bg-slate-800 hover:bg-red-500/20 p-2.5 rounded-xl transition">Đóng</button>
+                    class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
             <form id="create-pa-form" class="space-y-4" onsubmit="event.preventDefault(); window.submitCreatePARequest();">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Loại hành động</label>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Loại hành động</label>
                     <select id="create-pa-type" required onchange="handlePATypeChange()"
-                        class="w-full p-4 bg-slate-900 border border-slate-700/80 rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium text-slate-200">
+                        class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium text-slate-900 dark:text-slate-100">
                         <option value="">-- Chọn hành động --</option>
                         <option value="promote_user_admin">Nâng cấp User lên Admin</option>
                         <option value="demote_admin">Hạ cấp Admin xuống User</option>
@@ -544,19 +586,19 @@
                 </div>
 
                 <!-- Dynamic inputs container -->
-                <div id="create-pa-payload-inputs" class="space-y-4">
-                    <!-- Load động tùy loại hành động chọn -->
+                <div id="create-pa-payload-inputs" class="space-y-3">
+                    <!-- Loaded dynamically via JS -->
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Lý do thực hiện / Ghi chú</label>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Lý do thực hiện / Ghi chú</label>
                     <textarea id="create-pa-reason" rows="3" required placeholder="Nhập lý do chi tiết..."
-                        class="w-full p-4 bg-slate-900/90 border border-slate-700/80 rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium text-white resize-none"></textarea>
+                        class="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium text-slate-900 dark:text-white resize-none"></textarea>
                 </div>
 
-                <div class="pt-4">
+                <div class="pt-2">
                     <button type="submit" id="btn-submit-pa-request"
-                        class="w-full bg-gradient-to-r from-emerald-600 to-teal-500 text-white py-4 rounded-2xl font-black text-sm tracking-wider shadow-lg shadow-emerald-500/25 hover:from-emerald-500 hover:to-teal-400 transition">
+                        class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold text-sm tracking-wide shadow-sm transition">
                         GỬI YÊU CẦU DUYỆT
                     </button>
                 </div>
@@ -566,34 +608,38 @@
 
     <!-- PRIVILEGED ACTION DETAIL MODAL -->
     <div id="pa-detail-modal"
-        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md items-center justify-center p-4 z-[75] hidden flex">
-        <div class="glass-modal rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-black text-white font-heading">Chi tiết Yêu cầu đặc quyền</h3>
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-[75] hidden flex">
+        <div class="glass-modal rounded-2xl p-6 sm:p-7 w-full max-w-2xl shadow-xl animate-modal overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-200 dark:border-slate-800">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-heading">Chi tiết Yêu cầu đặc quyền</h3>
                 <button onclick="closePADetailModal()"
-                    class="text-slate-400 hover:text-red-400 bg-slate-800 hover:bg-red-500/20 p-2.5 rounded-xl transition">Đóng</button>
+                    class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            <div id="pa-detail-content" class="space-y-6">
-                <!-- Load JS -->
+            <div id="pa-detail-content" class="space-y-5">
+                <!-- Loaded via JS -->
             </div>
         </div>
     </div>
 
     <!-- COLLECTION POINT DETAIL MODAL -->
     <div id="cp-detail-modal"
-        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md items-center justify-center p-4 z-[60] hidden flex">
-        <div class="glass-modal rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl animate-modal overflow-y-auto max-h-[90vh]">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-black text-white font-heading">Chi tiết Điểm thu gom</h3>
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 z-[60] hidden flex">
+        <div class="glass-modal rounded-2xl p-6 sm:p-7 w-full max-w-2xl shadow-xl animate-modal overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-200 dark:border-slate-800">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-heading">Chi tiết Điểm thu gom</h3>
                 <button onclick="closeCPDetailModal()"
-                    class="text-slate-400 hover:text-red-400 bg-slate-800 hover:bg-red-500/20 p-2.5 rounded-xl transition">Đóng</button>
+                    class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            <div id="cp-detail-content" class="space-y-6">
-                <!-- Load JS -->
+            <div id="cp-detail-content" class="space-y-5">
+                <!-- Loaded via JS -->
             </div>
         </div>
     </div>
-
+
 </body>
 
 </html>

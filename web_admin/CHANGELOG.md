@@ -21,6 +21,18 @@ Tất cả các thay đổi đáng chú ý của module **Web Admin** sẽ đư�
   - Thêm `apiApproveCollectionPoint`: Cập nhật `is_verified: true` giúp điểm thu gom lập tức hiển thị công khai trên bản đồ Flutter cho cộng đồng.
   - Thêm `apiRejectCollectionPoint`: Loại bỏ điểm thu gom vi phạm hoặc không chính xác khỏi hệ thống.
 
+### 🎨 Tái cấu trúc Toàn diện UI/UX & Responsive Đa Thiết bị (Design System Overhaul)
+- **Tương thích Responsive Đa Màn hình (Mobile, Tablet, Desktop)**:
+  - Bổ sung thanh điều hướng trên cùng (Mobile Top Bar) với nút Menu Hamburger và chuyển đổi theme một chạm cho điện thoại và máy tính bảng.
+  - Sidebar dạng ngăn kéo trượt (Sliding Drawer) kèm lớp phủ mờ (Backdrop overlay) tự động đóng khi chuyển tab trên thiết bị di động.
+  - Layout co dãn linh hoạt (`lg:ml-64`, padding co dãn `p-4 sm:p-6 lg:p-8`), bảng biểu có vùng cuộn ngang mượt mà, chống tràn viền trên mọi kích thước màn hình.
+- **Tối ưu Độ tương phản & Hiển thị Hoàn hảo cả Chế độ Sáng/Tối (Light & Dark Mode)**:
+  - Khắc phục triệt để lỗi chữ trắng trên nền sáng ở các tiêu đề trang, thẻ Card, danh sách người dùng và các cửa sổ Modal.
+  - Đồng bộ bảng màu cao cấp chuẩn SaaS doanh nghiệp (`slate-900`/`white`, đường viền `slate-200`/`slate-800`), chữ hiển thị rõ ràng, tương phản cao, dễ nhìn.
+- **Loại bỏ Thiết kế Dạng AI Template (De-AI Aesthetic)**:
+  - Loại bỏ các bóng mờ phát sáng lòe loẹt, góc bo cong quá khổ (`rounded-[2.5rem]`), thay bằng tiêu chuẩn thiết kế phẳng hiện đại, tinh tế (`rounded-xl`, `rounded-2xl`).
+  - Tối ưu biểu mẫu nhập liệu, các nút bấm thao tác và bảng dữ liệu chuyên nghiệp.
+
 ---
 
 ## [0.1.2] - 2026-08-29
