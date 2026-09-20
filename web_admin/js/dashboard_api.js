@@ -314,14 +314,16 @@ export async function apiFetchGameQuestions(fromIndex, toIndex, isActive) {
  * Insert a new question by first creating a waste_dictionary entry, then game_questions.
  */
 export async function apiInsertGameQuestion({ slug, nameVi, groupId, imageUrl, funFact, isActive, userId }) {
+    const parsedGroupId = parseInt(groupId);
+
     // 1. Insert into waste_dictionary
     const { data: dict, error: dictErr } = await db.from('waste_dictionary')
         .insert({
             slug,
             name_vi: nameVi,
-            waste_group_id: groupId,
-            image_url: imageUrl,
-            fun_fact: funFact,
+            waste_group_id: parsedGroupId,
+            image_url: imageUrl || null,
+            fun_fact: funFact || null,
             created_by: userId,
             is_active: true
         })
@@ -336,8 +338,10 @@ export async function apiInsertGameQuestion({ slug, nameVi, groupId, imageUrl, f
             waste_dictionary_id: dict.id,
             game_types: ['quiz'],
             payload: {
-                image_url: imageUrl,
-                fun_fact: funFact
+                name_vi: nameVi,
+                waste_group_id: parsedGroupId,
+                image_url: imageUrl || null,
+                fun_fact: funFact || null
             },
             is_active: isActive
         });
@@ -349,17 +353,29 @@ export async function apiInsertGameQuestion({ slug, nameVi, groupId, imageUrl, f
  * Update an existing question and its related waste_dictionary item.
  */
 export async function apiUpdateGameQuestion({ questionId, dictId, nameVi, groupId, imageUrl, funFact, isActive }) {
+    const parsedGroupId = parseInt(groupId);
+
+    // If dictId is missing, resolve it from game_questions record
+    let targetDictId = dictId;
+    if (!targetDictId && questionId) {
+        const { data: qData } = await db.from('game_questions')
+            .select('waste_dictionary_id')
+            .eq('id', questionId)
+            .single();
+        targetDictId = qData?.waste_dictionary_id;
+    }
+
     // 1. Update waste_dictionary
-    if (dictId) {
+    if (targetDictId) {
         const { error: dictErr } = await db.from('waste_dictionary')
             .update({
                 name_vi: nameVi,
-                waste_group_id: groupId,
-                image_url: imageUrl,
-                fun_fact: funFact,
+                waste_group_id: parsedGroupId,
+                image_url: imageUrl || null,
+                fun_fact: funFact || null,
                 updated_at: new Date().toISOString()
             })
-            .eq('id', dictId);
+            .eq('id', targetDictId);
 
         if (dictErr) throw dictErr;
     }
@@ -369,8 +385,10 @@ export async function apiUpdateGameQuestion({ questionId, dictId, nameVi, groupI
         .update({
             is_active: isActive,
             payload: {
-                image_url: imageUrl,
-                fun_fact: funFact
+                name_vi: nameVi,
+                waste_group_id: parsedGroupId,
+                image_url: imageUrl || null,
+                fun_fact: funFact || null
             },
             updated_at: new Date().toISOString()
         })

@@ -1396,9 +1396,13 @@ function renderGameQuestions(questions) {
     }
 
     questions.forEach(q => {
-        const dict = q.waste_dictionary || {};
-        const group = dict.waste_groups || {};
-        const name = dict.name_vi || 'Chưa đặt tên';
+        const dict = Array.isArray(q.waste_dictionary) 
+            ? (q.waste_dictionary[0] || {}) 
+            : (q.waste_dictionary || {});
+        const group = Array.isArray(dict.waste_groups) 
+            ? (dict.waste_groups[0] || {}) 
+            : (dict.waste_groups || {});
+        const name = dict.name_vi || q.payload?.name_vi || 'Chưa đặt tên';
         const groupName = group.name_vi || 'Chưa phân loại';
         const imageUrl = dict.image_url || q.payload?.image_url || '';
         const funFact = dict.fun_fact || q.payload?.fun_fact || '';
@@ -1409,8 +1413,10 @@ function renderGameQuestions(questions) {
         card.className = 'glass-panel rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col hover:border-emerald-500/50 transition-all duration-300 shadow-sm';
 
         card.innerHTML = `
-            <!-- Card Image -->
-            <div class="h-44 bg-slate-100 dark:bg-slate-950 relative group overflow-hidden border-b border-slate-200 dark:border-slate-800 flex items-center justify-center">
+            <!-- Card Image (Clickable to Edit) -->
+            <div onclick="window.openEditQuestionModal('${escapeHTML(q.id)}')"
+                class="h-44 bg-slate-100 dark:bg-slate-950 relative group overflow-hidden border-b border-slate-200 dark:border-slate-800 flex items-center justify-center cursor-pointer"
+                title="Nhấp để chỉnh sửa câu hỏi này">
                 ${imageUrl ? `
                     <img src="${escapeHTML(imageUrl)}" alt="${escapeHTML(name)}"
                         class="w-full h-full object-cover transition duration-300 group-hover:scale-105"
@@ -1420,7 +1426,7 @@ function renderGameQuestions(questions) {
                         <svg class="w-10 h-10 mb-2 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <span class="text-xs font-semibold">Chưa có ảnh</span>
+                        <span class="text-xs font-semibold">Chưa có ảnh (Bấm để thêm)</span>
                     </div>
                 `}
 
@@ -1438,12 +1444,24 @@ function renderGameQuestions(questions) {
                         : '<span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-slate-700 text-slate-200 shadow-sm">Đã tắt</span>'
                     }
                 </div>
+
+                <!-- Hover Edit Indicator -->
+                <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                    <span class="px-3 py-1.5 bg-slate-900/90 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 backdrop-blur-sm shadow-md">
+                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Bấm để chỉnh sửa
+                    </span>
+                </div>
             </div>
 
             <!-- Card Body -->
             <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                 <div>
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white line-clamp-1 font-heading mb-1.5" title="${escapeHTML(name)}">
+                    <h3 onclick="window.openEditQuestionModal('${escapeHTML(q.id)}')"
+                        class="text-base font-bold text-slate-900 dark:text-white line-clamp-1 font-heading mb-1.5 cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition"
+                        title="Bấm để chỉnh sửa: ${escapeHTML(name)}">
                         ${escapeHTML(name)}
                     </h3>
                     <div class="min-h-[48px] bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/60 mb-4">
@@ -1464,20 +1482,25 @@ function renderGameQuestions(questions) {
                         <span>${isActive ? '⏸ Tạm tắt' : '▶ Kích hoạt'}</span>
                     </button>
 
-                    <div class="flex items-center gap-1.5">
+                    <div class="flex items-center gap-2">
+                        <!-- Prominent Edit Button -->
                         <button onclick="window.openEditQuestionModal('${escapeHTML(q.id)}')"
-                            class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-bold transition"
-                            title="Chỉnh sửa câu hỏi">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                            title="Chỉnh sửa câu hỏi này">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
+                            <span>Sửa</span>
                         </button>
+
+                        <!-- Delete Button -->
                         <button onclick="window.deleteGameQuestion('${escapeHTML(q.id)}', '${escapeHTML(dictId)}')"
-                            class="p-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-lg text-xs font-bold transition"
-                            title="Xóa câu hỏi">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1"
+                            title="Xóa câu hỏi khỏi Game">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>
+                            <span>Xóa</span>
                         </button>
                     </div>
                 </div>
@@ -1492,12 +1515,14 @@ window.filterQuestionsClient = () => {
     const group = document.getElementById('filter-q-group')?.value;
 
     const filtered = allGameQuestions.filter(q => {
-        const dict = q.waste_dictionary || {};
-        const name = (dict.name_vi || '').toLowerCase();
-        const groupId = dict.waste_group_id || '';
+        const dict = Array.isArray(q.waste_dictionary) 
+            ? (q.waste_dictionary[0] || {}) 
+            : (q.waste_dictionary || {});
+        const name = (dict.name_vi || q.payload?.name_vi || '').toLowerCase();
+        const groupId = String(dict.waste_group_id || q.payload?.waste_group_id || '');
 
         const matchSearch = !search || name.includes(search);
-        const matchGroup = !group || groupId === group;
+        const matchGroup = !group || groupId === String(group);
         return matchSearch && matchGroup;
     });
 
@@ -1518,15 +1543,26 @@ window.updateQuestionImagePreview = (url) => {
 };
 
 window.openCreateQuestionModal = () => {
-    document.getElementById('question-modal-title').innerText = 'Thêm câu hỏi vào Game';
+    // Ensure groups are loaded in dropdown
+    const qSelect = document.getElementById('question-group');
+    if (qSelect && qSelect.options.length <= 1 && wasteGroups && wasteGroups.length > 0) {
+        qSelect.innerHTML = '<option value="">-- Chọn nhóm phân loại đúng --</option>';
+        wasteGroups.forEach(g => {
+            qSelect.innerHTML += `<option value="${g.id}">${g.name_vi}</option>`;
+        });
+    }
+
+    document.getElementById('question-modal-title').innerText = '+ Thêm câu hỏi mới vào Game';
     document.getElementById('question-id').value = '';
     document.getElementById('question-dict-id').value = '';
     document.getElementById('question-name').value = '';
-    document.getElementById('question-group').value = '';
+    if (qSelect) qSelect.value = '';
     document.getElementById('question-image-url').value = '';
     document.getElementById('question-funfact').value = '';
     document.getElementById('question-is-active').checked = true;
-    document.getElementById('btn-save-question').innerText = 'LƯU CÂU HỎI VÀO CSDL';
+    
+    const saveBtn = document.getElementById('btn-save-question');
+    if (saveBtn) saveBtn.innerText = 'LƯU CÂU HỎI VÀO CSDL';
 
     window.updateQuestionImagePreview('');
 
@@ -1539,18 +1575,34 @@ window.openEditQuestionModal = (id) => {
     const q = allGameQuestions.find(item => item.id === id);
     if (!q) return;
 
-    const dict = q.waste_dictionary || {};
+    const dict = Array.isArray(q.waste_dictionary) 
+        ? (q.waste_dictionary[0] || {}) 
+        : (q.waste_dictionary || {});
 
-    document.getElementById('question-modal-title').innerText = 'Chỉnh sửa câu hỏi Game';
+    // Ensure groups are loaded in dropdown
+    const qSelect = document.getElementById('question-group');
+    if (qSelect && qSelect.options.length <= 1 && wasteGroups && wasteGroups.length > 0) {
+        qSelect.innerHTML = '<option value="">-- Chọn nhóm phân loại đúng --</option>';
+        wasteGroups.forEach(g => {
+            qSelect.innerHTML += `<option value="${g.id}">${g.name_vi}</option>`;
+        });
+    }
+
+    document.getElementById('question-modal-title').innerText = '✏️ Chỉnh sửa câu hỏi Game';
     document.getElementById('question-id').value = q.id;
     document.getElementById('question-dict-id').value = q.waste_dictionary_id || dict.id || '';
-    document.getElementById('question-name').value = dict.name_vi || '';
-    document.getElementById('question-group').value = dict.waste_group_id || '';
+    document.getElementById('question-name').value = dict.name_vi || q.payload?.name_vi || '';
+    
+    const selectedGroupId = dict.waste_group_id || q.payload?.waste_group_id || '';
+    if (qSelect) qSelect.value = String(selectedGroupId);
+
     const imgUrl = dict.image_url || q.payload?.image_url || '';
     document.getElementById('question-image-url').value = imgUrl;
     document.getElementById('question-funfact').value = dict.fun_fact || q.payload?.fun_fact || '';
     document.getElementById('question-is-active').checked = !!q.is_active;
-    document.getElementById('btn-save-question').innerText = 'CẬP NHẬT CÂU HỎI';
+    
+    const saveBtn = document.getElementById('btn-save-question');
+    if (saveBtn) saveBtn.innerText = 'CẬP NHẬT & LƯU THAY ĐỔI';
 
     window.updateQuestionImagePreview(imgUrl);
 
