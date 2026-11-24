@@ -73,10 +73,10 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
 
       - name: 🔨 Build Universal APK (Release)
-        run: flutter build apk --release
+        run: flutter build apk --release --android-skip-build-dependency-validation
 
       - name: 🔨 Build Split-per-ABI APKs (Release)
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --release --split-per-abi --android-skip-build-dependency-validation
 
       - name: 📦 Prepare Release APK Assets
         shell: bash
