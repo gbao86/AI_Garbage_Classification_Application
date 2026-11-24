@@ -15,7 +15,7 @@
 [![Platform](https://img.shields.io/badge/Flutter%20%7C%20Dart-blue?style=for-the-badge&logo=flutter&logoColor=white&labelColor=0c1419)](https://flutter.dev)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-ff3d5a?style=for-the-badge&logo=gnu&logoColor=white&labelColor=0c1419)](./LICENSE)
 [![Kaggle](https://img.shields.io/badge/Kaggle-Notebook-20BEFF?style=for-the-badge&logo=kaggle&logoColor=white&labelColor=0c1419)](https://www.kaggle.com/code/jisy736386/phan-loai-rac)
-[![APK](https://img.shields.io/badge/↓%20APK-v0.5.91-00ff88?style=for-the-badge&logo=android&logoColor=white&labelColor=0c1419)](https://drive.google.com/drive/folders/1swY2GXq4YbI0cJ71cbgdRxbpDXIc1g91?usp=sharing)
+[![APK](https://img.shields.io/badge/↓%20APK-v0.5.91-00ff88?style=for-the-badge&logo=android&logoColor=white&labelColor=0c1419)](https://github.com/gbao86/AI_Garbage_Classification_Application/releases/latest)
 
 </div>
 
@@ -241,7 +241,9 @@ phan_loai_rac_qua_hinh_anh/
 
 <div align="center">
 
-[![Download APK](https://img.shields.io/badge/↓%20Download%20APK%20v0.5.91-00ff88?style=for-the-badge&logo=android&logoColor=white&labelColor=0c1419)](https://drive.google.com/drive/folders/1swY2GXq4YbI0cJ71cbgdRxbpDXIc1g91?usp=drive_link)
+[![Download APK](https://img.shields.io/badge/↓%20Download%20APK%20v0.5.91-00ff88?style=for-the-badge&logo=android&logoColor=white&labelColor=0c1419)](https://github.com/gbao86/AI_Garbage_Classification_Application/releases/latest)
+
+*(Tất cả các phiên bản cũ & mới theo từng kiến trúc chip `universal`, `arm64-v8a`, `armeabi-v7a` đều có sẵn tại mục [GitHub Releases](https://github.com/gbao86/AI_Garbage_Classification_Application/releases))*
 
 </div>
 

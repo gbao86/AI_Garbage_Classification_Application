@@ -1,0 +1,106 @@
+name: 🤖 Build & Release Android APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tên tag phát hành (để trống sẽ tự lấy theo version trong pubspec.yaml, vd: v0.5.91)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🏷️ Determine Release Tag
+        id: meta
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            TAG="${GITHUB_REF_NAME}"
+          elif [[ -n "${{ github.event.inputs.tag_name }}" ]]; then
+            TAG="${{ github.event.inputs.tag_name }}"
+          else
+            APP_VER=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
+            TAG="v${APP_VER}"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Release tag: ${TAG}"
+
+      - name: ☕ Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: 📦 Install Flutter dependencies
+        run: flutter pub get
+
+      - name: 🔑 Generate Envied environment variables
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+          STADIA_MAPS_API_KEY: ${{ secrets.STADIA_MAPS_API_KEY }}
+        run: |
+          if [[ -z "$GEMINI_API_KEY" || -z "$SUPABASE_URL" || -z "$SUPABASE_PUBLISHABLE_KEY" ]]; then
+            echo "::error::Thiếu GitHub Secrets! Hãy thêm GEMINI_API_KEY, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, GOOGLE_WEB_CLIENT_ID, STADIA_MAPS_API_KEY trong Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          printf 'GEMINI_API_KEY=%s\nSUPABASE_URL=%s\nSUPABASE_PUBLISHABLE_KEY=%s\nGOOGLE_WEB_CLIENT_ID=%s\nSTADIA_MAPS_API_KEY=%s\n' \
+            "$GEMINI_API_KEY" \
+            "$SUPABASE_URL" \
+            "$SUPABASE_PUBLISHABLE_KEY" \
+            "$GOOGLE_WEB_CLIENT_ID" \
+            "$STADIA_MAPS_API_KEY" > .env
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: 🔨 Build Universal APK (Release)
+        run: flutter build apk --release
+
+      - name: 🔨 Build Split-per-ABI APKs (Release)
+        run: flutter build apk --release --split-per-abi
+
+      - name: 📦 Prepare Release APK Assets
+        shell: bash
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          mkdir -p release_apks
+          cp build/app/outputs/flutter-apk/app-release.apk "release_apks/EcoSort_${TAG}_universal.apk"
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "release_apks/EcoSort_${TAG}_arm64-v8a.apk"
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk "release_apks/EcoSort_${TAG}_armeabi-v7a.apk"
+          ls -lh release_apks/
+
+      - name: 📤 Upload APK Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: EcoSort-Android-${{ steps.meta.outputs.tag }}
+          path: release_apks/*.apk
+
+      - name: 🚀 Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: EcoSort by Bao ${{ steps.meta.outputs.tag }}
+          generate_release_notes: true
+          files: |
+            release_apks/EcoSort_${{ steps.meta.outputs.tag }}_universal.apk
+            release_apks/EcoSort_${{ steps.meta.outputs.tag }}_arm64-v8a.apk
+            release_apks/EcoSort_${{ steps.meta.outputs.tag }}_armeabi-v7a.apk
