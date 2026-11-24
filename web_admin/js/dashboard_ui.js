@@ -991,7 +991,7 @@ window.fetchSystemSettings = async () => {
 
         const maintenance = data.find(s => s.key === 'maintenance')?.value || { enabled: false, kill_switch: false, message: "" };
         const points = data.find(s => s.key === 'points')?.value || { scan_base: 10, game_correct: 5, streak_bonus_per: 1 };
-        const gemini = data.find(s => s.key === 'gemini')?.value || { model: "gemini-3.8-flash" };
+        const gemini = data.find(s => s.key === 'gemini')?.value || { model: "gemini-4-hydrogen" };
 
         document.getElementById('setting-maint-enabled').checked = !!maintenance.enabled;
         document.getElementById('setting-maint-killswitch').checked = !!maintenance.kill_switch;
@@ -1001,7 +1001,7 @@ window.fetchSystemSettings = async () => {
         document.getElementById('setting-points-correct').value = points.game_correct || 5;
         document.getElementById('setting-points-streak').value = points.streak_bonus_per || 1;
 
-        document.getElementById('setting-gemini-model').value = gemini.model || 'gemini-3.8-flash';
+        document.getElementById('setting-gemini-model').value = gemini.model || 'gemini-4-hydrogen';
 
         const inputs = [
             'setting-maint-enabled', 'setting-maint-killswitch', 'setting-maint-message',
@@ -1045,9 +1045,16 @@ window.saveSystemSettings = async () => {
             streak_bonus_per: parseInt(document.getElementById('setting-points-streak').value) || 1
         };
 
+        const rawGeminiModel = document.getElementById('setting-gemini-model').value || '';
+        const cleanGeminiModel = rawGeminiModel
+            .replace(/[\(\)\{\}\[\]"'`,;\s]+/g, '')
+            .replace(/^models\/+/, '');
         const geminiVal = {
-            model: document.getElementById('setting-gemini-model').value.trim() || 'gemini-3.8-flash'
+            model: /^[a-zA-Z0-9][a-zA-Z0-9._-]{1,63}$/.test(cleanGeminiModel)
+                ? cleanGeminiModel
+                : 'gemini-4-hydrogen'
         };
+        document.getElementById('setting-gemini-model').value = geminiVal.model;
 
         await api.apiSaveSystemSettings({
             maintenanceVal,

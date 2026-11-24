@@ -123,7 +123,7 @@ Hệ thống bảo mật **Role-Based Access Control (RBAC)** 3 tầng vững ch
 ### ⚙️ 4. Cấu hình hệ thống (System Settings)
 - Bật/Tắt chế độ Bảo trì toàn ứng dụng (`maintenance_mode`).
 - Bật/Tắt công tắc Ngắt khẩn cấp (`kill_switch`) vô hiệu hóa tính năng ghi API khi có sự cố.
-- Cấu hình hệ số điểm thưởng Gamification & Mô hình AI Gemini toàn hệ thống.
+- Cấu hình hệ số điểm thưởng Gamification & Mô hình AI Gemini toàn hệ thống (mặc định `gemini-4-hydrogen`, tự động làm sạch ký tự/ngoặc thừa trước khi lưu và đồng bộ trực tiếp sang ứng dụng Flutter).
 
 ### 📍 5. Quản lý & Thẩm định Điểm thu gom Cộng đồng (Community Collection Points)
 - Tiếp nhận danh sách các điểm bỏ rác do người dùng đóng góp từ bản đồ di động (`is_verified = false`).

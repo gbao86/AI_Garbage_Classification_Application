@@ -5,7 +5,7 @@
 
 <!-- TYPING ANIMATION -->
 <a href="https://github.com/gbao86/AI_Garbage_Classification_Application">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Space+Mono&weight=700&size=18&duration=3000&pause=800&color=00FF88&center=true&vCenter=true&multiline=true&width=700&height=70&lines=♻+Edge+AI+%7C+TFLite+%3C15ms+%7C+GPU+Delegate;☁+Gemini+3.5+Flash+Cloud+Fallback+%7C+Neon+Segmentation" alt="Typing SVG"/>
+  <img src="https://readme-typing-svg.herokuapp.com?font=Space+Mono&weight=700&size=18&duration=3000&pause=800&color=00FF88&center=true&vCenter=true&multiline=true&width=700&height=70&lines=♻+Edge+AI+%7C+TFLite+%3C15ms+%7C+GPU+Delegate;☁+Gemini+4+Hydrogen+REST+Fallback+%7C+Neon+Segmentation" alt="Typing SVG"/>
 </a>
 
 <br/>
@@ -28,7 +28,7 @@
 | Tầng | Công nghệ | Vai trò |
 |:---:|:---|:---|
 | 🧠 **Edge AI** | TFLite · GPU Delegate | Suy luận cục bộ &lt;15ms, không cần mạng |
-| ☁ **LLM Cloud** | Gemini 3.5 Flash | Fallback thông minh khi confidence &lt;75% |
+| ☁ **LLM Cloud** | Gemini 4 Hydrogen (REST v1beta) | Fallback thông minh khi confidence &lt;75%, đọc model động từ Supabase &amp; tự chuyển model dự phòng khi 503 |
 | 👁 **Vision** | ML Kit Segmentation | Vẽ viền Neon phát sáng quanh rác |
 
 ---
@@ -42,7 +42,7 @@ sequenceDiagram
     participant App as 📱 Flutter App
     participant ML  as 👁 ML Kit Segmentation
     participant TF  as ⚡ TFLite (Local GPU)
-    participant API as ✨ Gemini 3.5 Flash
+    participant API as ✨ Gemini 4 Hydrogen (REST v1beta)
     participant DB  as 🗄 Supabase
 
     User->>App: Chụp ảnh rác thải
@@ -85,7 +85,7 @@ graph TD
     D --> E{Confidence ≥ 75%?}:::decide
     E -->|✅ Đủ tin cậy| F[Hiển thị kết quả local]:::process
     E -->|❌ Thấp| G{Có kết nối mạng?}:::decide
-    G -->|📶 Online| H[Gemini 3.5 Flash · Cloud]:::cloud
+    G -->|📶 Online| H[Gemini 4 Hydrogen · REST v1beta + Fallback]:::cloud
     G -->|📵 Offline| I[Fallback TFLite · Outbox Queue]:::process
     H --> J[JSON payload → Supabase sync]:::cloud
     F --> L([✨ ML Kit Neon Render · +XP · CO₂]):::start
@@ -101,8 +101,17 @@ graph TD
 
 ### 🧠 Dual AI Brain
 - **TFLite Local** — `model_unquant.tflite` chạy trên GPU Delegate, 224×224px, 10 lớp, **&lt;15ms** hoàn toàn offline
-- **Gemini 3.5 Flash** — auto kích hoạt khi confidence &lt;75%, trả JSON cấu trúc với hướng dẫn xử lý chi tiết
+- **Gemini 4 Hydrogen (REST API v1beta)** — auto kích hoạt khi confidence &lt;75%, gọi trực tiếp qua `http` với `thinkingConfig: LOW` và trả JSON cấu trúc kèm hướng dẫn xử lý chi tiết
+- **Dynamic Model Sync & Anti-503 Fallback** — đọc cấu hình model động từ bảng `system_settings` trên Supabase (kèm bộ lọc làm sạch ký tự/ngoặc thừa), tự động chuyển qua chuỗi dự phòng `gemini-4-hydrogen` → `gemini-3.8-flash` → `gemini-2.5-flash-lite` khi gặp lỗi quá tải `503`
 - **DB Label Sync** — Gemini hiệu chỉnh nhãn → tự đồng bộ ngược Supabase, cập nhật CO₂ + XP tương ứng
+
+### 🎮 Eco Game Quiz (1-Chạm & Non-Blocking Flow)
+- **Instant Tap-to-Choose**: Thẻ Hero Card lớn kèm lưới 2×2 thuận tay cái, phản hồi rung xúc giác (`HapticFeedback`) và hiệu ứng `+XP` nổi không ngắt quãng
+- **Fun Fact 3 tầng**: Micro Capsule trong game, nút gợi ý trên thẻ và Sổ tay Kiến thức Xanh sau mỗi vòng 10 câu
+
+### 🌐 EcoSort Web Admin Portal
+- Cổng quản trị SPA độc lập ([`web_admin/`](./web_admin/README.md) · triển khai trên [Cloudflare Pages](https://ecosort-by-bao-admin.pages.dev/)) xây dựng bằng Vite + Tailwind CSS + Supabase JS
+- Hỗ trợ duyệt báo cáo rác, xác thực điểm thu gom, quản lý câu hỏi Quiz, cấu hình model AI động, quản trị người dùng RBAC và phê duyệt đặc quyền 2 bước (Double-Approval)
 
 ### 📱 Multi-Device Adaptive Architecture (Tương thích Đa thiết bị)
 - **Hỗ trợ đa dạng Android 32-bit & 64-bit**: Tối ưu mượt mà từ các dòng điện thoại RAM hạn chế (Android 32-bit như Samsung A12, A13, A22 4G...) đến các dòng Flagship/Gaming (Android 64-bit như Poco, Xiaomi, Google Pixel, Samsung S-series).
@@ -155,7 +164,7 @@ graph TD
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 ![TensorFlow](https://img.shields.io/badge/TFLite-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
-![Google Cloud](https://img.shields.io/badge/Gemini%203.5-4285F4?style=for-the-badge&logo=google&logoColor=white)
+![Google Cloud](https://img.shields.io/badge/Gemini%204%20Hydrogen-4285F4?style=for-the-badge&logo=google&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
