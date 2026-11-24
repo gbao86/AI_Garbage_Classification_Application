@@ -160,9 +160,9 @@ class _ScanningScreenState extends State<ScanningScreen> with TickerProviderStat
 
       setState(() => _isGeminiRunning = true);
       try {
-        // Thêm timeout 15s để tránh treo app khi mạng lag
+        // Thêm timeout 30s để đủ thời gian cho Gemini 4 (thinking LOW) và tự động fallback model dự phòng nếu quá tải (503)
         final geminiResult = await _geminiService.processImageAndGetGuidance(widget.image)
-            .timeout(const Duration(seconds: 15));
+            .timeout(const Duration(seconds: 30));
         debugPrint('[FLOW] Gemini trả về thành công: $geminiResult');
 
         String finalMarkdownText = geminiResult;

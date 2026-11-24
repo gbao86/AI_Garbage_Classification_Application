@@ -2,6 +2,22 @@
 
 Lịch sử cập nhật các phiên bản của **EcoSort by Bao**
 
+## [0.5.91] - 2026-11-24
+
+### 🛡️ Nâng cấp Gemini 4 Hydrogen qua REST API v1beta, Khắc phục Lỗi 503 & Đồng bộ Model Động từ Supabase
+- 🔴 **Vấn đề trước đây**:
+  - `GeminiService` sử dụng SDK `google_generative_ai` (đã ngừng phát triển) và hardcode duy nhất một model (`gemini-3.8-flash`), không có cơ chế thử lại (retry) hay model dự phòng khi Google trả về lỗi quá tải `Server Error [503] UNAVAILABLE`.
+  - Chưa đọc cấu hình model động từ bảng `system_settings` (key `gemini`) trên Supabase dù Web Admin đã hỗ trợ chỉnh sửa.
+  - Khi gọi lại Gemini từ `ResultScreen` thất bại, `SnackBar` hiển thị nguyên chuỗi lỗi JSON thô.
+- 🛠️ **Giải pháp nâng cấp**:
+  - 🚀 **Chuyển sang REST API trực tiếp (`v1beta` qua `http`) & Gemini 4 Hydrogen**: Thay thế SDK cũ bằng gọi HTTP thẳng tới `generativelanguage.googleapis.com/v1beta`, tích hợp `thinkingConfig: {thinkingLevel: LOW}` cho `gemini-4-hydrogen` để phản hồi siêu nhanh và bóc tách an toàn phần `text` (bỏ qua phần `thought` nếu có).
+  - 🔄 **Đọc Model động từ Supabase kèm bộ lọc làm sạch (`sanitizeModelName`)**: Tự động tải tên model từ `system_settings` (cache 5 phút, timeout 3 giây), tự động loại bỏ các ký tự ngoặc/nháy dư thừa (`((`, `))`, `{{`, `}}`, `[[`, `]]`, tiền tố `models/`, chuỗi JSON lồng nhau) và kiểm tra định dạng hợp lệ trước khi gọi API.
+  - ⚡ **Chuỗi Model Dự phòng & Retry Tự động (Fallback Chain)**: Khi model chính gặp lỗi `503` / `429` / `UNAVAILABLE`, hệ thống tự động chuyển lần lượt qua các model dự phòng (`gemini-4-hydrogen` → `gemini-3.8-flash` → `gemini-2.5-flash-lite`) và retry lần cuối trước khi báo lỗi.
+  - 💬 **Thông báo lỗi thân thiện**: Bổ sung `GeminiService.friendlyErrorMessage()` cho `ResultScreen` để hiển thị cảnh báo ngắn gọn, dễ hiểu thay vì raw exception.
+  - ⏱️ **Tối ưu Timeout**: Đặt timeout `15 giây` cho mỗi yêu cầu REST API và `30 giây` tổng trong `ScanningScreen` để đủ thời gian cho chế độ thinking và fallback.
+
+---
+
 ## [0.5.9] - 2026-09-21
 
 ### 🎮 Đại tu Toàn diện Giao diện & Trải nghiệm Kéo thả Game Quiz (Game UI/UX Overhaul & Non-Blocking Flow)

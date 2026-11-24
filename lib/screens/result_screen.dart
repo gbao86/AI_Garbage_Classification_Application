@@ -298,7 +298,10 @@ class _ResultScreenState extends State<ResultScreen> {
       debugPrint('Error reanalyzing with Gemini: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi khi gọi Gemini AI: $e')),
+          SnackBar(
+            backgroundColor: Colors.orange.shade800,
+            content: Text(GeminiService.friendlyErrorMessage(e)),
+          ),
         );
       }
     } finally {
